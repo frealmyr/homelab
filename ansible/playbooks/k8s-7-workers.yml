@@ -1,0 +1,48 @@
+---
+- hosts: k8s_controller, k8s_workers
+  become: true
+
+  tasks:
+    - name: kublet - restart service
+      service:
+        name: kubelet
+        daemon_reload: yes
+        state: restarted
+      when: "'k8s_workers' in group_names"
+
+    - name: containerd - restart service
+      service:
+        name: containerd
+        daemon_reload: yes
+        state: restarted
+      when: "'k8s_workers' in group_names"
+
+    - name: kubeadm - reset existing kubernetes configuration
+      command: kubeadm reset -f
+      when: "'k8s_workers' in group_names"
+
+    - name: kubeadm - remove cni folder
+      file:
+        path: /etc/cni/net.d
+        state: absent
+      when: "'k8s_workers' in group_names"
+
+    - name: kubeadm - create kubeadm join token
+      command: kubeadm token create --print-join-command
+      when: "'k8s_controller' in group_names"
+      register: k8s_join_token
+
+    - set_fact:
+        k8s_join_command: "{{ k8s_join_token.stdout }}"
+      when: "'k8s_controller' in group_names"
+
+    - name: kubedm - enroll worker nodes to master
+      command: "{{ hostvars['k8s-controller-0']['k8s_join_command'] }}"
+      when: "'k8s_workers' in group_names"
+
+    # - name: kubectl - add taints to worker nodes
+    #   command: "kubectl taint nodes {{ ansible_hostname }} {{ item }}"
+    #   become_user: fredrick
+    #   when: "'k8s_workers' in group_names"
+    #   with_items:
+    #     - hostname={{ ansible_hostname }}:NoSchedule

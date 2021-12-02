@@ -1,0 +1,18 @@
+---
+- hosts: k8s_controller, k8s_workers
+  become: true
+
+  tasks:
+    - name: system - rebooting worker nodes (cluster created)
+      reboot:
+      when: "'k8s_workers' in group_names"
+      register: restart_worker
+
+    - name: ansible - sleep for 10 seconds
+      wait_for:
+        timeout: 10
+      when: restart_worker.changed
+
+    - name: system - rebooting controller nodes (cluster created)
+      reboot:
+      when: "'k8s_controller' in group_names"

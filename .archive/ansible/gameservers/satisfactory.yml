@@ -1,0 +1,131 @@
+---
+- name: Allow satisfactory ports
+  community.general.ufw:
+    rule: allow
+    port: '{{ item }}'
+    proto: udp
+  loop:
+    - '7777'
+    - '15000'
+    - '15777'
+
+- name: Add 32-bit architecture
+  command: dpkg --add-architecture i386
+
+- name: Update apt packages
+  apt:
+    update_cache: yes
+
+- name: Install dependencies
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - curl
+    - wget
+    - file
+    - tar
+    - bzip2
+    - gzip
+    - unzip
+    - bsdmainutils
+    - python
+    - python-apt
+    - util-linux
+    - ca-certificates 
+    - binutils
+    - bc
+    - jq
+    - tmux
+    - netcat
+    - lib32gcc1
+    - lib32stdc++6
+    - libsdl2-2.0-0:i386
+
+- name: Install steamcmd
+  shell: |
+    echo steam steam/question select "I AGREE" | debconf-set-selections && \
+    echo steam steam/license note '' | debconf-set-selections && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -q -y --no-install-recommends steamcmd && \
+    ln -sf /usr/games/steamcmd /usr/bin/steamcmd
+
+- name: Create user for {{ server_name }}
+  ansible.builtin.user:
+    name: "{{ server_name }}"
+    create_home: yes
+    home: "/home/{{ server_name }}"
+
+- name: Download LinuxGSM script
+  get_url:
+    url: https://linuxgsm.sh
+    dest: /home/{{ server_name }}/linuxgsm.sh
+    mode: '755'
+  become_user: "{{ server_name }}"
+
+- name: Prepare linuxgsm installer
+  command: bash linuxgsm.sh {{ server_name }}
+  become_user: "{{ server_name }}"
+  args:
+    chdir: /home/{{ server_name }}
+
+- name: Install {{ server_name }} server
+  command: ./{{ server_name }} auto-install
+  become_user: "{{ server_name }}"
+  args:
+    chdir: /home/{{ server_name }}
+
+- name: Start {{ server_name }} server
+  command: ./{{ server_name }} start
+  become_user: "{{ server_name }}"
+  args:
+    chdir: /home/{{ server_name }}
+
+- name: Add cronjob {{ server_name }} update
+  ansible.builtin.cron:
+    name: "update {{ server_name }}"
+    weekday: "*"
+    minute: "0"
+    hour: "7"
+    job: "/home/{{ server_name }}/{{ server_name }} update"
+  become_user: "{{ server_name }}"
+
+- name: Add cronjob {{ server_name }} backup
+  ansible.builtin.cron:
+    name: "backup {{ server_name }}"
+    weekday: "*/3"
+    minute: "0"
+    hour: "6"
+    job: "/home/{{ server_name }}/{{ server_name }} backup"
+  become_user: "{{ server_name }}"
+
+- name: Add cronjob {{ server_name }} monitor
+  ansible.builtin.cron:
+    name: "monitor {{ server_name }}"
+    weekday: "*"
+    minute: "*/5"
+    hour: "*"
+    job: "/home/{{ server_name }}/{{ server_name }} monitor"
+  become_user: "{{ server_name }}"
+
+- name: Add cronjob {{ server_name }} update-lgsm
+  ansible.builtin.cron:
+    name: "monitor update-lgsm"
+    weekday: "0"
+    minute: "50"
+    hour: "6"
+    job: "/home/{{ server_name }}/{{ server_name }} update-lgsm"
+  become_user: "{{ server_name }}"
+
+- name: Copy common.cfg to {{ server_name }}
+  ansible.builtin.copy:
+    src: ./files/common.cfg
+    dest: /home/{{ server_name }}/lgsm/config-lgsm/{{ server_name }}/common.cfg
+  become_user: "{{ server_name }}"
+
+- name: Adding discord webhook {{ server_name }}
+  ansible.builtin.lineinfile:
+    path: /home/{{ server_name }}/lgsm/config-lgsm/{{ server_name }}/common.cfg
+    regexp: '^discordwebhook=""'
+    line: discordwebhook="{{ discord_webhook }}"

@@ -1,0 +1,20 @@
+version: '3.5'
+
+secrets:
+  cloudflare_api_key:
+    file: ${HOME}/.secrets/ddns/cloudflare_api_key
+
+services:
+  cloudflare-ddns:
+    container_name: cloudflare-ddns
+    image: oznu/cloudflare-ddns
+    environment:
+      - API_KEY_FILE=/run/secrets/cloudflare_api_key
+      - ZONE=fmlab.no
+      - SUBDOMAIN=auth
+      - CRON=* */1 * * *
+    secrets:
+      - cloudflare_api_key
+    labels:
+      - traefik.enable=false
+    restart: always

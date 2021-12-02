@@ -1,0 +1,30 @@
+app:
+  image:
+    repository: postgres
+    tag: 15
+
+  persistentVolumes:
+    static:
+      - name: data
+        mountPath: /var/lib/postgresql/data
+
+  mountSecrets:
+    - name: credentials-postgres
+      secretName: credentials-postgres
+      mountPath: /run/secrets/postgres
+
+  environmentVariables:
+    POSTGRES_PASSWORD_FILE: "/run/secrets/postgres/password"
+
+  containerPorts:
+    - name: sql
+      containerPort: 5432
+      protocol: TCP
+
+  services:
+    - name: sql
+      type: ClusterIP
+      ports:
+        - name: sql
+          port: 5432
+          targetPort: 5432

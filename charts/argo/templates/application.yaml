@@ -1,0 +1,47 @@
+{{- range $project_key, $project_value := .Values.appProject }}
+{{- range $app_key, $app_value := $project_value.applications }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $app_key }}
+  namespace: argocd
+  {{- if ($app_value.sync).wave }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ $app_value.sync.wave }}"
+  {{- end }}
+spec:
+  destination:
+    name: in-cluster
+    {{- if ($app_value.namespace).name }}
+    namespace: {{ $app_value.namespace.name }}
+    {{- else }}
+    namespace: {{ $app_key }}
+    {{- end }}
+  project: {{ $project_key }}
+  source:
+    targetRevision: main
+    path: {{ $.Values.basePath }}/{{ $project_key }}/{{ $app_key }}
+    repoURL: {{ $.Values.repoURL }}
+    {{- if and (ne $app_value.type "kustomization") (ne $app_value.type "manifest") }}
+    helm:
+      releaseName: {{ $app_key }}
+    {{- end }}
+  {{- with $app_value.ignoreDifferences }}
+  ignoreDifferences:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if or ($app_value.namespace).create ($app_value.sync).autoSync }}
+  syncPolicy:
+  {{- if ($app_value.namespace).create }}
+    syncOptions:
+      - CreateNamespace=true
+  {{- end }}
+  {{- if ($app_value.sync).autoSync }}
+    automated:
+      selfHeal: true
+      prune: true
+  {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

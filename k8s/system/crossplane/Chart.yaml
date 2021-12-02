@@ -1,0 +1,12 @@
+apiVersion: v2
+name: crossplane
+description: Provision infrastructure using kubernetes manifests
+
+type: application
+
+version: 1.0.0
+
+dependencies:
+- name: crossplane
+  version: 1.9.1
+  repository: https://charts.crossplane.io/stable

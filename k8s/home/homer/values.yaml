@@ -1,0 +1,53 @@
+app:
+  image:
+    repository: b4bz/homer
+    tag: latest
+
+  environmentVariables:
+    INIT_ASSETS: "1"
+
+  mountConfigmaps:
+    - name: assets
+      configMap: homer-assets
+      mountPath: /www/assets
+    - name: icons
+      configMap: homer-icons
+      mountPath: /www/assets/icons
+
+  securityContext:
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+
+  containerPorts:
+    - name: http
+      containerPort: 8080
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 8080
+          targetPort: 8080
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 8080
+        hosts:
+          - host: home.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        tls:
+          - secretName: homer
+            hosts:
+              - home.fmlab.no

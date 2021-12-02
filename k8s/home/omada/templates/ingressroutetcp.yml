@@ -1,0 +1,17 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: omada-frontend
+  annotations:
+    kubernetes.io/ingress.class: traefik-internal
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: HostSNI(`omada.fmlab.no`)
+    services:
+      - name: omada-https
+        port: 443
+  tls:
+    passthrough: true

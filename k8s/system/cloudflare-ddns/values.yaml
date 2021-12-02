@@ -1,0 +1,15 @@
+app:
+  image:
+    repository: oznu/cloudflare-ddns
+    tag: latest
+
+  environmentVariables:
+    ZONE: "fmlab.no"
+    SUBDOMAIN: "vpn"
+    CRON: "* */1 * * *"
+
+  secretEnvironmentVariables:
+    - name: API_KEY
+      secret:
+        name: cloudflare-credentials
+        key: api_token

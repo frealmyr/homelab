@@ -1,0 +1,21 @@
+grafana:
+  admin:
+    existingSecret: grafana-admin-credentials
+    userKey: username
+    passwordKey: password
+  persistence:
+    enabled: true
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: traefik-internal
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-internal-security@kubernetescrd
+    hosts:
+      - grafana.fmlab.no
+    tls:
+      - secretName: certificate-grafana
+        hosts:
+          - grafana.fmlab.no

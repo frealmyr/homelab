@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homer-icons
+binaryData:
+  {{ $root := . }}
+  {{ range $path, $bytes := .Files.Glob "files/icons/*" }}
+  {{ base $path }}: |
+    {{ $root.Files.Get $path | b64enc }}
+  {{ end }}

@@ -1,0 +1,264 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.name" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "app.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.podHostNetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
+      containers:
+        - name: {{ include "app.name" . }}
+          {{- if or .Values.environmentVariables .Values.secretEnvironmentVariables }}
+          env:
+          {{- if .Values.environmentVariables }}
+          {{- range $key, $value := .Values.environmentVariables }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.secretEnvironmentVariables }}
+          {{- range .Values.secretEnvironmentVariables }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secret.name }}
+                  key: {{ .secret.key | quote }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.command }}
+          {{- with .Values.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.containerPorts }}
+          ports:
+          {{- range .Values.containerPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+              protocol: {{ .protocol }}
+          {{- end }}
+          {{- end }}
+          {{- if or .Values.persistentVolumes.static .Values.persistentVolumes.dynamic .Values.persistentVolumes.hostPath .Values.persistentVolumes.nfs .Values.mountSecrets .Values.mountConfigmaps }}
+          volumeMounts:
+          {{- if .Values.persistentVolumes }}
+          {{- range .Values.persistentVolumes.dynamic }}
+          {{- if .create }}
+            - name: {{ include "app.name" $ }}-{{ .name }}
+          {{- else }}
+            - name: {{ .name }}
+          {{- end }}
+              {{- range .mounts }}
+              mountPath: {{ .path }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- range .Values.persistentVolumes.static }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- range .Values.persistentVolumes.hostPath }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- range .Values.persistentVolumes.nfs }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- range .Values.mountSecrets }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              readOnly: true
+          {{- end }}
+          {{- range .Values.mountConfigmaps }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.liveness }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.liveness.path }}
+              port: {{ .Values.liveness.port }}
+          {{- end }}
+          {{- if .Values.readiness }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readiness.path }}
+              port: {{ .Values.readiness.port }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+        {{- range .Values.additionalContainers }}
+        - name: {{ .name }}
+          {{- if or .environmentVariables .secretEnvironmentVariables }}
+          env:
+          {{- range $key, $value := .environmentVariables }}
+            - name: {{ $key }}
+              value: '{{ $value }}'
+          {{- end }}
+          {{- range .secretEnvironmentVariables }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secret.name }}
+                  key: {{ .secret.key }}
+          {{- end }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          {{- if .command }}
+          {{- with .command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .containerPorts }}
+          ports:
+          {{- range .containerPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+              protocol: {{ .protocol }}
+          {{- end }}
+          {{- end }}
+          {{- if .persistentVolumes }}
+          volumeMounts:
+          {{- if .persistentVolumes.dynamic }}
+          {{- range .persistentVolumes.dynamic }}
+          {{- if .create }}
+            - name: {{ include "app.name" $ }}-{{ .name }}
+          {{- else }}
+            - name: {{ .name }}
+          {{- end }}
+              {{- range .mounts }}
+              mountPath: {{ .path }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- range .persistentVolumes.static }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- range .persistentVolumes.hostPath }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- end }}
+          {{- if .liveness }}
+          livenessProbe:
+            httpGet:
+              path: {{ .liveness.path }}
+              port: {{ .liveness.port }}
+          {{- end }}
+          {{- if .readiness }}
+          readinessProbe:
+            httpGet:
+              path: {{ .readiness.path }}
+              port: {{ .readiness.port }}
+          {{- end }}
+          resources:
+            {{- toYaml .resources | nindent 12 }}
+        {{- end }}
+
+      {{- if or .Values.persistentVolumes.dynamic .Values.persistentVolumes.static .Values.persistentVolumes.hostPath .Values.persistentVolumes.nfs .Values.mountSecrets .Values.mountConfigmaps }}
+      volumes:
+      {{- if .Values.persistentVolumes }}
+      {{- range .Values.persistentVolumes.dynamic }}
+      {{- if .create }}
+        - name: {{ include "app.name" $ }}-{{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ include "app.name" $ }}-{{ .name }}
+      {{- else }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ .name }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- range .Values.persistentVolumes.static }}
+        - name: {{ .name }}
+          hostPath:
+            path: /var/lib/k8s/volumes/{{ include "app.name" $ }}/{{ .name }}
+            type: {{ default "DirectoryOrCreate" .type }}
+      {{- end }}
+      {{- range .Values.persistentVolumes.hostPath }}
+        - name: {{ .name }}
+          hostPath:
+            path: {{ .hostPath }}
+            {{- if .type }}
+            type: {{ .type }}
+            {{- end }}
+      {{- end }}
+      {{- range .Values.persistentVolumes.nfs }}
+        - name: {{ .name }}
+          nfs:
+            server: {{ .server | quote }}
+            path: {{ .remotePath | quote }}
+      {{- end }}
+      {{- range .Values.mountSecrets }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretName }}
+            optional: false
+      {{- end }}
+      {{- range .Values.mountConfigmaps }}
+        - name: {{ .name }}
+          configMap:
+            name: {{ .configMap }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

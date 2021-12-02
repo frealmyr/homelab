@@ -1,0 +1,7 @@
+apiVersion: v2
+name: external-services
+description: For hooking up external services from other devices on the network to Traefik
+
+type: application
+
+version: 1.0.3

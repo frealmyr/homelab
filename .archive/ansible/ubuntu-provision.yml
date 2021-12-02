@@ -1,0 +1,168 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    ##################
+    ## APT Packages ##
+    ##################
+
+    - name: docker - ensure that distro provided docker does not exist
+      apt:
+        pkg:
+          - docker
+          - docker-engine
+          - docker.io
+          - containerd.io
+          - runc
+        state: absent
+
+    - name: apt - update & upgrade packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: apt - install apt repo prereq
+      apt:
+        pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+
+    - name: apt - add signing keys
+      ansible.builtin.apt_key:
+        url: "{{ item }}"
+        state: present
+      with_items:
+        - "https://download.docker.com/linux/ubuntu/gpg"
+
+    - name: apt - add repositories
+      ansible.builtin.apt_repository:
+        repo: "{{ item }}"
+        state: present
+      with_items:
+        - "deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable"
+
+    - name: apt - install packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+          - containerd.io
+          - curl
+          - git
+          - htop
+          - inxi
+          - jq
+          - mc
+          - net-tools
+          - nvme-cli
+          - smartmontools
+          - tlp
+          - tmux
+          - ufw
+          - zsh
+
+    - name: apt - clean/remove apt packages
+      apt:
+        autoclean: yes
+        autoremove: yes
+
+    ############
+    ## Docker ##
+    ############
+
+    - name: docker - add user to docker group
+      user: name=fredrick
+        groups=docker
+        append=yes
+
+    - name: docker - restart docker service
+      ansible.builtin.systemd:
+        state: restarted
+        daemon_reload: yes
+        name: docker
+
+    ##############
+    ## Firewall ##
+    ##############
+
+    - name: firewall - allow ingress ports
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - "22"
+        - "8080"
+        - "8443"
+
+    - name: firewall - allow all access from RFC1918 network
+      community.general.ufw:
+        rule: allow
+        src: "{{ item }}"
+      loop:
+        - 10.0.0.0/24 # LAN
+        - 192.168.0.0/16 # Docker
+
+    - name: firewall - enable ufw
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+    ###################
+    ## Configuration ##
+    ###################
+
+    - name: shell - use zsh as default shell
+      shell: chsh -s $(which zsh) fredrick
+
+    - name: tlp - copy custom ac profile
+      copy: src={{ item.src }} dest={{ item.dest }}
+      with_items:
+        - { src: "./files/tlp/99-ac.conf", dest: "/etc/tlp.d/99-ac.conf" }
+
+    - name: ssh - add local public key to server
+      authorized_key:
+        user: fredrick
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+    ##############
+    ## Hostname ##
+    ##############
+
+    - name: hostname - change if mismatch from inventory name
+      hostname: name="{{ inventory_hostname }}"
+      when: ansible_fqdn != ansible_ssh_host
+
+    - name: system - rebooting host
+      reboot:
+      when: ansible_fqdn != ansible_ssh_host
+
+    - name: hostname - fix /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1  {{ ansible_hostname }}"
+        state: present
+      when: ansible_fqdn != ansible_ssh_host
+
+    ############
+    ## Reboot ##
+    ############
+
+    - name: system - rebooting host
+      reboot:
+
+    #################
+    ## Validations ##
+    #################
+
+    - name: hostname - validate ansible_fqdn == inventory_hostname
+      tags:
+        - validate
+      assert:
+        that: ansible_fqdn == inventory_hostname

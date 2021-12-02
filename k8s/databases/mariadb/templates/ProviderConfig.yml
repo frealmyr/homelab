@@ -1,0 +1,12 @@
+---
+apiVersion: mysql.sql.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: mariadb
+spec:
+  credentials:
+    source: MySQLConnectionSecret
+    connectionSecretRef:
+      name: credentials-sql
+      namespace: databases
+  tls: preferred

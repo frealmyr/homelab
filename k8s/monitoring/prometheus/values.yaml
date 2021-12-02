@@ -1,0 +1,54 @@
+prometheus:
+  server:
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: traefik-internal
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-internal-security@kubernetescrd
+      hosts:
+        - prometheus.fmlab.no
+      tls:
+        - secretName: certificate-prometheus-server
+          hosts:
+            - prometheus.fmlab.no
+    persistentVolume:
+      enabled: true
+
+  alertmanager:
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: traefik-internal
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-internal-security@kubernetescrd
+      hosts:
+        - host: alertmanager.fmlab.no
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: certificate-alertmanager
+          hosts:
+            - alertmanager.fmlab.no
+    persistentVolume:
+      enabled: true
+
+  # Exporters for nodes are already installed with apt in ansible
+  prometheus-node-exporter:
+    enabled: false
+  serverFiles:
+    prometheus.yml:
+      scrape_configs:
+        - job_name: node-exporter
+          scrape_interval: 30m
+          scrape_timeout: 30s
+          static_configs:
+            - targets:
+              - 10.8.0.10:9100
+              - 10.8.0.11:9100
+              - 10.8.0.12:9100

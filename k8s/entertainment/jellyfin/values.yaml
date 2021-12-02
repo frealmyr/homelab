@@ -1,0 +1,59 @@
+app:
+  image:
+    repository: jellyfin/jellyfin
+    tag: 10.8.9
+
+  persistentVolumes:
+    static:
+      - name: config
+        mountPath: /config
+      - name: cache
+        mountPath: /cache
+    hostPath:
+      - name: downloads
+        mountPath: /media
+        hostPath: /home/fredrick/media # TODO public user
+
+  environmentVariables:
+    JELLYFIN_PublishedServerUrl: https://jellyfin.fmlab.no
+
+  podSecurityContext:
+    # runAsUser: 1000
+    # runAsGroup: 1000
+    SupplementalGroups:
+      - 44 # Video
+      - 109 # Render
+
+  resources:
+    limits:
+      amd.com/gpu: 1
+
+  containerPorts:
+    - name: http
+      containerPort: 8096
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 8096
+          targetPort: 8096
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 8096
+        hosts:
+          - host: jellyfin.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        tls:
+          - secretName: jellyfin
+            hosts:
+              - jellyfin.fmlab.no

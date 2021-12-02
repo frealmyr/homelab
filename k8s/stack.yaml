@@ -1,0 +1,180 @@
+repoURL: https://github.com/frealmyr/homelab
+targetRevision: main
+basePath: k8s
+
+namespaces:
+  databases:
+  monitoring:
+
+appProject:
+  databases:
+    applications:
+      mariadb:
+        namespace:
+          name: databases
+        sync:
+          autoSync: true
+          wave: "-1"
+      postgres:
+        namespace:
+          name: databases
+        sync:
+          autoSync: true
+          wave: "-1"
+      redis:
+        namespace:
+          name: databases
+        sync:
+          autoSync: true
+          wave: "-1"
+
+  entertainment:
+    applications:
+      jellyfin:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+
+  home:
+    applications:
+      adguard:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+      homeassistant:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+      homebox:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+      homer:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+      omada:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+      yarr:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+
+  monitoring:
+    applications:
+      grafana:
+        namespace:
+          name: monitoring
+        sync:
+          autoSync: true
+      prometheus:
+        namespace:
+          name: monitoring
+        sync:
+          autoSync: true
+          wave: "-1"
+
+  office:
+    applications:
+      freshrss:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+
+  public:
+    applications:
+      photoview:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+      wireguard:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+
+  system:
+    applications:
+      amd-gpu:
+        namespace:
+          name: kube-system
+        sync:
+          autoSync: true
+          wave: "-1"
+      external-secrets:
+        namespace:
+          name: external-secrets
+        sync:
+          autoSync: true
+          wave: "-4"
+      cloudflare-ddns:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+          wave: "-3"
+      cert-manager:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+          wave: "-3"
+      local-path-provisioner:
+        namespace:
+          name: local-path-provisioner
+          create: true
+        sync:
+          autoSync: true
+          wave: "-2"
+      crossplane:
+        namespace:
+          name: crossplane-system
+          create: true
+        sync:
+          autoSync: true
+          wave: "-2"
+      traefik-internal:
+        namespace:
+          name: traefik-internal
+          create: true
+        sync:
+          autoSync: true
+          wave: "-1"
+        ignoreDifferences:
+          - group: ""
+            kind: ConfigMap
+            name: traefik-whitelist
+            jsonPointers:
+              - /data/whitelist
+      traefik-external:
+        namespace:
+          name: traefik-external
+          create: true
+        sync:
+          autoSync: true
+          wave: "-1"
+        ignoreDifferences:
+          - group: ""
+            kind: ConfigMap
+            name: traefik-whitelist
+            jsonPointers:
+              - /data/whitelist
+
+  tools:
+    applications:
+      librespeed:
+        namespace:
+          create: true
+        sync:
+          autoSync: true

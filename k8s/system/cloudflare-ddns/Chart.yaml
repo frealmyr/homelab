@@ -1,0 +1,12 @@
+apiVersion: v2
+name: cloudflare-ddns
+description: CloudFlare Dynamic DNS
+
+type: application
+
+version: 1.0.0
+
+dependencies:
+  - name: app
+    version: ^1.0.0
+    repository: "https://frealmyr.github.io/homelab/"

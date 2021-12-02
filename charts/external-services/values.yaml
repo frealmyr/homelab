@@ -1,0 +1,6 @@
+services: {}
+#  - name: transmission
+#    port: 9091
+#    ipAddress: 10.0.0.5
+
+ingressClass: traefik-internal

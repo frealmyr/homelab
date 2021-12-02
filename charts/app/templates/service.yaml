@@ -1,0 +1,30 @@
+{{- range .Values.services }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "app.name" (merge . $) }}-{{ .name }}
+  labels:
+    {{- include "app.labels" (merge . $) | nindent 4 }}
+  {{- if .loadBalancerIP }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "sharing-is-caring"
+  {{- end }}
+spec:
+  type: {{ .type }}
+  {{- if .loadBalancerIP }}
+  loadBalancerIP: {{ .loadBalancerIP }}
+  {{- end }}
+  ports:
+    {{- range .ports }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ default "TCP" .protocol }}
+      {{- if .nodePort }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    {{- include "app.selectorLabels" (merge . $) | nindent 4 }}
+{{- end }}

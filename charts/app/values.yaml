@@ -1,0 +1,278 @@
+# Default values for app.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+command: {}
+  # - redis-server
+  # - '--save 60 1' 
+  # - '--loglevel warning'
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+annotations: {}
+
+environmentVariables: {}
+#  PID: 1000
+#  PGID: "1000"
+#  TZ: "Europe/Oslo"
+
+secretEnvironmentVariables: {}
+  # - name: DB_DATABASE
+  #   secret:
+  #     name: credentials-db
+  #     key: database
+  # - name: DB_USERNAME
+  #   secret:
+  #     name: credentials-db
+  #     key: username
+  # - name: DB_PASSWORD
+  #   secret:
+  #     name: credentials-db
+  #     key: password
+
+persistentVolumes: {}
+  # static:
+  #   - name: config
+  #     mountPath: /config
+  #   - name: backups
+  #     mountPath: /config
+  #     type: Directory
+  # dynamic:
+  #   - name: shared
+  #     accessMode: ReadWriteMany
+  #     storageClassName: nas
+  #     size: 10Gi
+  #     volumeName: yolo-app
+  #     mounts:
+  #       - path: /shared
+  #         subPath: shared
+  #   - name: config
+  #     create: true
+  #     size: 10Gi
+  #     mounts:
+  #       - path: /config
+  #         subPath: config
+  #       - path: /config/backups
+  #         subPath: backups
+  # hostPath:
+  #   - name: videos
+  #     mountPath: /mnt/videos
+  #     hostPath: /media/SSD2/Videos
+  #     type: Directory
+  #   - name: downloads
+  #     mountPath: /mnt/downloads
+  #     hostPath: /media/SSD2/Downloads
+  # nfs:
+  #   - name: gallery
+  #     remotePath: /gallery
+  #     server: 10.7.0.11
+  #     mountPath: /app/gallery
+
+mountSecrets: {}
+#  - name: cert-app
+#    secretName: certificate-app
+#    mountPath: /secrets/cert-app
+
+mountConfigmaps: {}
+#  - name: config-app
+#    configMap: config-app
+#    mountPath: /configmaps/conf-app
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  {}
+  # supplementalGroups:
+  #   - 44 # Video
+  #   - 109 # Render
+  # fsGroup: 2000
+
+podHostNetwork: false
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+containerPorts: {}
+#   - name: http
+#     containerPort: 80
+#     protocol: TCP
+
+services:
+  {}
+  # - name: http
+  #   type: ClusterIP
+  #   ports:
+  #     - name: http
+  #       port: 9091
+  #       targetPort: 9091
+  # - name: peer
+  #   type: NodePort
+  #   ports:
+  #     - name: peer-tcp
+  #       port: 51413
+  #       targetPort: 51413
+  #       nodePort: 32143
+  #     - name: peer-udp
+  #       port: 51413
+  #       targetPort: 51413
+  #       protocol: UDP
+  #       nodePort: 32143
+
+additionalContainers:
+  {}
+  # - name: docker-proxy
+  #   environmentVariables:
+  #     - name: PID
+  #       value: "1000"
+  #     - name: PGID
+  #       value: "1000"
+  #     - name: TZ
+  #       value: "Europe/Oslo"
+  #   securityContext:
+  #     capabilities:
+  #       drop:
+  #         - ALL
+  #     readOnlyRootFilesystem: true
+  #     runAsNonRoot: true
+  #     runAsUser: 1000
+  #   image:
+  #     repository: docker-image
+  #     pullPolicy: IfNotPresent
+  #     tag: latest
+  #   command: ["printenv"]
+  #   secretEnvironmentVariables:
+  #     - name: DB_DATABASE
+  #       secret:
+  #         name: credentials-db
+  #         key: database
+  #     - name: DB_USERNAME
+  #       secret:
+  #         name: credentials-db
+  #         key: username
+  #     - name: DB_PASSWORD
+  #       secret:
+  #         name: credentials-db
+  #         key: password
+  #   containerPorts:
+  #     - name: http
+  #       containerPort: 80
+  #       protocol: TCP
+  #   persistentVolumes:
+  #     pvc:
+  #       create: true
+  #       size: 10Gi
+  #       mounts:
+  #         - path: /opt/adguardhome/work
+  #           subPath: work
+  #     hostPath:
+  #       - name: hdd1
+  #         mountPath: /media/HDD1
+  #         hostPath: /media/HDD1
+  #         type: Directory
+  #   liveness:
+  #     path: /
+  #     port: http
+  #   readiness:
+  #     path: /
+  #     port: http
+  #   resources:
+  #     limits:
+  #       cpu: 100m
+  #       memory: 128Mi
+  #     requests:
+  #       cpu: 100m
+  #       memory: 128Mi
+
+liveness: {}
+  # path: /
+  # port: http
+
+readiness: {}
+  # path: /
+  # port: http
+
+ingresses:
+  enabled: false
+  className: "traefik-internal"
+  annotations:
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  ingress:
+    {}
+    # - name: frontend
+    #   service:
+    #     name: http
+    #     port: 80
+    #   hosts:
+    #     - host: chart-example.local
+    #       paths:
+    #         - path: /
+    #           pathType: ImplementationSpecific
+    #   tls:
+    #     - secretName: chart-example-tls
+    #       hosts:
+    #         - chart-example.local
+    # - name: api
+    #   service:
+    #     name: grpc
+    #     port: 3389
+    #   hosts:
+    #     - host: chart-example.local
+    #       paths:
+    #         - path: /
+    #           pathType: ImplementationSpecific
+    #   tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+resources:
+  {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

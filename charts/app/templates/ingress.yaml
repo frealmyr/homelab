@@ -1,0 +1,51 @@
+{{- if .Values.ingresses.enabled -}}
+{{- range .Values.ingresses.ingress }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "app.name" (merge . $) }}-{{ .name }}
+  labels:
+    {{- include "app.labels" (merge . $) | nindent 4 }}
+  annotations:
+    {{- if .tls }}
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    traefik.ingress.kubernetes.io/router.entrypoints: 'websecure'
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+    {{- end }}
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ .Values.ingresses.className }}-security@kubernetescrd"
+    {{- with .Values.ingresses.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingresses.className }}
+  {{- $serviceName := .service.name -}}
+  {{- $servicePort := .service.port -}}
+  {{- if .tls }}
+  tls:
+    {{- range .tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "app.name" (merge . $) }}-{{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+
+{{- end }}

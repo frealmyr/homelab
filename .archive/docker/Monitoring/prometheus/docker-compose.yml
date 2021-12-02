@@ -1,0 +1,107 @@
+version: '3.5'
+
+networks:
+  web:
+    external: true
+  monitoring:
+    external: true
+  internal:
+
+volumes:
+  data_prometheus:
+  data_alertmanager:
+  data_grafana:
+
+services:
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    #user: 1000:1000
+    volumes:
+      - type: bind
+        source: ${HOME}/.volumes/prometheus/
+        target: /etc/prometheus/
+      - type: volume
+        source: data_prometheus
+        target: /prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.external-url=http://prometheus.fmlab.no'
+    restart: unless-stopped
+    networks:
+      - web
+      - monitoring
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web
+      - traefik.http.routers.prometheus.entryPoints=https
+      - traefik.http.routers.prometheus.rule=Host(`prometheus.fmlab.no`)
+      - traefik.http.routers.prometheus.service=prometheus
+      - traefik.http.routers.prometheus.tls.certresolver=letsEncrypt
+      - traefik.http.services.prometheus.loadbalancer.server.port=9090
+      - traefik.http.routers.prometheus.middlewares=sso@file,security@file
+
+  alertmanager:
+    container_name: alertmanager
+    image: prom/alertmanager:latest
+    #user: 1000:1000
+    volumes:
+      - type: bind
+        source: ${HOME}/.volumes/alertmanager/
+        target: /etc/alertmanager/
+      - type: volume
+        source: data_alertmanager
+        target: /alertmanager
+    networks:
+      - web
+      - internal
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://alertmanager.fmlab.no'
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web
+      - traefik.http.routers.alertmanager.entryPoints=https
+      - traefik.http.routers.alertmanager.rule=Host(`alertmanager.fmlab.no`)
+      - traefik.http.routers.alertmanager.service=alertmanager
+      - traefik.http.routers.alertmanager.tls.certresolver=letsEncrypt
+      - traefik.http.services.alertmanager.loadbalancer.server.port=9093
+      - traefik.http.routers.alertmanager.middlewares=sso@file,security@file
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana-oss:latest
+    # user: 472:0
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,ryantxu-ajax-panel,grafana-simple-json-datasource
+    volumes:
+      - type: volume
+        source: data_grafana
+        target: /var/lib/grafana
+      - type: bind
+        source: ${HOME}/.volumes/grafana/provisioning/
+        target: /etc/grafana/provisioning/
+      - type: bind
+        source: ${HOME}/.volumes/grafana/custom.ini
+        target: /etc/grafana/grafana.ini
+    networks:
+      - web
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web
+      - traefik.http.routers.grafana.entryPoints=https
+      - traefik.http.routers.grafana.rule=Host(`grafana.fmlab.no`)
+      - traefik.http.routers.grafana.service=grafana
+      - traefik.http.routers.grafana.tls.certresolver=letsEncrypt
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+      - traefik.http.routers.grafana.middlewares=sso@file,security@file
+    restart: unless-stopped

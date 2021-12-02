@@ -1,0 +1,44 @@
+app:
+  image:
+    repository: lscr.io/linuxserver/homeassistant
+    tag: latest
+
+  environmentVariables:
+    PID: "1000"
+    PGID: "1000"
+    TZ: "Europe/Oslo"
+
+  persistentVolumes:
+    static:
+      - name: config
+        mountPath: /config
+
+  containerPorts:
+    - name: http
+      containerPort: 8123
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 8123
+          targetPort: 8123
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 8123
+        hosts:
+          - host: ha.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        tls:
+          - secretName: homeassistant
+            hosts:
+              - ha.fmlab.no
