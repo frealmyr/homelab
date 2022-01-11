@@ -1,0 +1,9 @@
+cert-manager:
+  installCRDs: true
+  prometheus:
+    enabled: false
+    servicemonitor:
+      enabled: false
+  clusterResourceNamespace: cert-manager
+  extraArgs:
+    - --cluster-resource-namespace=cert-manager

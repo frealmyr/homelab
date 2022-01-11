@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubernetes-dashboard
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: monitoring
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/system/kubernetes-dashboard
+    repoURL: https://github.com/frealmyr/homelab
+    helm:
+      releaseName: kubernetes-dashboard
+      valueFiles:
+      - default.yaml

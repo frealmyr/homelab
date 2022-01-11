@@ -1,0 +1,19 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: traefik-system
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/system/traefik
+    repoURL: https://github.com/frealmyr/homelab
+    helm:
+      releaseName: traefik
+      valueFiles:
+      - default.yaml

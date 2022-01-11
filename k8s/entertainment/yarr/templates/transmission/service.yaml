@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: transmission
+  labels:
+    app: transmission
+spec:
+  type: NodePort
+  ports:
+    - name: ui
+      port: 9091
+    - name: tcp
+      port: 54213
+      targetPort: 51413
+    - name: udp
+      port: 54213
+      protocol: UDP
+      targetPort: 51413
+  selector:
+    app: transmission

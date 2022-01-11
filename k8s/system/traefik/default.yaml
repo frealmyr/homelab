@@ -1,0 +1,52 @@
+traefik:
+  deployment:
+    additionalContainers:
+      - name: docker-proxy
+        image: tecnativa/docker-socket-proxy:latest
+        securityContext:
+          privileged: true
+        ports:
+          - proxy:
+            containerPort: 2375
+            protocol: TCP
+        env:
+          - name: CONTAINERS
+            value: "1"
+        volumeMounts:
+          - name: dockersock
+            mountPath: /var/run/docker.sock
+    additionalVolumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+  ingressClass:
+    enabled: true
+    isDefaultClass: true
+  ingressRoute:
+    dashboard:
+      enabled: false
+  additionalArguments:
+    - --providers.docker.endpoint=tcp://127.0.0.1:2375
+  service:
+    spec:
+      loadBalancerIP: "10.0.0.100"
+  podSecurityPolicy:
+    enabled: true
+  tlsOptions:
+    default:
+      minVersion: VersionTLS12
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384   # TLS 1.2
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305    # TLS 1.2
+        - TLS_AES_256_GCM_SHA384                  # TLS 1.3
+        - TLS_CHACHA20_POLY1305_SHA256            # TLS 1.3
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+      sniStrict: true
+  providers:
+    kubernetesCRD:
+      allowCrossNamespace: true
+    kubernetesIngress:
+      publishedService:
+        enabled: true

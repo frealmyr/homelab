@@ -1,0 +1,26 @@
+kubernetes-dashboard:
+  settings:
+    clusterName: "FMLab"
+    itemsPerPage: 50
+  protocolHttp: true
+  extraArgs:
+    - --enable-skip-login
+    - --enable-insecure-login
+  service:
+    externalPort: 8080
+  rbac:
+    clusterReadOnlyRole: true
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: traefik
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-system-sso@kubernetescrd,traefik-system-security@kubernetescrd
+    hosts:
+      - k8s.fmlab.no
+    tls:
+      - hosts:
+          - k8s.fmlab.no
+        secretName: kubernetes-dashboard

@@ -1,0 +1,14 @@
+apiVersion: v2
+name: kubernetes-dashboard
+description: Kubernetes Dashboard
+
+type: application
+
+version: 1.0.0
+appVersion: 2.4.0
+
+dependencies:
+- name: kubernetes-dashboard
+  version: 5.0.5
+  repository: https://kubernetes.github.io/dashboard/
+  # alias: k8s-dashboard

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: monitoring
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/system/prometheus
+    repoURL: https://github.com/frealmyr/homelab
+    helm:
+      releaseName: prometheus
+      valueFiles:
+      - default.yaml

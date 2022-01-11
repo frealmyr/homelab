@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: yarr
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: yarr
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/entertainment/yarr
+    repoURL: https://github.com/frealmyr/homelab
+    helm:
+      releaseName: yarr
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

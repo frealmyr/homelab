@@ -7,7 +7,7 @@ resource "helm_release" "argocd" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
 
-  namespace  = "argocd"
+  namespace        = "argocd"
   create_namespace = true
 
   values = [<<EOF
@@ -49,8 +49,8 @@ resource "helm_release" "argocd_app_homelab" {
             namespace: ''
             server: 'https://kubernetes.default.svc'
           source:
-            path: .
-            repoURL: 'https://github.com/frealmyr/homelab-apps'
+            path: k8s
+            repoURL: 'https://github.com/frealmyr/homelab'
             targetRevision: main
             directory:
               recurse: false
