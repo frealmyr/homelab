@@ -33,14 +33,14 @@ spec:
           volumeMounts:
             - name: pvc-config
               mountPath: /data/.config
-            - name: storage
-              mountPath: /storage
+            - name: ssd2
+              mountPath: /media/SSD2
       restartPolicy: Always
       volumes:
         - name: pvc-config
           persistentVolumeClaim:
             claimName: transmission-config
-        - name: storage
+        - name: ssd2
           hostPath:
             path: /media/SSD2
             type: Directory

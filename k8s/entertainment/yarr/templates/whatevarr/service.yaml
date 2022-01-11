@@ -1,0 +1,42 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jackett
+  labels:
+    app: whatevarr
+spec:
+  type: NodePort
+  ports:
+    - name: jackett
+      port: 9117
+  selector:
+    app: whatevarr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarr
+  labels:
+    app: whatevarr
+spec:
+  type: NodePort
+  ports:
+    - name: sonarr
+      port: 8989
+  selector:
+    app: whatevarr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radarr
+  labels:
+    app: whatevarr
+spec:
+  type: NodePort
+  ports:
+    - name: radarr
+      port: 7878
+  selector:
+    app: whatevarr

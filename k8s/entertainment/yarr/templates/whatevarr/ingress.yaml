@@ -1,0 +1,81 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: 'traefik-system-sso@kubernetescrd,traefik-system-security@kubernetescrd'
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+  name: jackett
+spec:
+  rules:
+    - host: jackett.fmlab.no
+      http:
+        paths:
+          - backend:
+              service:
+                name: jackett
+                port:
+                  number: 9117
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - jackett.fmlab.no
+      secretName: certificate-jackett
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: 'traefik-system-sso@kubernetescrd,traefik-system-security@kubernetescrd'
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+  name: sonarr
+spec:
+  rules:
+    - host: sonarr.fmlab.no
+      http:
+        paths:
+          - backend:
+              service:
+                name: sonarr
+                port:
+                  number: 8989
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - sonarr.fmlab.no
+      secretName: certificate-sonarr
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: 'traefik-system-sso@kubernetescrd,traefik-system-security@kubernetescrd'
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+  name: radarr
+spec:
+  rules:
+    - host: radarr.fmlab.no
+      http:
+        paths:
+          - backend:
+              service:
+                name: radarr
+                port:
+                  number: 7878
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - radarr.fmlab.no
+      secretName: certificate-radarr

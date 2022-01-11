@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whatevarr
+  labels:
+    app: whatevarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whatevarr
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: whatevarr
+    spec:
+      containers:
+        - name: jackett
+          env:
+            - name: PUID
+              value: "1001"
+            - name: GID
+              value: "1001"
+            - name: TZ
+              value: "Europe/Oslo"
+          image: linuxserver/jackett:latest
+          ports:
+            - containerPort: 9117
+          volumeMounts:
+            - name: jackett-config
+              mountPath: /config
+        - name: sonarr
+          env:
+            - name: PUID
+              value: "1001"
+            - name: GID
+              value: "1001"
+            - name: TZ
+              value: "Europe/Oslo"
+          image: linuxserver/sonarr:latest
+          ports:
+            - containerPort: 8989
+          volumeMounts:
+            - name: sonarr-config
+              mountPath: /config
+            - name: ssd2
+              mountPath: /media/SSD2
+        - name: radarr
+          env:
+            - name: PUID
+              value: "1001"
+            - name: GID
+              value: "1001"
+            - name: TZ
+              value: "Europe/Oslo"
+          image: linuxserver/radarr:latest
+          ports:
+            - containerPort: 7878
+          volumeMounts:
+            - name: radarr-config
+              mountPath: /config
+            - name: ssd2
+              mountPath: /media/SSD2
+      restartPolicy: Always
+      volumes:
+        - name: jackett-config
+          persistentVolumeClaim:
+            claimName: sonarr-config
+        - name: sonarr-config
+          persistentVolumeClaim:
+            claimName: jackett-config
+        - name: radarr-config
+          persistentVolumeClaim:
+            claimName: radarr-config
+        - name: ssd2
+          hostPath:
+            path: /media/SSD2
+            type: Directory
