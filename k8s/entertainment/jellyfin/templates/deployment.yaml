@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  labels:
+    app: jellyfin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: jellyfin
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        supplementalGroups:
+          - 44
+          - 109
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:latest
+          ports:
+            - containerPort: 8096
+          volumeMounts:
+            - name: pvc-config
+              mountPath: /config
+            - name: ssd2
+              mountPath: /media/SSD2
+          env:
+            - name: HIP_VISIBLE_DEVICES
+              value: "0" # # 0,1,2,...,n for running on GPU and select the GPUs, -1 for running on CPU 
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+          resources:
+            limits:
+              amd.com/gpu: 1 # requesting a GPU
+      restartPolicy: Always
+      volumes:
+        - name: pvc-config
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+        - name: ssd2
+          hostPath:
+            path: /media/SSD2
+            type: Directory

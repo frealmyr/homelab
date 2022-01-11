@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: yarr
+  name: whatevarr
   namespace: argocd
 spec:
   destination:
     name: in-cluster
-    namespace: yarr
+    namespace: entertainment
   project: default
   source:
     targetRevision: main
-    path: k8s/entertainment/yarr
+    path: k8s/entertainment/whatevarr
     repoURL: https://github.com/frealmyr/homelab
     helm:
-      releaseName: yarr
+      releaseName: whatevarr
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

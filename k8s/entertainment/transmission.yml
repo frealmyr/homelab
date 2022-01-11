@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: transmission
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: entertainment
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/entertainment/transmission
+    repoURL: https://github.com/frealmyr/homelab
+    helm:
+      releaseName: transmission
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: transmission
+description: Download Client
+
+type: application
+
+version: 1.0.0
