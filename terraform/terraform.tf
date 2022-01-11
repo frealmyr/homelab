@@ -7,11 +7,11 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path = "./.terraform/kubeconfig"
+  config_path = "/home/fredrick/.kube/config"
 }
 
 provider "helm" {
   kubernetes {
-    config_path = "./.terraform/kubeconfig"
+    config_path = "/home/fredrick/.kube/config"
   }
 }

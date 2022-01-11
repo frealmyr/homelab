@@ -1,0 +1,43 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: install apt packages requirements
+      apt:
+        pkg:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+
+    - name: add docker signing key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: add docker apt repository
+      ansible.builtin.apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: install apt packages
+      apt:
+        pkg:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+
+    - name: add user to docker group
+      user: name=fredrick
+            groups=docker
+            append=yes
+
+    - name: use systemd cgroup driver
+      shell: echo '{"exec-opts":["native.cgroupdriver=systemd"]}'> /etc/docker/daemon.json
+
+    - name: restart docker service
+      ansible.builtin.systemd:
+        state: restarted
+        daemon_reload: yes
+        name: docker

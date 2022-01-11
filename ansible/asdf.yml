@@ -1,0 +1,62 @@
+---
+- hosts: localhost
+  become: yes
+  become_user: fredrick
+
+  tasks:
+    - name: clone asdf repository
+      git:
+        repo: https://github.com/asdf-vm/asdf.git
+        dest: "~/.asdf"
+        version: v0.8.1
+        update: no
+
+    - name: add asdf script to bashrc
+      blockinfile:
+        path: "~/.bashrc"
+        block: ". $HOME/.asdf/asdf.sh"
+        marker: '# {mark} ANSIBLE MANAGED BLOCK - asdf script'
+
+    - name: add asdf completions to bashrc
+      blockinfile:
+        path: "~/.bashrc"
+        block: ". $HOME/.asdf/completions/asdf.bash"
+        marker: '# {mark} ANSIBLE MANAGED BLOCK - asdf completions'
+
+    - name: add asdf plugins
+      shell: $HOME/.asdf/bin/asdf plugin add "{{ item }}"
+      loop:
+        - terraform
+        - helm
+        - istioctl
+        - kompose
+        - krew
+        - stern
+
+      register: asdf_add_result
+      failed_when:
+        - asdf_add_result.rc == 1 or asdf_add_result.rc == 2 and not "'already added' in asdf_add_result.stderr" # Already added plugin should be rc0..
+
+    - name: install asdf plugins
+      shell: $HOME/.asdf/bin/asdf install "{{ item }}" latest
+      loop:
+        - terraform
+        - helm
+        - istioctl
+        - kompose
+        - krew
+
+    - name: install asdf stern plugin
+      shell: $HOME/.asdf/bin/asdf install stern 1.20.0
+
+    - name: set global default asdf versions
+      shell: $HOME/.asdf/bin/asdf global "{{ item }}" latest
+      loop:
+        - terraform
+        - helm
+        - istioctl
+        - kompose
+        - krew
+
+    - name: set global default asdf stern version
+      shell: $HOME/.asdf/bin/asdf global stern 1.20.0

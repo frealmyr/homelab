@@ -1,0 +1,38 @@
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: Disable ipv6 in UFW
+      ansible.builtin.lineinfile:
+        path: /etc/default/ufw
+        regexp: '^IPV6='
+        line: IPV6=no
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+    - name: Allow ssh, block brute force attempts
+      community.general.ufw:
+        rule: limit
+        port: ssh
+        proto: tcp
+
+    - name: Allow all access to tcp port 80
+      community.general.ufw:
+        rule: allow
+        port: '{{ item }}'
+        proto: tcp
+      loop:
+        - '80'
+        - '443'
+
+    - name: Allow all access from RFC1918 networks to this host
+      community.general.ufw:
+        rule: allow
+        src: '{{ item }}'
+      loop:
+        - 10.0.0.0/24
+        - 172.17.0.0/16
+        - 10.244.0.0/16
