@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: install apt packages requirements
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+        - libnuma-dev
+
+    - name: add rockm signing key
+      ansible.builtin.apt_key:
+        url: https://repo.radeon.com/rocm/rocm.gpg.key
+        state: present
+
+    - name: add rockm apt repository
+      ansible.builtin.apt_repository:
+        repo: deb [arch=amd64] https://repo.radeon.com/rocm/apt/debian/ ubuntu main
+        state: present
+
+    - name: install apt packages
+      apt:
+        update_cache: yes
+        pkg:
+        - rocm-dkms
+
+# Note: To run the ROCm programs, add the ROCm binaries in your PATH.
+# echo 'export PATH=$PATH:/opt/rocm/bin:/opt/rocm/rocprofiler/bin:/opt/rocm/opencl/bin' | sudo tee -a /etc/profile.d/rocm.sh
