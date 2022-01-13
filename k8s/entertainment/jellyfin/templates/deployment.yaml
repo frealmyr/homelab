@@ -34,10 +34,6 @@ spec:
               mountPath: /config
             - name: ssd2
               mountPath: /media/SSD2
-          # securityContext:
-          #   privileged: true
-          #   capabilities:
-          #     add: ["SYS_ADMIN"]
       restartPolicy: Always
       volumes:
         - name: pvc-config
