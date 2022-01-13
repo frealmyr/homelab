@@ -1,0 +1,7 @@
+apiVersion: v2
+name: amdgpu-device-plugin
+description: Installs AMD GPU Plugin
+
+type: application
+
+version: 1.0.0
