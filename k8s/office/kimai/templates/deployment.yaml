@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kimai
+  labels:
+    app: kimai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kimai
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: kimai
+    spec:
+      containers:
+        - name: kimai
+          env:
+            - name: TRUSTED_HOSTS
+              value: kimai.fmlab.no,localhost,127.0.0.1
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: kimai-db-credentials
+                  key: MYSQL_CONN_URI
+          image: kimai/kimai2:fpm
+          ports:
+            - containerPort: 8001
+          volumeMounts:
+            - name: kimai-config
+              mountPath: /opt/kimai/public
+        - name: kimai-db
+          env:
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: kimai-db-credentials
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: kimai-db-credentials
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kimai-db-credentials
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kimai-db-credentials
+                  key: MYSQL_ROOT_PASSWORD
+          image: mysql:5.7
+          ports:
+            - containerPort: 3306
+          # livenessProbe:
+          #   exec:
+          #     command:
+          #       - mysqladmin
+          #       - p$MYSQL_ROOT_PASSWORD
+          #       - ping
+          #       - -h
+          #       - localhost
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 60
+          volumeMounts:
+            - name: kimai-db
+              mountPath: /var/lib/mysql
+      restartPolicy: Always
+      volumes:
+        - name: kimai-config
+          persistentVolumeClaim:
+            claimName: kimai-config
+        - name: kimai-db
+          persistentVolumeClaim:
+            claimName: kimai-db

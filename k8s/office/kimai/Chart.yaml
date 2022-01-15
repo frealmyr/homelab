@@ -1,0 +1,7 @@
+apiVersion: v2
+name: kimai
+description: Time Tracking
+
+type: application
+
+version: 1.0.0
