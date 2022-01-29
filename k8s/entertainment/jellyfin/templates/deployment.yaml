@@ -18,15 +18,23 @@ spec:
         app: jellyfin
     spec:
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
         supplementalGroups:
-          - 44
-          - 109
+          - 44 # Video
+          - 109 # Render
       containers:
         - name: jellyfin
-          image: jellyfin/jellyfin:latest
+          env:
+            - name: PID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Oslo"
+            - name: JELLYFIN_PublishedServerUrl
+              value: "https://jellyfin.fmlab.no"
+            - name: DOCKER_MODS
+              value: "linuxserver/mods:jellyfin-amd"
+          image: lscr.io/linuxserver/jellyfin:latest
           ports:
             - containerPort: 8096
           volumeMounts:
@@ -34,6 +42,8 @@ spec:
               mountPath: /config
             - name: ssd2
               mountPath: /media/SSD2
+            - name: devdri
+              mountPath: /dev/dri
       restartPolicy: Always
       volumes:
         - name: pvc-config
@@ -42,3 +52,7 @@ spec:
         - name: ssd2
           hostPath:
             path: /media/SSD2
+        - name: devdri
+          hostPath:
+            path: /dev/dri
+            type: Directory
