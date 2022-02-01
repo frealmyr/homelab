@@ -20,14 +20,14 @@ spec:
       containers:
         - name: kimai
           env:
-            - name: TRUSTED_HOSTS
-              value: kimai.fmlab.no,localhost,127.0.0.1
+            - name: TRUSTED_PROXIES
+              value: TRUSTED_PROXIES=127.0.0.1,0.0.0.0,localhost,kimai.fmlab.no,fmlab.no
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: kimai-db-credentials
                   key: MYSQL_CONN_URI
-          image: kimai/kimai2:fpm
+          image: kimai/kimai2:latest
           ports:
             - containerPort: 8001
           volumeMounts:
