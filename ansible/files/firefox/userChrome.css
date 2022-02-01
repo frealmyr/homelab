@@ -1,0 +1,21 @@
+/* hides the native tabs */
+#TabsToolbar {
+  visibility: collapse !important;
+}
+
+#titlebar {
+  visibility: collapse !important;
+}
+
+#sidebar-header {
+  visibility: collapse !important;
+}
+
+#back-button, #forward-button {
+  display:none!important;
+}
+
+/* Hide sidebar splitter when using Tree Style Tab.  */
+/* #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"] + #sidebar-splitter {
+  display: none !important;
+} */

@@ -16,3 +16,6 @@ spec:
       releaseName: cert-manager
       valueFiles:
       - default.yaml
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

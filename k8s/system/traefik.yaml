@@ -17,3 +17,6 @@ spec:
       releaseName: traefik
       valueFiles:
       - default.yaml
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
