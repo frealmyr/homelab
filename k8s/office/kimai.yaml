@@ -1,18 +1,19 @@
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: amdgpu-device-plugin
+  name: kimai
   namespace: argocd
 spec:
   destination:
     name: in-cluster
-    namespace: kube-system
+    namespace: office
   project: default
   source:
     targetRevision: main
-    path: k8s/system/amdgpu-device-plugin
+    path: k8s/office/kimai
     repoURL: https://github.com/frealmyr/homelab
     helm:
-      releaseName: amdgpu-device-plugin
-
+      releaseName: kimai
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

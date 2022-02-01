@@ -17,6 +17,21 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: office
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: argocd
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/office
+    repoURL: https://github.com/frealmyr/homelab
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: entertainment
   namespace: argocd
 spec:

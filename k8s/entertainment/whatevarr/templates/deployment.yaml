@@ -25,9 +25,9 @@ spec:
         - name: jackett
           env:
             - name: PUID
-              value: "1001"
+              value: "1000"
             - name: GID
-              value: "1001"
+              value: "1000"
             - name: TZ
               value: "Europe/Oslo"
           image: linuxserver/jackett:latest
@@ -39,9 +39,9 @@ spec:
         - name: sonarr
           env:
             - name: PUID
-              value: "1001"
+              value: "1000"
             - name: GID
-              value: "1001"
+              value: "1000"
             - name: TZ
               value: "Europe/Oslo"
           image: linuxserver/sonarr:latest
@@ -55,9 +55,9 @@ spec:
         - name: radarr
           env:
             - name: PUID
-              value: "1001"
+              value: "1000"
             - name: GID
-              value: "1001"
+              value: "1000"
             - name: TZ
               value: "Europe/Oslo"
           image: linuxserver/radarr:latest

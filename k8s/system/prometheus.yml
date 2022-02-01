@@ -16,3 +16,6 @@ spec:
       releaseName: prometheus
       valueFiles:
       - default.yaml
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
