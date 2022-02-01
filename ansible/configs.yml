@@ -48,7 +48,7 @@
 
   - name: clone dotfiles as a bare repo to homefolder
     ansible.builtin.git:
-      repo: https://github.com/frealmyr/dotfiles-configs.git
+      repo: https://github.com/frealmyr/dotfiles.git
       dest: $HOME/.dotfiles/
       bare: yes
 

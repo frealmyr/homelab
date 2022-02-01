@@ -6,11 +6,11 @@
   #   - name: Get required roles with ansible galaxy
   #     raw: ansible-galaxy install -r ansible/roles/requirements.yml -p ansible/roles/.tmp
 
+- name: install packages
+  import_playbook: ansible/packages.yml
+
 - name: install asdf and plugins
   import_playbook: ansible/asdf.yml
-
-- name: download config files
-  import_playbook: ansible/configs.yml
 
 - name: install docker
   import_playbook: ansible/docker.yml
@@ -18,11 +18,14 @@
 - name: install gameservers
   import_playbook: ansible/gameservers.yml
 
-- name: enable firewall
-  import_playbook: ansible/firewall.yml
-
 - name: install k8s
   import_playbook: ansible/k8s.yml
 
-- name: install packages
-  import_playbook: ansible/packages.yml
+- name: download config files
+  import_playbook: ansible/configs.yml
+
+- name: generate firefox profiles
+  import_playbook: ansible/firefox.yml
+
+- name: enable firewall
+  import_playbook: ansible/firewall.yml

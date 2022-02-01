@@ -2,12 +2,6 @@
 - hosts: localhost
   become: true
   tasks:
-    - name: Disable ipv6 in UFW
-      ansible.builtin.lineinfile:
-        path: /etc/default/ufw
-        regexp: '^IPV6='
-        line: IPV6=no
-
     - name: Enable UFW
       community.general.ufw:
         state: enabled
