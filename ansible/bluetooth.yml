@@ -1,0 +1,39 @@
+---
+- hosts: localhost
+  become: yes
+  vars:
+    driverzip: 20200909_LINUX_BT_DRIVER_KERNEL_5.7_COEX_v0202.zip
+  tasks:
+    - name: Blacklist bluetooth modules
+      community.general.kernel_blacklist:
+        name: {{ item }}
+        state: present
+      with_items:
+        - "btrtl"
+        - "btusb"
+        - "btintel"
+        - "btbcm"
+
+    - name: Download Asus BT500 driver
+      get_url:
+        url: https://dlcdnets.asus.com/pub/ASUS/wireless/USB-BT500/{{ driverzip }}
+        dest: /tmp
+
+    - name: Unzipping
+      unarchive:
+        src: /tmp/{{ driverzip }}
+        dest: /tmp
+        copy: no
+
+    - name: Make drivers
+      command: make install INTERFACE=all
+      args:
+        chdir: /tmp/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202
+
+    - name: Copy firmware/config
+      copy: src={{ item.src }} dest={{ item.dest }}
+      with_items:
+        - { src: '/tmp/btdriver/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/rtkbt-firmware/lib/firmware/rtl8761bu_fw', dest: '/lib/firmware/rtl8761bu_fw' }
+        - { src: '/tmp/btdriver/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/rtkbt-firmware/lib/firmware/rtl8761bu_config', dest: '/lib/firmware/rtl8761bu_config' }
+        - { src: '/tmp/btdriver/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/rtkbt-firmware/lib/firmware/rtlbt/rtl8761b_fw', dest: '/lib/firmware/rtlbt/rtl8761b_fw' }
+        - { src: '/tmp/btdriver/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/rtkbt-firmware/lib/firmware/rtlbt/rtl8761b_config', dest: '/lib/firmware/rtlbt/rtl8761b_config' }

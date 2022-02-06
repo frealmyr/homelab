@@ -9,6 +9,9 @@
 - name: install packages
   import_playbook: ansible/packages.yml
 
+- name: fix ASUS BT500 bluetooth
+  import_playbook: ansible/bluetooth.yml
+
 - name: install asdf and plugins
   import_playbook: ansible/asdf.yml
 
