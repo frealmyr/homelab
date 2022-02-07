@@ -55,11 +55,19 @@
         autoclean: yes
         autoremove: yes
 
+    ##########
+    ## Snap ##
+    ##########
+
     - name: install snap packages
       community.general.snap:
         name:
           - geforcenow-electron
           - moonlight
+
+    #############
+    ## Flatpak ##
+    #############
 
     - name: add the flathub flatpak repository
       community.general.flatpak_remote:
@@ -67,4 +75,23 @@
         state: present
         flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
         method: user
+      become_user: fredrick
+
+    - name: install flatpak packages
+      community.general.flatpak:
+        name: "{{ item }}"
+        state: present
+        method: user
+      with_items:
+        - "org.yuzu_emu.yuzu"
+      become_user: fredrick
+
+    ##########
+    ## Misc ##
+    ##########
+
+    - name: download yuzu keys
+      get_url:
+        url: https://raw.githubusercontent.com/emuworld/aio/master/prod.keys
+        dest: /home/fredrick/.var/app/org.yuzu_emu.yuzu/data/yuzu/keys
       become_user: fredrick
