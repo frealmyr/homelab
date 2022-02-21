@@ -11,6 +11,8 @@ resource "helm_release" "argocd" {
   create_namespace = true
 
   values = [<<EOF
+    metrics:
+      enabled: true
     controller:
       containerSecurityContext:
         capabilities:
