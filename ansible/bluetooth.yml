@@ -6,7 +6,7 @@
   tasks:
     - name: Blacklist bluetooth modules
       community.general.kernel_blacklist:
-        name: {{ item }}
+        name: "{{ item }}"
         state: present
       with_items:
         - "btrtl"
@@ -26,7 +26,7 @@
         copy: no
 
     - name: Make drivers
-      command: make install INTERFACE=all
+      command: make install INTERFACE=usb
       args:
         chdir: /tmp/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202
 
@@ -35,5 +35,4 @@
       with_items:
         - { src: '/tmp/btdriver/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/rtkbt-firmware/lib/firmware/rtl8761bu_fw', dest: '/lib/firmware/rtl8761bu_fw' }
         - { src: '/tmp/btdriver/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/rtkbt-firmware/lib/firmware/rtl8761bu_config', dest: '/lib/firmware/rtl8761bu_config' }
-        - { src: '/tmp/btdriver/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/rtkbt-firmware/lib/firmware/rtlbt/rtl8761b_fw', dest: '/lib/firmware/rtlbt/rtl8761b_fw' }
-        - { src: '/tmp/btdriver/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/20200806_LINUX_BT_DRIVER_RTL8761B_COEX_v0202/rtkbt-firmware/lib/firmware/rtlbt/rtl8761b_config', dest: '/lib/firmware/rtlbt/rtl8761b_config' }
+
