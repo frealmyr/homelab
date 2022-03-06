@@ -12,8 +12,6 @@ spec:
     targetRevision: main
     path: k8s/system/tekton
     repoURL: https://github.com/frealmyr/homelab
-    kustomize:
-      version: v4.5.2
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
