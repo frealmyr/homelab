@@ -13,7 +13,13 @@ resource "helm_release" "argocd" {
   values = [<<EOF
     metrics:
       enabled: true
+      serviceMonitor:
+        enabled: true
     controller:
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
       containerSecurityContext:
         capabilities:
           drop:

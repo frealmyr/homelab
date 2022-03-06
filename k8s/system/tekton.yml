@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tekton
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: tekton
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/system/tekton
+    repoURL: https://github.com/frealmyr/homelab
+    kustomize:
+      version: v4.5.2
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
