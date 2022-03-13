@@ -64,6 +64,15 @@ services: {}
   #   type: ClusterIP
   #   port: 3389
 
+liveness:
+  enabled: false
+  path: /
+  port: http
+readiness:
+  enabled: false
+  path: /
+  port: http
+
 ingresses:
   enabled: false
   className: "traefik"

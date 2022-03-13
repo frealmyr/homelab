@@ -52,14 +52,18 @@ spec:
               mountPath: {{ .path }}
           {{- end }}
           {{- end }}
+          {{- if .Values.liveness.enabled }}
           livenessProbe:
             httpGet:
-              path: /
-              port: http
+              path: {{ .Values.liveness.path }}
+              port: {{ .Values.liveness.port }}
+          {{- end }}
+          {{- if .Values.liveness.enabled }}
           readinessProbe:
             httpGet:
-              path: /
-              port: http
+              path: {{ .Values.readiness.path }}
+              port: {{ .Values.readiness.port }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- if or .Values.persistentVolumes.create .Values.persistentVolumes.hostPath }}
