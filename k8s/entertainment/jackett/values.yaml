@@ -17,13 +17,12 @@ app:
     fsGroup: 1000
 
   persistentVolumes:
-    create:
-      - name: config
-        path: /config
-        size: 10Gi
-    hostPath:
-      - name: ssd2
-        path: /media/SSD2
+    pvc:
+      create: true
+      size: 10Gi
+      mounts:
+        - path: /config
+          subPath: config
 
   containerPorts:
     - name: http

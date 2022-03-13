@@ -20,13 +20,29 @@ app:
       value: "51413"
 
   persistentVolumes:
-    create:
-      - name: config
-        path: /config
-        size: 10Gi
+    pvc:
+      create: true
+      size: 100Gi
+      mounts:
+        - path: /config
+          subPath: config
     hostPath:
-      - name: ssd2
-        path: /media/SSD2
+      - name: downloads
+        mountPath: /media/downloads
+        hostPath: /media/SSD2/Downloads
+        type: Directory
+      - name: anime
+        mountPath: /media/anime
+        hostPath: /media/SSD2/Anime
+        type: Directory
+      - name: movies
+        mountPath: /media/movies
+        hostPath: /media/SSD2/Movies
+        type: Directory
+      - name: tvseries
+        mountPath: /media/tvseries
+        hostPath: /media/SSD2/TV-Series
+        type: Directory
 
   containerPorts:
     - name: http

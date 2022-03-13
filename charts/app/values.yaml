@@ -23,13 +23,20 @@ environmentVariables: {}
   #   value: "Europe/Oslo"
 
 persistentVolumes: {}
-  # create:
-  #   - name: yolo
-  #     path: /config
-  #     size: 10Gi
+  # pvc:
+  #   create: true
+  #   size: 10Gi
+  #   mounts:
+  #     - path: /config
+  #       subPath: config
   # hostPath:
-  #   - name: ssd2
-  #     path: /media/SSD2
+  #   - name: videos
+  #     mountPath: /mnt/videos
+  #     hostPath: /media/SSD2/Videos
+  #     type: Directory
+  #   - name: downloads
+  #     mountPath: /mnt/downloads
+  #     hostPath: /media/SSD2/Downloads
 
 serviceAccount:
   # Specifies whether a service account should be created

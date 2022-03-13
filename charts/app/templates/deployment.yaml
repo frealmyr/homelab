@@ -47,13 +47,18 @@ spec:
           {{- end }}
           {{- if or .Values.persistentVolumes.create .Values.persistentVolumes.hostPath }}
           volumeMounts:
-          {{- range .Values.persistentVolumes.create }}
-            - name: {{ .name }}
+          {{- if .Values.persistentVolumes.pvc.create }}
+          {{- range .Values.persistentVolumes.pvc.mounts }}
+            - name: {{ include "app.fullname" (merge . $) }}
               mountPath: {{ .path }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
+          {{- end }}
           {{- end }}
           {{- range .Values.persistentVolumes.hostPath }}
             - name: {{ .name }}
-              mountPath: {{ .path }}
+              mountPath: {{ .mountPath }}
           {{- end }}
           {{- end }}
           {{- if .Values.liveness.enabled }}
@@ -70,17 +75,20 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- if or .Values.persistentVolumes.create .Values.persistentVolumes.hostPath }}
+      {{- if or .Values.persistentVolumes.pvc.create .Values.persistentVolumes.hostPath }}
       volumes:
-      {{- range .Values.persistentVolumes.create }}
-        - name: {{ .name }}
+      {{- if .Values.persistentVolumes.pvc.create }}
+        - name: {{ include "app.fullname" . }}
           persistentVolumeClaim:
-            claimName: {{ include "app.fullname" (merge . $) }}-{{ .name }}
+            claimName: {{ include "app.fullname" . }}
       {{- end }}
       {{- range .Values.persistentVolumes.hostPath }}
         - name: {{ .name }}
           hostPath:
-            path: {{ .path }}
+            path: {{ .hostPath }}
+            {{- if .type }}
+            type: {{ .type }}
+            {{- end }}
       {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}
