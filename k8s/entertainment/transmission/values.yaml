@@ -1,18 +1,28 @@
 app:
   image:
-    repository: gists/transmission
+    repository: lscr.io/linuxserver/transmission
     tag: latest
 
   environmentVariables:
-    - name: USERNAME
+    - name: PID
+      value: "1000"
+    - name: PGID
+      value: "1000"
+    - name: TZ
+      value: "Europe/Oslo"
+    - name: TRANSMISSION_WEB_HOME
+      value: "/flood-for-transmission/"
+    - name: USER
       value: "foo"
-    - name: PASSWORD
+    - name: PASS
       value: "bar"
+    - name: PEERPORT
+      value: "51413"
 
   persistentVolumes:
     create:
       - name: config
-        path: /data/.config
+        path: /config
         size: 10Gi
     hostPath:
       - name: ssd2
@@ -48,10 +58,6 @@ app:
           targetPort: 51413
           protocol: UDP
           nodePort: 32143
-
-  liveness:
-    enabled: false
-    path: /transmission/web/
 
   ingresses:
     enabled: true
