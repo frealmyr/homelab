@@ -17,7 +17,7 @@ app:
 
   persistentVolumes:
     create:
-      - name: jellyfin-config
+      - name: config
         path: /config
         size: 10Gi
     hostPath:
