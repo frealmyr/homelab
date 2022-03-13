@@ -29,6 +29,10 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
+          {{- with .Values.environmentVariables }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -37,6 +41,17 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
+          {{- if or .Values.persistentVolumes.create .Values.persistentVolumes.hostPath }}
+          volumeMounts:
+          {{- range .Values.persistentVolumes.create }}
+            - name: {{ .name }}
+              mountPath: {{ .path }}
+          {{- end }}
+          {{- range .Values.persistentVolumes.hostPath }}
+            - name: {{ .name }}
+              mountPath: {{ .path }}
+          {{- end }}
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /
@@ -47,6 +62,19 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      {{- if or .Values.persistentVolumes.create .Values.persistentVolumes.hostPath }}
+      volumes:
+      {{- range .Values.persistentVolumes.create }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ include "app.fullname" (merge . $) }}-{{ .name }}
+      {{- end }}
+      {{- range .Values.persistentVolumes.hostPath }}
+        - name: {{ .name }}
+          hostPath:
+            path: {{ .path }}
+      {{- end }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

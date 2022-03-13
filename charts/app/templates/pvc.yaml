@@ -1,0 +1,15 @@
+{{- range .Values.persistentVolumes.create }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "app.fullname" (merge . $) }}-{{ .name }}
+  labels:
+    {{- include "app.labels" (merge . $) | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .path }}
+{{- end }}
