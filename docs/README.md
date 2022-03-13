@@ -1,5 +1,7 @@
 # Homelab
 
+![haxor](https://user-images.githubusercontent.com/29174850/158081185-2a5475e0-6919-493d-92e5-b9412b71cda8.gif)
+
 > Better documentation coming soon~
 
 All homelab host configuration is done via Ansible, Kubernetes provisioning is done seperately using Terraform after Ansible.
