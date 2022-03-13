@@ -4,7 +4,7 @@ description: sailboat for movies
 
 type: application
 
-version: 1.0.1
+version: 1.0.2
 
 dependencies:
 - name: app
