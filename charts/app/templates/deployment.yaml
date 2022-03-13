@@ -37,10 +37,14 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerPorts }}
           ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
+          {{- range .Values.containerPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+              protocol: {{ .protocol }}
+          {{- end }}
+          {{- end }}
           {{- if or .Values.persistentVolumes.create .Values.persistentVolumes.hostPath }}
           volumeMounts:
           {{- range .Values.persistentVolumes.create }}

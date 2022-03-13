@@ -10,7 +10,7 @@ spec:
   type: {{ .type }}
   ports:
     - port: {{ .port }}
-      targetPort: http
+      targetPort: {{ .targetPort }}
       protocol: TCP
       name: {{ .name }}
   selector:
