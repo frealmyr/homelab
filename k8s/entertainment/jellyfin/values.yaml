@@ -1,0 +1,56 @@
+app:
+  image:
+    repository: lscr.io/linuxserver/jellyfin
+    tag: latest
+
+  environmentVariables:
+    - name: PID
+      value: "1000"
+    - name: PGID
+      value: "1000"
+    - name: TZ
+      value: "Europe/Oslo"
+    - name: JELLYFIN_PublishedServerUrl
+      value: "https://media.fmlab.no"
+    - name: DOCKER_MODS
+      value: "linuxserver/mods:jellyfin-amd"
+
+  persistentVolumes:
+    create:
+      - name: jellyfin-config
+        path: /config
+        size: 10Gi
+    hostPath:
+      - name: ssd2
+        path: /media/SSD2
+      # - name: devdri
+      #   path: /dev/dri
+      #   type: Directory
+
+  podSecurityContext:
+    supplementalGroups:
+      - 44 # Video
+      - 109 # Render
+
+  services:
+    - name: http
+      type: ClusterIP
+      port: 8096
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 8096
+        hosts:
+          - host: media.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        forwardAuth: true
+        tls:
+          - secretName: jellyfin-frontend-tls
+            hosts:
+              - media.fmlab.no
