@@ -53,11 +53,13 @@ app:
   services:
     - name: http
       type: ClusterIP
-      port: 8096
-      targetPort: 8096
+      ports:
+        - name: http
+          port: 8096
+          targetPort: 8096
 
   liveness:
-    enabled: true
+    enabled: false
 
   ingresses:
     enabled: true
