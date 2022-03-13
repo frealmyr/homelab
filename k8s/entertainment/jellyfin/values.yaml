@@ -41,7 +41,7 @@ app:
     - name: http
       type: ClusterIP
       port: 8096
-      targetPort: 8086
+      targetPort: 8096
 
   liveness:
     enabled: true
