@@ -9,6 +9,7 @@ metadata:
 spec:
   type: {{ .type }}
   ports:
+    {{- range .ports }}
     - port: {{ .port }}
       targetPort: {{ .targetPort }}
       protocol: {{ default "TCP" .protocol }}
@@ -16,6 +17,7 @@ spec:
       nodePort: {{ .nodePort }}
       {{- end }}
       name: {{ .name }}
+    {{- end }}
   selector:
     {{- include "app.selectorLabels" (merge . $) | nindent 4 }}
 {{- end }}

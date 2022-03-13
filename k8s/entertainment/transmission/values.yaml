@@ -32,22 +32,26 @@ app:
   services:
     - name: http
       type: ClusterIP
-      port: 9091
-      targetPort: 9091
-    - name: peer-tcp
+      ports:
+        - name: http
+          port: 9091
+          targetPort: 9091
+    - name: peer
       type: NodePort
-      port: 51413
-      targetPort: 51413
-      nodePort: 32143
-    - name: peer-udp
-      type: NodePort
-      protocol: UDP
-      port: 51413
-      targetPort: 51413
-      nodePort: 32143
+      ports:
+        - name: peer-tcp
+          port: 51413
+          targetPort: 51413
+          nodePort: 32143
+        - name: peer-udp
+          port: 51413
+          targetPort: 51413
+          protocol: UDP
+          nodePort: 32143
 
   liveness:
-    enabled: true
+    enabled: false
+    path: /transmission/web/
 
   ingresses:
     enabled: true

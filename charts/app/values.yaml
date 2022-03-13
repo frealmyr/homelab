@@ -64,13 +64,22 @@ containerPorts: {}
 services: {}
   # - name: http
   #   type: ClusterIP
-  #   port: 80
-  #   targetPort: 80
-  # - name: db
-  #   type: nodePort
-  #   port: 3389
-  #   targetPort: 3389
-  #   nodePort: 3389
+  #   ports:
+  #     - name: http
+  #       port: 9091
+  #       targetPort: 9091
+  # - name: peer
+  #   type: NodePort
+  #   ports:
+  #     - name: peer-tcp
+  #       port: 51413
+  #       targetPort: 51413
+  #       nodePort: 32143
+  #     - name: peer-udp
+  #       port: 51413
+  #       targetPort: 51413
+  #       protocol: UDP
+  #       nodePort: 32143
 
 liveness:
   enabled: false
