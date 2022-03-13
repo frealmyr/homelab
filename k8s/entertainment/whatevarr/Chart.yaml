@@ -1,7 +1,0 @@
-apiVersion: v2
-name: yarr
-description: Transmission, Radarr, Sonarr
-
-type: application
-
-version: 1.0.0

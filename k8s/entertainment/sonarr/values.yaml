@@ -1,0 +1,57 @@
+app:
+  image:
+    repository: lscr.io/linuxserver/sonarr
+    tag: latest
+
+  environmentVariables:
+    - name: PID
+      value: "1000"
+    - name: PGID
+      value: "1000"
+    - name: TZ
+      value: "Europe/Oslo"
+
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+
+  persistentVolumes:
+    create:
+      - name: config
+        path: /config
+        size: 10Gi
+    hostPath:
+      - name: ssd2
+        path: /media/SSD2
+
+  containerPorts:
+    - name: http
+      containerPort: 8989
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 8989
+          targetPort: 8989
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 8989
+        hosts:
+          - host: sonarr.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        forwardAuth: true
+        tls:
+          - secretName: sonarr-tls
+            hosts:
+              - sonarr.fmlab.no

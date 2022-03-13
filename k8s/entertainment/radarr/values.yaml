@@ -1,0 +1,57 @@
+app:
+  image:
+    repository: lscr.io/linuxserver/radarr
+    tag: latest
+
+  environmentVariables:
+    - name: PID
+      value: "1000"
+    - name: PGID
+      value: "1000"
+    - name: TZ
+      value: "Europe/Oslo"
+
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+
+  persistentVolumes:
+    create:
+      - name: config
+        path: /config
+        size: 10Gi
+    hostPath:
+      - name: ssd2
+        path: /media/SSD2
+
+  containerPorts:
+    - name: http
+      containerPort: 7878
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 7878
+          targetPort: 7878
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 7878
+        hosts:
+          - host: radarr.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        forwardAuth: true
+        tls:
+          - secretName: radarr-tls
+            hosts:
+              - radarr.fmlab.no

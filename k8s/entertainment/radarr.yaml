@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: radarr
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: entertainment
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/entertainment/radarr
+    repoURL: https://github.com/frealmyr/homelab
+    helm:
+      releaseName: radarr
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

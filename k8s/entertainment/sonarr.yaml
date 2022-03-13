@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: whatevarr
+  name: sonarr
   namespace: argocd
 spec:
   destination:
@@ -10,10 +10,10 @@ spec:
   project: default
   source:
     targetRevision: main
-    path: k8s/entertainment/whatevarr
+    path: k8s/entertainment/sonarr
     repoURL: https://github.com/frealmyr/homelab
     helm:
-      releaseName: whatevarr
+      releaseName: sonarr
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
