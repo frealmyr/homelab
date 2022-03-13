@@ -32,10 +32,19 @@ app:
       - 44 # Video
       - 109 # Render
 
+  containerPorts:
+    - name: http
+      containerPort: 8096
+      protocol: TCP
+
   services:
     - name: http
       type: ClusterIP
       port: 8096
+      targetPort: 8086
+
+  liveness:
+    enabled: true
 
   ingresses:
     enabled: true
