@@ -1,0 +1,68 @@
+app:
+  image:
+    repository: gists/transmission
+    tag: latest
+
+  environmentVariables:
+    - name: USERNAME
+      value: "foo"
+    - name: PASSWORD
+      value: "bar"
+
+  persistentVolumes:
+    create:
+      - name: config
+        path: /data/.config
+        size: 10Gi
+    hostPath:
+      - name: ssd2
+        path: /media/SSD2
+
+  containerPorts:
+    - name: http
+      containerPort: 9091
+      protocol: TCP
+    - name: peer-tcp
+      containerPort: 51413
+      protocol: TCP
+    - name: peer-udp
+      containerPort: 51413
+      protocol: UDP
+
+  services:
+    - name: http
+      type: ClusterIP
+      port: 9091
+      targetPort: 9091
+    - name: peer-tcp
+      type: NodePort
+      port: 51413
+      targetPort: 51413
+      nodePort: 32143
+    - name: peer-udp
+      type: NodePort
+      protocol: UDP
+      port: 51413
+      targetPort: 51413
+      nodePort: 32143
+
+  liveness:
+    enabled: true
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 9091
+        hosts:
+          - host: transmission.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        forwardAuth: true
+        tls:
+          - secretName: transmission-tls
+            hosts:
+              - transmission.fmlab.no

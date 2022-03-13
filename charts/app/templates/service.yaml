@@ -11,7 +11,10 @@ spec:
   ports:
     - port: {{ .port }}
       targetPort: {{ .targetPort }}
-      protocol: TCP
+      protocol: {{ default "TCP" .protocol }}
+      {{- if .nodePort }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
       name: {{ .name }}
   selector:
     {{- include "app.selectorLabels" (merge . $) | nindent 4 }}
