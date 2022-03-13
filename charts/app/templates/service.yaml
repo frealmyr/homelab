@@ -1,15 +1,18 @@
+{{- range .Values.services }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: {{ include "app.fullname" (merge . $) }}-{{ .name }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
+    {{- include "app.labels" (merge . $) | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .port }}
       targetPort: http
       protocol: TCP
-      name: http
+      name: {{ .name }}
   selector:
-    {{- include "app.selectorLabels" . | nindent 4 }}
+    {{- include "app.selectorLabels" (merge . $) | nindent 4 }}
+{{- end }}
