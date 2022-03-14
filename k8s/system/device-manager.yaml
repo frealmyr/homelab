@@ -1,0 +1,18 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: device-manager
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: device-manager
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/system/device-manager
+    repoURL: https://github.com/frealmyr/homelab
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
