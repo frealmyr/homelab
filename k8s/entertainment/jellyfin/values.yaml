@@ -75,7 +75,6 @@ app:
             paths:
               - path: /
                 pathType: ImplementationSpecific
-        forwardAuth: true
         tls:
           - secretName: jellyfin-frontend-tls
             hosts:
