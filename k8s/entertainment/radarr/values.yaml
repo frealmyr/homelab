@@ -19,17 +19,9 @@ app:
         - path: /config
           subPath: config
     hostPath:
-      - name: downloads
-        mountPath: /media/downloads
-        hostPath: /media/SSD2/Downloads
-        type: Directory
-      - name: anime
-        mountPath: /media/anime
-        hostPath: /media/SSD2/Anime
-        type: Directory
-      - name: movies
-        mountPath: /media/movies
-        hostPath: /media/SSD2/Movies
+      - name: ssd2
+        mountPath: /media/SSD2
+        hostPath: /media/SSD2
         type: Directory
 
   containerPorts:
