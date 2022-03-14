@@ -5,7 +5,5 @@ metadata:
   namespace: device-manager
 data:
   conf.yaml: |
-    - devicematch: ^renderD128$
-      nummaxdevices: 20
-    - devicematch: ^card0$
+    - devicematch: ^dri$
       nummaxdevices: 20

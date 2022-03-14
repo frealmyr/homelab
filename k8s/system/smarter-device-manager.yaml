@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: device-manager
+  name: smarter-device-manager
   namespace: argocd
 spec:
   destination:
@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     targetRevision: main
-    path: k8s/system/device-manager
+    path: k8s/system/smarter-device-manager
     repoURL: https://github.com/frealmyr/homelab
   syncPolicy:
     syncOptions:

@@ -45,6 +45,12 @@ app:
       - 44 # Video
       - 109 # Render
 
+  resources:
+    limits:
+      smarter-devices/dri: '1'
+    requests:
+      smarter-devices/dri: '1'
+
   containerPorts:
     - name: http
       containerPort: 8096
