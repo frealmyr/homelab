@@ -14,7 +14,8 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-environmentVariables: {}
+environmentVariables:
+  {}
   # - name: PID
   #   value: "1000"
   # - name: PGID
@@ -22,9 +23,9 @@ environmentVariables: {}
   # - name: TZ
   #   value: "Europe/Oslo"
 
-persistentVolumes: {}
-  # pvc:
-  #   create: true
+persistentVolumes:
+  pvc:
+    create: false
   #   size: 10Gi
   #   mounts:
   #     - path: /config
@@ -49,13 +50,15 @@ serviceAccount:
 
 podAnnotations: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # supplementalGroups:
   #   - 44 # Video
   #   - 109 # Render
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -63,12 +66,14 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-containerPorts: {}
+containerPorts:
+  {}
   # - name: http
   #   containerPort: 80
   #   protocol: TCP
 
-services: {}
+services:
+  {}
   # - name: http
   #   type: ClusterIP
   #   ports:
@@ -88,6 +93,59 @@ services: {}
   #       protocol: UDP
   #       nodePort: 32143
 
+additionalContainers:
+  {}
+  # - name: docker-proxy
+  #   environmentVariables:
+  #     - name: PID
+  #       value: "1000"
+  #     - name: PGID
+  #       value: "1000"
+  #     - name: TZ
+  #       value: "Europe/Oslo"
+  #   securityContext:
+  #     capabilities:
+  #       drop:
+  #         - ALL
+  #     readOnlyRootFilesystem: true
+  #     runAsNonRoot: true
+  #     runAsUser: 1000
+  #   image:
+  #     repository: docker-image
+  #     pullPolicy: IfNotPresent
+  #     tag: latest
+  #   containerPorts:
+  #     - name: http
+  #       containerPort: 80
+  #       protocol: TCP
+  #   persistentVolumes:
+  #     pvc:
+  #       create: true
+  #       size: 10Gi
+  #       mounts:
+  #         - path: /opt/adguardhome/work
+  #           subPath: work
+  #     hostPath:
+  #       - name: hdd1
+  #         mountPath: /media/HDD1
+  #         hostPath: /media/HDD1
+  #         type: Directory
+  #   liveness:
+  #     enabled: false
+  #     path: /
+  #     port: http
+  #   readiness:
+  #     enabled: false
+  #     path: /
+  #     port: http
+  #   resources:
+  #     limits:
+  #       cpu: 100m
+  #       memory: 128Mi
+  #     requests:
+  #       cpu: 100m
+  #       memory: 128Mi
+
 liveness:
   enabled: false
   path: /
@@ -103,7 +161,8 @@ ingresses:
   annotations:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  ingress: {}
+  ingress:
+    {}
     # - name: frontend
     #   service:
     #     name: http
@@ -129,11 +188,12 @@ ingresses:
     #           pathType: ImplementationSpecific
     #   forwardAuth: false # Google Forward Auth Proxy
     #   tls: []
-      #  - secretName: chart-example-tls
-      #    hosts:
-      #      - chart-example.local
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
 
-resources: {}
+resources:
+  {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following

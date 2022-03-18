@@ -1,0 +1,70 @@
+app:
+  image:
+    repository: miniflux/miniflux
+    tag: latest
+
+  environmentVariables:
+    - name: RUN_MIGRATIONS
+      value: "1"
+    - name: CREATE_ADMIN
+      value: "1"
+    - name: ADMIN_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: miniflux-db-creds
+          key: username
+    - name: ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: miniflux-db-creds
+          key: password
+    - name: DATABASE_URL
+      valueFrom:
+        secretKeyRef:
+          name: miniflux-db-creds
+          key: url
+
+  containerPorts:
+    - name: http
+      containerPort: 8080
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 8080
+          targetPort: 8080
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 8080
+        hosts:
+          - host: news.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        forwardAuth: true
+        tls:
+          - secretName: miniflux
+            hosts:
+              - news.fmlab.no
+      - name: api
+        service:
+          name: http
+          port: 8080
+        hosts:
+          - host: news.fmlab.no
+            paths:
+              - path: /fever
+                pathType: ImplementationSpecific
+        forwardAuth: false
+        tls:
+          - secretName: miniflux
+            hosts:
+              - news.fmlab.no

@@ -28,6 +28,55 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
+        {{- range .Values.additionalContainers }}
+        - name: {{ .name }}
+          {{- with .environmentVariables }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          {{- if .containerPorts }}
+          ports:
+          {{- range .containerPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+              protocol: {{ .protocol }}
+          {{- end }}
+          {{- end }}
+          {{- if or .persistentVolumes.create .persistentVolumes.hostPath }}
+          volumeMounts:
+          {{- if .persistentVolumes.pvc.create }}
+          {{- range .persistentVolumes.pvc.mounts }}
+            - name: {{ include "app.fullname" (merge . $) }}
+              mountPath: {{ .path }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- range .persistentVolumes.hostPath }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- end }}
+          {{- if .liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .liveness.path }}
+              port: {{ .liveness.port }}
+          {{- end }}
+          {{- if .liveness.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .readiness.path }}
+              port: {{ .readiness.port }}
+          {{- end }}
+          resources:
+            {{- toYaml .resources | nindent 12 }}
+        {{- end }}
         - name: {{ .Chart.Name }}
           {{- with .Values.environmentVariables }}
           env:
