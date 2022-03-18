@@ -43,3 +43,18 @@ spec:
     targetRevision: main
     path: k8s/entertainment
     repoURL: https://github.com/frealmyr/homelab
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: home
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: argocd
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/home
+    repoURL: https://github.com/frealmyr/homelab

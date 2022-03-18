@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kimai
+  name: adguard
   namespace: argocd
 spec:
   destination:
     name: in-cluster
-    namespace: office
+    namespace: home
   project: default
   source:
     targetRevision: main
-    path: k8s/office/kimai
+    path: k8s/home/adguard
     repoURL: https://github.com/frealmyr/homelab
     helm:
-      releaseName: kimai
+      releaseName: adguard
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

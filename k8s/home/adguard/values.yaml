@@ -1,0 +1,66 @@
+app:
+  image:
+    repository: adguard/adguardhome
+    tag: latest
+
+  persistentVolumes:
+    pvc:
+      create: true
+      size: 10Gi
+      mounts:
+        - path: /opt/adguardhome/work
+          subPath: work
+        - path: /opt/adguardhome/conf
+          subPath: conf
+
+  containerPorts:
+    - name: http
+      containerPort: 3000
+      protocol: TCP
+    - name: dns-tcp
+      containerPort: 53
+      protocol: TCP
+    - name: dns-udp
+      containerPort: 53
+      protocol: UDP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 3000
+          targetPort: 3000
+    - name: dns-tcp
+      type: LoadBalancer
+      loadBalancerIP: 10.0.0.100
+      ports:
+        - name: http
+          port: 53
+          targetPort: 53
+    - name: dns-udp
+      type: LoadBalancer
+      loadBalancerIP: 10.0.0.100
+      ports:
+        - name: http
+          port: 53
+          targetPort: 53
+          protocol: UDP
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 3000
+        hosts:
+          - host: adguard.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        forwardAuth: true
+        tls:
+          - secretName: adguard
+            hosts:
+              - adguard.fmlab.no

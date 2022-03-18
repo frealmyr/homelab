@@ -7,7 +7,7 @@ resource "helm_release" "metallb" {
   repository = "https://metallb.github.io/metallb"
   chart      = "metallb"
 
-  namespace  = "metallb-system"
+  namespace        = "metallb-system"
   create_namespace = true
 
   values = [<<EOF
@@ -16,7 +16,7 @@ resource "helm_release" "metallb" {
       - name: default
         protocol: layer2
         addresses:
-        - 10.0.0.100/16
+        - 10.0.0.100/32
   EOF
   ]
 }
