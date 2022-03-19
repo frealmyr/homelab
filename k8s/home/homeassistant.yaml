@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homeassistant
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: home
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/home/homeassistant
+    repoURL: https://github.com/frealmyr/homelab
+    helm:
+      releaseName: homeassistant
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
