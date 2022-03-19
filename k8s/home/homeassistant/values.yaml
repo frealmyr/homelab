@@ -31,13 +31,6 @@ app:
         - name: http
           port: 8123
           targetPort: 8123
-    - name: http-tmp
-      type: LoadBalancer
-      loadBalancerIP: 10.0.0.100
-      ports:
-        - name: http
-          port: 8123
-          targetPort: 8123
 
   ingresses:
     enabled: true
