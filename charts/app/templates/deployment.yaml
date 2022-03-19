@@ -94,7 +94,7 @@ spec:
               protocol: {{ .protocol }}
           {{- end }}
           {{- end }}
-          {{- if or .Values.persistentVolumes.create .Values.persistentVolumes.hostPath }}
+          {{- if or .Values.persistentVolumes.pvc.create .Values.persistentVolumes.hostPath }}
           volumeMounts:
           {{- if .Values.persistentVolumes.pvc.create }}
           {{- range .Values.persistentVolumes.pvc.mounts }}
