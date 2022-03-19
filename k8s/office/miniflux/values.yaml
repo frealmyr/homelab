@@ -29,6 +29,41 @@ app:
       containerPort: 8080
       protocol: TCP
 
+  additionalContainers:
+    - name: postgres
+      environmentVariables:
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: miniflux-db-creds
+              key: database
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: miniflux-db-creds
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: miniflux-db-creds
+              key: password
+      image:
+        repository: postgres
+        pullPolicy: IfNotPresent
+        tag: 14-alpine
+      persistentVolumes:
+        pvc:
+          create: true
+          size: 20Gi
+          mounts:
+            - path: /var/lib/postgresql/data
+              subPath: postgres
+      securityContext: {}
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+
   services:
     - name: http
       type: ClusterIP
