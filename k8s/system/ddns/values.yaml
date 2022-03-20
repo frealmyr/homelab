@@ -1,0 +1,17 @@
+app:
+  image:
+    repository: oznu/cloudflare-ddns
+    tag: latest
+
+  environmentVariables:
+    - name: API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare-credentials
+          key: apikey
+    - name: ZONE
+      value: "fmlab.no"
+    - name: SUBDOMAIN
+      value: "auth"
+    - name: CRON
+      value: "* */6 * * *"

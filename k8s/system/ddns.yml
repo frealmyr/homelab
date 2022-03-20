@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ddns
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: ddns
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/system/ddns
+    repoURL: https://github.com/frealmyr/homelab
+    helm:
+      releaseName: ddns
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
