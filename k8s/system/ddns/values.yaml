@@ -14,4 +14,4 @@ app:
     - name: SUBDOMAIN
       value: "auth"
     - name: CRON
-      value: "* */6 * * *"
+      value: "* */1 * * *"
