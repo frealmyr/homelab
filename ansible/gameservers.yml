@@ -6,4 +6,10 @@
       include_tasks: gameservers/satisfactory.yml
       vars:
         server_name: sfserver
-        discord_webhook: https://discord.com/api/webhooks/replace/me
+        discord_webhook: https://discord.com/api/webhooks/pasthere
+
+    - name: install 7 Days to die
+      include_tasks: gameservers/7daystodie.yml
+      vars:
+        server_name: sdtdserver
+        discord_webhook: https://discord.com/api/webhooks/pasthere
