@@ -39,6 +39,12 @@ persistentVolumes:
   #     mountPath: /mnt/downloads
   #     hostPath: /media/SSD2/Downloads
 
+mountSecrets:
+  {}
+#  - name: cert-app
+#    secretName: certificate-app
+#    mountPath: /secrets/cert-app
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -68,9 +74,9 @@ securityContext:
 
 containerPorts:
   {}
-  # - name: http
-  #   containerPort: 80
-  #   protocol: TCP
+#   - name: http
+#     containerPort: 80
+#     protocol: TCP
 
 services:
   {}

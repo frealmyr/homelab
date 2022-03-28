@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: omada
+  namespace: argocd
+spec:
+  destination:
+    name: in-cluster
+    namespace: omada
+  project: default
+  source:
+    targetRevision: main
+    path: k8s/home/omada
+    repoURL: https://github.com/frealmyr/homelab
+    helm:
+      releaseName: omada
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

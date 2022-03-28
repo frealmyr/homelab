@@ -94,7 +94,7 @@ spec:
               protocol: {{ .protocol }}
           {{- end }}
           {{- end }}
-          {{- if or .Values.persistentVolumes.pvc.create .Values.persistentVolumes.hostPath }}
+          {{- if or .Values.persistentVolumes.pvc.create .Values.persistentVolumes.hostPath .Values.mountSecrets }}
           volumeMounts:
           {{- if .Values.persistentVolumes.pvc.create }}
           {{- range .Values.persistentVolumes.pvc.mounts }}
@@ -108,6 +108,11 @@ spec:
           {{- range .Values.persistentVolumes.hostPath }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- range .Values.mountSecrets }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              readOnly: true
           {{- end }}
           {{- end }}
           {{- if .Values.liveness.enabled }}
@@ -124,7 +129,7 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- if or .Values.persistentVolumes.pvc.create .Values.persistentVolumes.hostPath }}
+      {{- if or .Values.persistentVolumes.pvc.create .Values.persistentVolumes.hostPath .Values.mountSecrets }}
       volumes:
       {{- if .Values.persistentVolumes.pvc.create }}
         - name: {{ include "app.fullname" . }}
@@ -138,6 +143,12 @@ spec:
             {{- if .type }}
             type: {{ .type }}
             {{- end }}
+      {{- end }}
+      {{- range .Values.mountSecrets }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretName }}
+            optional: false
       {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}

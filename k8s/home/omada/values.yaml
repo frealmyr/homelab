@@ -1,0 +1,145 @@
+app:
+  image:
+    repository: mbentley/omada-controller
+    tag: 5.1
+
+  persistentVolumes:
+    pvc:
+      create: true
+      size: 10Gi
+      mounts:
+        - path: /opt/tplink/EAPController/data
+          subPath: data
+        - path: /opt/tplink/EAPController/work
+          subPath: work
+        - path: /opt/tplink/EAPController/logs
+          subPath: logs
+
+  mountSecrets:
+    - name: cert-omada
+      secretName: certificate-omada
+      mountPath: /secrets/certificates
+
+  environmentVariables:
+    - name: TLS_1_11_ENABLED
+      value: "true"
+    - name: TZ
+      value: "Europe/Oslo"
+    - name: SHOW_SERVER_LOGS
+      value: "true"
+    - name: MANAGE_HTTP_PORT
+      value: "80"
+    - name: PORTAL_HTTP_PORT
+      value: "80"
+    - name: MANAGE_HTTPS_PORT
+      value: "443"
+    - name: PORTAL_HTTPS_PORT
+      value: "443"
+    - name: SSL_CERT_NAME
+      value: "/secrets/certificates/tls.crt"
+    - name: SSL_KEY_NAME
+      value: "/secrets/certificates/tls.key"
+
+  containerPorts:
+    - name: http
+      containerPort: 80
+      protocol: TCP
+    - name: ctrl-1-tcp
+      containerPort: 29810
+      protocol: TCP
+    - name: ctrl-2-tcp
+      containerPort: 29811
+      protocol: TCP
+    - name: ctrl-3-tcp
+      containerPort: 29812
+      protocol: TCP
+    - name: ctrl-4-tcp
+      containerPort: 29813
+      protocol: TCP
+    - name: ctrl-5-tcp
+      containerPort: 29814
+      protocol: TCP
+    - name: ctrl-1-udp
+      containerPort: 29810
+      protocol: UDP
+    - name: ctrl-2-udp
+      containerPort: 29811
+      protocol: UDP
+    - name: ctrl-3-udp
+      containerPort: 29812
+      protocol: UDP
+    - name: ctrl-4-udp
+      containerPort: 29813
+      protocol: UDP
+    - name: ctrl-5-udp
+      containerPort: 29814
+      protocol: UDP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 80
+          targetPort: 80
+    - name: controller-tcp
+      type: LoadBalancer
+      loadBalancerIP: 10.0.0.100
+      ports:
+        - name: ctrl-1-tcp
+          port: 29810
+          targetPort: 29810
+        - name: ctrl-2-tcp
+          port: 29811
+          targetPort: 29811
+        - name: ctrl-3-tcp
+          port: 29812
+          targetPort: 29812
+        - name: ctrl-4-tcp
+          port: 29813
+          targetPort: 29813
+        - name: ctrl-5-tcp
+          port: 29814
+          targetPort: 29814
+    - name: controller-udp
+      type: LoadBalancer
+      loadBalancerIP: 10.0.0.100
+      ports:
+        - name: ctrl-1-udp
+          port: 29810
+          targetPort: 29810
+          protocol: UDP
+        - name: ctrl-2-udp
+          port: 29811
+          targetPort: 29811
+          protocol: UDP
+        - name: ctrl-3-udp
+          port: 29812
+          targetPort: 29812
+          protocol: UDP
+        - name: ctrl-4-udp
+          port: 29813
+          targetPort: 29813
+          protocol: UDP
+        - name: ctrl-5-udp
+          port: 29814
+          targetPort: 29814
+          protocol: UDP
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 80
+        hosts:
+          - host: omada.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        forwardAuth: true
+        tls:
+          - secretName: certificate-omada
+            hosts:
+              - omada.fmlab.no
