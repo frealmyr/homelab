@@ -39,8 +39,7 @@ persistentVolumes:
   #     mountPath: /mnt/downloads
   #     hostPath: /media/SSD2/Downloads
 
-mountSecrets:
-  {}
+mountSecrets: {}
 #  - name: cert-app
 #    secretName: certificate-app
 #    mountPath: /secrets/cert-app
@@ -63,6 +62,8 @@ podSecurityContext:
   #   - 109 # Render
   # fsGroup: 2000
 
+podHostNetwork: false
+
 securityContext:
   {}
   # capabilities:
@@ -72,8 +73,7 @@ securityContext:
   # runAsNonRoot: true
   # runAsUser: 1000
 
-containerPorts:
-  {}
+containerPorts: {}
 #   - name: http
 #     containerPort: 80
 #     protocol: TCP

@@ -49,6 +49,8 @@ traefik:
   providers:
     kubernetesCRD:
       allowCrossNamespace: true
+      allowExternalNameServices: true # Allows to route to non-k8s services
     kubernetesIngress:
+      allowExternalNameServices: true
       publishedService:
         enabled: true
