@@ -40,7 +40,7 @@ app:
           name: http
           port: 8123
         hosts:
-          - host: home.fmlab.no
+          - host: homeassistant.fmlab.no
             paths:
               - path: /
                 pathType: ImplementationSpecific
@@ -48,4 +48,4 @@ app:
         tls:
           - secretName: homeassistant
             hosts:
-              - home.fmlab.no
+              - homeassistant.fmlab.no
