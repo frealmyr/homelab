@@ -17,8 +17,8 @@ keel:
       cert-manager.io/cluster-issuer: letsencrypt-staging
       kubernetes.io/ingress.class: traefik
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.middlewares: 'traefik-system-sso@kubernetescrd,traefik-system-security@kubernetescrd'
-      traefik.ingress.kubernetes.io/router.tls: 'true'
+      traefik.ingress.kubernetes.io/router.middlewares: "traefik-system-sso@kubernetescrd,traefik-system-security@kubernetescrd"
+      traefik.ingress.kubernetes.io/router.tls: "true"
     hosts:
       - host: keel.fmlab.no
         paths:

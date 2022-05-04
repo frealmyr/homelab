@@ -3,6 +3,12 @@ app:
     repository: adguard/adguardhome
     tag: latest
 
+  annotations:
+    keel.sh/policy: force # Non-semver
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 10m"
+    keel.sh/approvals: "1"
+
   persistentVolumes:
     pvc:
       create: true
