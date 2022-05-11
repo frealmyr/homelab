@@ -53,20 +53,3 @@ app:
           targetPort: 53
           protocol: UDP
 
-  ingresses:
-    enabled: true
-    ingress:
-      - name: frontend
-        service:
-          name: http
-          port: 3000
-        hosts:
-          - host: adguard.fmlab.no
-            paths:
-              - path: /
-                pathType: ImplementationSpecific
-        forwardAuth: true
-        tls:
-          - secretName: adguard
-            hosts:
-              - adguard.fmlab.no
