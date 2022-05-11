@@ -1,4 +1,1 @@
-app:
-  image:
-    repository: adguard/adguardhome
-    tag: latest
+
