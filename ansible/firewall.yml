@@ -2,11 +2,6 @@
 - hosts: localhost
   become: true
   tasks:
-    - name: Enable UFW
-      community.general.ufw:
-        state: enabled
-        policy: deny
-
     - name: Allow ssh, block brute force attempts
       community.general.ufw:
         rule: limit
@@ -28,5 +23,8 @@
         src: '{{ item }}'
       loop:
         - 10.0.0.0/24
-        - 172.17.0.0/16
-        - 10.244.0.0/16
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+        policy: deny
