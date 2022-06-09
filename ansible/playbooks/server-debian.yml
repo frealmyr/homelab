@@ -1,0 +1,175 @@
+---
+- hosts: server_debian
+  become: true
+
+  vars:
+    hdds:
+      - label: HDD1
+        filesystem: ext4
+        path: /media/HDD1
+      - label: HDD2
+        filesystem: ext4
+        path: /media/HDD2
+      # - label: HDD3
+      #   filesystem: ntfs
+      #   path: /media/HDD3
+
+  tasks:
+
+##################
+## APT Packages ##
+##################
+
+    - name: docker - ensure that distro provided docker does not exist
+      apt:
+        pkg:
+          - docker
+          - docker-engine
+          - docker.io
+          - containerd
+          - runc
+        state: absent
+
+    - name: apt - update & upgrade packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: apt - install apt repo prereq
+      apt:
+        pkg:
+        - ca-certificates
+        - curl
+        - gnupg
+        - lsb-release
+
+    - name: apt - add signing keys
+      ansible.builtin.apt_key:
+        url: "{{ item }}"
+        state: present
+      with_items:
+        - "https://download.docker.com/linux/debian/gpg"
+
+    - name: apt - add repositories
+      ansible.builtin.apt_repository:
+        repo: "{{ item }}"
+        state: present
+      with_items:
+        - "deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable"
+
+    - name: apt - install packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+        - curl
+        - htop
+        - inxi
+        - git
+        - mc
+        - net-tools
+        - tmux
+        - ufw
+        - tlp
+        - zsh
+        - prometheus-node-exporter
+        - smartmontools
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-compose
+        - docker-compose-plugin
+
+    - name: apt - clean/remove apt packages
+      apt:
+        autoclean: yes
+        autoremove: yes
+
+############
+## Docker ##
+############
+
+    - name: docker - add user to docker group
+      user: name=fredrick
+            groups=docker
+            append=yes
+
+    - name: docker - restart docker service
+      ansible.builtin.systemd:
+        state: restarted
+        daemon_reload: yes
+        name: docker
+
+##############
+## Firewall ##
+##############
+
+    - name: firewall - allow ingress ports
+      community.general.ufw:
+        rule: allow
+        port: '{{ item }}'
+        proto: tcp
+      loop:
+        - '22'
+        - '8080'
+        - '8443'
+
+    - name: firewall - allow all access from RFC1918 network
+      community.general.ufw:
+        rule: allow
+        src: '{{ item }}'
+      loop:
+        - 10.0.0.0/24
+
+    - name: firewall - enable ufw
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+##########
+## HDDs ##
+##########
+
+    - name: hdd - store uuid to variable
+      command: blkid -t LABEL={{ item.label }} -s UUID -o value
+      loop: "{{ hdds }}"
+      register: hdd_uuid
+
+    - name: hdd - mount hdds on boot from fstab
+      lineinfile:
+        path: /etc/fstab
+        state: present
+        create: no
+        line: UUID={{ item.stdout }} {{ item.item.path }}  {{ item.item.filesystem }}  noatime,errors=remount-ro 0 1
+      with_items: "{{ hdd_uuid.results }}"
+
+    - name: hdd - validate fstab by mounting all
+      command: mount -a
+      args:
+        warn: no
+
+###################
+## Configuration ##
+###################
+
+    - name: shell - use zsh as default shell
+      shell: chsh -s $(which zsh) fredrick
+
+    - name: tlp - copy custom ac profile
+      copy: src={{ item.src }} dest={{ item.dest }}
+      with_items:
+        - { src: './files/tlp/99-ac.conf', dest: '/etc/tlp.d/99-ac.conf' }
+
+    - name: ssh - add local public key to server
+      authorized_key:
+        user: fredrick
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+############
+## Reboot ##
+############
+
+    - name: system - rebooting host
+      reboot:

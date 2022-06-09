@@ -1,0 +1,84 @@
+version: '3.5'
+
+networks:
+  web:
+    external: true
+  internal:
+  proxy:
+  monitoring:
+    external: true
+
+secrets:
+  forwardini:
+    file: ${HOME}/.secrets/traefik/forward.ini
+
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:latest
+    user: 1000:1000
+    environment:
+      - TZ=Europe/Oslo
+    ports:
+      - 8080:8080
+      - 8443:8443
+    networks:
+      - web
+      - internal
+      - proxy
+      - monitoring
+    volumes:
+      - type: bind
+        source: ${HOME}/.secrets/traefik/acme.json
+        target: /etc/traefik/acme/acme.json
+      - type: bind
+        source: ${HOME}/.volumes/traefik/traefik.yml
+        target: /etc/traefik/traefik.yml
+      - type: bind
+        read_only: true
+        source: /etc/localtime
+        target: /etc/localtime
+      - type: bind
+        source: ${HOME}/.volumes/traefik/dynamic/
+        target: /etc/traefik/dynamic/
+    depends_on:
+      - docker-proxy
+      - traefik-fa
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  docker-proxy:
+    container_name: traefik_docker_proxy
+    image: tecnativa/docker-socket-proxy:latest
+    networks:
+      - internal
+    environment:
+      - CONTAINERS=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  traefik-fa:
+    container_name: traefik_forward_auth
+    image: thomseddon/traefik-forward-auth
+    user: 1000:1000
+    networks:
+      - web
+      - proxy
+    environment:
+      - CONFIG=/run/secrets/forwardini
+      - LOG_LEVEL=error
+    secrets:
+      - forwardini
+    labels:
+      - traefik.enable=true
+      - traefik.backend=traefik-fa
+      - traefik.http.services.traefik-fa.loadBalancer.server.port=4181
+      # SSL configuration
+      - traefik.http.routers.traefik-fa-ssl.entryPoints=https
+      - traefik.http.routers.traefik-fa-ssl.rule=host(`auth.fmlab.no`)
+      - traefik.http.routers.traefik-fa-ssl.middlewares=sso@file,security@file
+      - traefik.http.routers.traefik-fa-ssl.tls.certResolver=letsEncrypt
+      - traefik.http.routers.traefik-fa-ssl.tls.domains[0].main=auth.fmlab.no
+    restart: unless-stopped

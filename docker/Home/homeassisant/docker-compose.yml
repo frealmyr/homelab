@@ -1,0 +1,18 @@
+version: "3.5"
+
+volumes:
+  config:
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: lscr.io/linuxserver/homeassistant:latest
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Oslo
+    volumes:
+      - config:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped

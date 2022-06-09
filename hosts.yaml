@@ -1,6 +1,0 @@
-servers:
-  hosts:
-    fm-x300:
-      ansible_host: 10.0.0.10
-    fm-nuc:
-      ansible_host: 10.0.0.11

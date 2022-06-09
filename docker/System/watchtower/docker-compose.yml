@@ -1,0 +1,36 @@
+version: "3.5"
+
+networks:
+  internal:
+
+services:
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    networks:
+      - internal
+    environment:
+      - TZ=Europe/Oslo
+      - DOCKER_HOST=tcp://docker-proxy:2375
+      - WATCHTOWER_SCHEDULE=${CRON_SCHEDULE}
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL=${WEBHOOK}
+      - WATCHTOWER_NOTIFICATIONS_LEVEL=info
+    depends_on:
+      - docker-proxy
+    restart: unless-stopped
+
+  docker-proxy:
+    container_name: watchtower_docker_proxy
+    image: tecnativa/docker-socket-proxy:latest
+    networks:
+      - internal
+    environment:
+      - POST=1
+      - CONTAINERS=1
+      - NETWORKS=1
+      - IMAGES=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped

@@ -1,5 +1,5 @@
 ---
-- hosts: servers
+- hosts: all
   become: true
 
 - name: install packages

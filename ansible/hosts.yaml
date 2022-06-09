@@ -1,0 +1,16 @@
+all:
+  hosts:
+    fm-nuc:
+      ansible_host: 10.0.0.10
+    fm-tv:
+      ansible_host: 10.0.0.11
+
+server_debian:
+  hosts:
+    fm-nuc:
+      ansible_host: 10.0.0.10
+
+htpc_fedora:
+  hosts:
+    fm-tv:
+      ansible_host: 10.0.0.11

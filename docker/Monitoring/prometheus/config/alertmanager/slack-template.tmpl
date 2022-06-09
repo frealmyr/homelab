@@ -1,0 +1,22 @@
+{{ define "__single_message_title" -}}
+    {{ range .Alerts.Firing }}{{ if .Labels.instance }}{{ .Labels.instance }}: {{ else }}{{ .Labels.alertname }}: {{ end }}{{ .Annotations.description }}{{ end -}}
+    {{ range .Alerts.Resolved }}{{ if .Labels.instance }}{{ .Labels.instance }}: {{ else }}{{ .Labels.alertname }}{{ end }}{{ .Annotations.description }}{{ end }}{{ end -}}
+{{ define "custom_title" -}}
+    [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}]
+    {{- if eq (len .Alerts) 1 }}{{ template "__single_message_title" . }}{{ end }}
+{{- end -}}
+{{ define "custom_slack_message" }}
+{{ if eq (len .Alerts) 1 -}}
+    {{ range .Alerts.Firing }}<{{ .GeneratorURL }}|:chart_with_upwards_trend:>{{ if .Labels.runbook_url }}<{{ .Labels.runbook_url }}|:spiral_note_pad:>{{ end }} - {{ if .Labels.instance }}{{ .Labels.instance }}: {{ end }}{{ .Annotations.description }}{{ end -}}
+    {{ range .Alerts.Resolved }}{{ if .Labels.instance }}{{ .Labels.instance }}{{ else }}{{ .Annotations.description }}{{ end }}{{ end }}
+{{ else }}
+{{ if gt (len .Alerts.Firing) 0 }}
+*Alerts Firing:*
+{{ range .Alerts.Firing }}<{{ .GeneratorURL }}|:chart_with_upwards_trend:>{{ if .Labels.runbook_url }}<{{ .Labels.runbook_url }}|:spiral_note_pad:>{{ end }} - {{ if .Labels.instance }}{{ .Labels.instance }} - {{ else }}{{ .Labels.alertname }} - {{ end }}{{ .Annotations.description }}
+{{ end }}{{ end }}
+{{ if gt (len .Alerts.Resolved) 0 }}
+*Alerts Resolved:*
+{{ range .Alerts.Resolved }} - {{ if .Labels.instance }}{{ .Labels.instance }} - {{ else }}{{ .Labels.alertname }} - {{ end }} {{ .Annotations.description }}
+{{ end }}{{ end }}
+{{ end }}
+{{ end }}

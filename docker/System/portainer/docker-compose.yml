@@ -1,0 +1,47 @@
+version: "3.5"
+
+networks:
+  web:
+    external: true
+  internal:
+
+volumes:
+  data:
+
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer:latest
+    networks:
+      - web
+      - internal
+    volumes:
+      - data:/data
+    command: -H tcp://docker-proxy:2375
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web
+      - traefik.http.routers.${PROJECT}.entryPoints=https
+      - traefik.http.routers.${PROJECT}.rule=Host(`${TRAEFIK_HOSTNAME}`)
+      - traefik.http.routers.${PROJECT}.service=${PROJECT}
+      - traefik.http.routers.${PROJECT}.tls.certresolver=letsEncrypt
+      - traefik.http.services.${PROJECT}.loadbalancer.server.port=${TRAEFIK_PORT}
+      - traefik.http.routers.${PROJECT}.middlewares=sso@file,security@file
+
+  docker-proxy:
+    container_name: portainer_docker_proxy
+    image: tecnativa/docker-socket-proxy:latest
+    networks:
+      - internal
+    environment:
+      - POST=1
+      - CONTAINERS=1
+      - IMAGES=1
+      - INFO=1
+      - NETWORKS=1
+      - NODES=1
+      - SERVICES=1
+      - SYSTEM=1
+      - VOLUMES=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

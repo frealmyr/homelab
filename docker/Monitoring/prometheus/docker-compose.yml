@@ -1,0 +1,140 @@
+version: '3.5'
+
+networks:
+  web:
+    external: true
+  monitoring:
+    external: true
+  internal:
+
+services:
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    user: "${UID}:${GID}"
+    volumes:
+      - ./config/prometheus/:/etc/prometheus/
+      - ${VOLUME_DIR}/prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.external-url=http://prometheus.fmlab.no'
+    restart: unless-stopped
+    networks:
+      - web
+      - monitoring
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=prometheus_web
+      - traefik.http.routers.prometheus.rule=Host(`prometheus.fmlab.no`)
+      - traefik.http.services.prometheus.loadbalancer.server.port=9090
+      - traefik.http.routers.prometheus.tls.certresolver=letsEncrypt
+      - traefik.http.routers.prometheus.middlewares=sso@file
+      - traefik.http.routers.prometheus.entryPoints=https
+
+  alertmanager:
+    container_name: alertmanager
+    image: prom/alertmanager:latest
+    volumes:
+      - ./config/alertmanager/:/etc/alertmanager/
+    networks:
+      - web
+      - monitoring
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://alertmanager.fmlab.no'
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=alertmanager_web
+      - traefik.http.routers.alertmanager.rule=Host(`alertmanager.fmlab.no`)
+      - traefik.http.services.alertmanager.loadbalancer.server.port=9093
+      - traefik.http.routers.alertmanager.tls.certresolver=letsEncrypt
+      - traefik.http.routers.alertmanager.middlewares=sso@file
+      - traefik.http.routers.alertmanager.entryPoints=https
+
+        #  node-exporter:
+        #container_name: node-exporter
+        #image: prom/node-exporter:latest
+        #volumes:
+        #- /proc:/host/proc:ro
+        #- /sys:/host/sys:ro
+        # - /:/rootfs:ro,rslave
+        #- /tmp/node_exporter:/tmp/node_exporter
+        #command: 
+        #- '--path.procfs=/host/proc' 
+        #- '--path.sysfs=/host/sys'
+        #- '--collector.textfile.directory=/tmp/node_exporter'
+        #- --collector.filesystem.ignored-mount-points
+        #- "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+        #networks:
+        #- monitoring
+        #restart: unless-stopped
+
+  # cadvisor:
+  #   container_name: cadvisor
+  #   image: google/cadvisor:latest
+  #   networks:
+  #     - monitoring
+  #     - internal
+  #   volumes:
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #     - /dev/disk/:/dev/disk:ro 
+  #   ports:  
+  #     - 7575:8080
+  #   depends_on:
+  #     - docker-proxy
+  #   command: --docker_only=true --docker="tcp://docker-proxy:2375"
+  #   restart: unless-stopped
+
+  # docker-proxy:
+  #   container_name: cadvisor_docker_proxy
+  #   image: tecnativa/docker-socket-proxy:latest
+  #   networks:
+  #     - internal
+  #   environment:
+  #     - CONTAINERS=1
+  #     - IMAGES=1
+  #     - INFO=1
+  #     - NETWORKS=1
+  #     - NODES=1
+  #     - SERVICES=1
+  #     - SESSION=1
+  #     - SYSTEM=1
+  #     - TASKS=1
+  #     - VOLUMES=1
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   restart: unless-stopped
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    user: "${UID}:${GID}"
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,ryantxu-ajax-panel,grafana-simple-json-datasource
+    depends_on:
+      - prometheus
+    volumes:
+      - ${VOLUME_DIR}/grafana:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning/
+      - ./config/grafana/custom.ini:/etc/grafana/grafana.ini
+    env_file:
+      - ./config/grafana/config.monitoring
+    networks:
+      - web
+      - monitoring
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=grafana_web
+      - traefik.http.routers.grafana.rule=Host(`grafana.fmlab.no`)
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+      - traefik.http.routers.grafana.tls.certresolver=letsEncrypt
+      - traefik.http.routers.grafana.middlewares=sso@file
+      - traefik.http.routers.grafana.entryPoints=https
+
