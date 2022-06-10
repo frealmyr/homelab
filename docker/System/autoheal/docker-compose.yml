@@ -1,0 +1,35 @@
+version: "3.5"
+
+# networks:
+#   internal:
+
+services:
+  autoheal:
+    container_name: autoheal
+    image: willfarrell/autoheal:latest
+    # networks:
+    #   - internal
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+      - AUTOHEAL_INTERVAL=60
+      - AUTOHEAL_START_PERIOD=10
+      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=60
+      - CURL_TIMEOUT=30
+      # - DOCKER_SOCK=tcp://docker-proxy:2375 # https://github.com/willfarrell/docker-autoheal/pull/64
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # depends_on:
+    #   - docker-proxy
+    restart: unless-stopped
+
+  # docker-proxy: # https://github.com/willfarrell/docker-autoheal/pull/64
+  #   container_name: watchtower_docker_proxy
+  #   image: tecnativa/docker-socket-proxy:latest
+  #   networks:
+  #     - internal
+  #   environment:
+  #     - POST=1
+  #     - CONTAINERS=1
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   restart: unless-stopped

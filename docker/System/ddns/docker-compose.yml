@@ -2,10 +2,10 @@ version: '3.5'
 
 secrets:
   cloudflare_api_key:
-    file: ${HOME}/.secrets/cloudflare_api_key
+    file: ${HOME}/.secrets/ddns/cloudflare_api_key
 
 services:
- cloudflare-ddns:
+  cloudflare-ddns:
     container_name: cloudflare-ddns
     image: oznu/cloudflare-ddns
     environment:

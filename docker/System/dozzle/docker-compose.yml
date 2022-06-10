@@ -1,23 +1,26 @@
 version: "3.5"
 
 networks:
+  internal:
   web:
     external: true
-  internal:
-
-volumes:
-  data:
 
 services:
-  portainer:
-    container_name: portainer
-    image: portainer/portainer:latest
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    # extra_hosts:
+    # - "docker-hostname:172.18.0.1"
     networks:
       - web
       - internal
-    volumes:
-      - data:/data
-    command: -H tcp://docker-proxy:2375
+    healthcheck:
+      start_period: 60s
+    environment:
+    - DOCKER_TLS_VERIFY=false
+    - DOCKER_HOST=tcp://docker-proxy:2375
+    #- DOZZLE_TAILSIZE=100
+    #- DOZZLE_FILTER=
     labels:
       - traefik.enable=true
       - traefik.docker.network=web
@@ -27,23 +30,17 @@ services:
       - traefik.http.routers.${PROJECT}.tls.certresolver=letsEncrypt
       - traefik.http.services.${PROJECT}.loadbalancer.server.port=${TRAEFIK_PORT}
       - traefik.http.routers.${PROJECT}.middlewares=sso@file,security@file
+    depends_on:
+      - docker-proxy
     restart: unless-stopped
 
   docker-proxy:
-    container_name: portainer_docker_proxy
+    container_name: dozzle_docker_proxy
     image: tecnativa/docker-socket-proxy:latest
     networks:
       - internal
     environment:
-      - POST=1
       - CONTAINERS=1
-      - IMAGES=1
-      - INFO=1
-      - NETWORKS=1
-      - NODES=1
-      - SERVICES=1
-      - SYSTEM=1
-      - VOLUMES=1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped

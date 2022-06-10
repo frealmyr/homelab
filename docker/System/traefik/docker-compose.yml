@@ -27,6 +27,14 @@ services:
       - internal
       - proxy
       - monitoring
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    labels:
+      - autoheal=true
     volumes:
       - type: bind
         source: ${HOME}/.secrets/traefik/acme.json

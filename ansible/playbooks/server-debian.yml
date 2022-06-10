@@ -15,10 +15,9 @@
       #   path: /media/HDD3
 
   tasks:
-
-##################
-## APT Packages ##
-##################
+    ##################
+    ## APT Packages ##
+    ##################
 
     - name: docker - ensure that distro provided docker does not exist
       apt:
@@ -39,10 +38,10 @@
     - name: apt - install apt repo prereq
       apt:
         pkg:
-        - ca-certificates
-        - curl
-        - gnupg
-        - lsb-release
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
 
     - name: apt - add signing keys
       ansible.builtin.apt_key:
@@ -63,37 +62,39 @@
         update_cache: yes
         cache_valid_time: 3600
         pkg:
-        - curl
-        - htop
-        - inxi
-        - git
-        - mc
-        - net-tools
-        - tmux
-        - ufw
-        - tlp
-        - zsh
-        - prometheus-node-exporter
-        - smartmontools
-        - docker-ce
-        - docker-ce-cli
-        - containerd.io
-        - docker-compose
-        - docker-compose-plugin
+          - containerd.io
+          - curl
+          - docker-ce
+          - docker-ce-cli
+          - docker-compose
+          - docker-compose-plugin
+          - git
+          - htop
+          - inxi
+          - jq
+          - mc
+          - net-tools
+          - nvme-cli
+          - prometheus-node-exporter
+          - smartmontools
+          - tlp
+          - tmux
+          - ufw
+          - zsh
 
     - name: apt - clean/remove apt packages
       apt:
         autoclean: yes
         autoremove: yes
 
-############
-## Docker ##
-############
+    ############
+    ## Docker ##
+    ############
 
     - name: docker - add user to docker group
       user: name=fredrick
-            groups=docker
-            append=yes
+        groups=docker
+        append=yes
 
     - name: docker - restart docker service
       ansible.builtin.systemd:
@@ -101,35 +102,36 @@
         daemon_reload: yes
         name: docker
 
-##############
-## Firewall ##
-##############
+    ##############
+    ## Firewall ##
+    ##############
 
     - name: firewall - allow ingress ports
       community.general.ufw:
         rule: allow
-        port: '{{ item }}'
+        port: "{{ item }}"
         proto: tcp
       loop:
-        - '22'
-        - '8080'
-        - '8443'
+        - "22"
+        - "8080"
+        - "8443"
 
     - name: firewall - allow all access from RFC1918 network
       community.general.ufw:
         rule: allow
-        src: '{{ item }}'
+        src: "{{ item }}"
       loop:
         - 10.0.0.0/24
+        - 192.168.0.0/16
 
     - name: firewall - enable ufw
       community.general.ufw:
         state: enabled
         policy: deny
 
-##########
-## HDDs ##
-##########
+    ##########
+    ## HDDs ##
+    ##########
 
     - name: hdd - store uuid to variable
       command: blkid -t LABEL={{ item.label }} -s UUID -o value
@@ -149,9 +151,9 @@
       args:
         warn: no
 
-###################
-## Configuration ##
-###################
+    ###################
+    ## Configuration ##
+    ###################
 
     - name: shell - use zsh as default shell
       shell: chsh -s $(which zsh) fredrick
@@ -159,7 +161,7 @@
     - name: tlp - copy custom ac profile
       copy: src={{ item.src }} dest={{ item.dest }}
       with_items:
-        - { src: './files/tlp/99-ac.conf', dest: '/etc/tlp.d/99-ac.conf' }
+        - { src: "./files/tlp/99-ac.conf", dest: "/etc/tlp.d/99-ac.conf" }
 
     - name: ssh - add local public key to server
       authorized_key:
@@ -167,9 +169,9 @@
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 
-############
-## Reboot ##
-############
+    ############
+    ## Reboot ##
+    ############
 
     - name: system - rebooting host
       reboot:
