@@ -1,16 +1,26 @@
 all:
   hosts:
-    fm-nuc:
+    node-x300:
       ansible_host: 10.0.0.10
-    fm-tv:
+    node-nuc:
       ansible_host: 10.0.0.11
 
-server_debian:
+k8s_master:
   hosts:
-    fm-nuc:
+    node-x300:
       ansible_host: 10.0.0.10
 
-htpc_fedora:
+k8s_workers:
   hosts:
-    fm-tv:
+    node-nuc:
       ansible_host: 10.0.0.11
+
+nas:
+  hosts:
+    node-nuc:
+      ansible_host: 10.0.0.11
+
+htpc:
+  hosts:
+    node-x300:
+      ansible_host: 10.0.0.10

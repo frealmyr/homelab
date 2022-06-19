@@ -8,4 +8,4 @@ spec:
   ports:
     - name: http
       port: 8123
-  externalName: 10.0.0.100
+  externalName: 10.0.0.10

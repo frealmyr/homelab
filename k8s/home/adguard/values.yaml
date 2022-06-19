@@ -39,17 +39,16 @@ app:
           targetPort: 3000
     - name: dns-tcp
       type: LoadBalancer
-      loadBalancerIP: 10.0.0.100
+      loadBalancerIP: 10.0.0.10
       ports:
         - name: http
           port: 53
           targetPort: 53
     - name: dns-udp
       type: LoadBalancer
-      loadBalancerIP: 10.0.0.100
+      loadBalancerIP: 10.0.0.10
       ports:
         - name: http
           port: 53
           targetPort: 53
           protocol: UDP
-

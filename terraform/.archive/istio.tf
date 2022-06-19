@@ -6,7 +6,7 @@ resource "kubernetes_namespace" "istio_system" {
   metadata {
     name = "istio-system"
     labels = {
-      cert-manager-tls: "istio-system"
+      cert-manager-tls : "istio-system"
     }
   }
 }
@@ -37,7 +37,7 @@ resource "helm_release" "istio_gateway_loadbalancer" {
     labels:
       istio: ingressgateway
     service:
-      loadBalancerIP: 10.0.0.100
+      loadBalancerIP: 10.0.0.10
   EOF
   ]
 

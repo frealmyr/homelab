@@ -14,18 +14,27 @@ resource "helm_release" "argocd" {
     metrics:
       enabled: true
       serviceMonitor:
-        enabled: true
+        enabled: false
     controller:
       metrics:
         enabled: true
         serviceMonitor:
-          enabled: true
+          enabled: false
       containerSecurityContext:
         capabilities:
           drop:
             - all
         readOnlyRootFilesystem: true
         runAsNonRoot: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - node-x300
     dex:
       enabled: false
     server:
@@ -33,6 +42,15 @@ resource "helm_release" "argocd" {
         url: https://argocd.fmlab.no
       extraArgs:
         - --insecure # Using traefik for TLS termination instead of argocd
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - node-x300
   EOF
   ]
   depends_on = [helm_release.metallb]

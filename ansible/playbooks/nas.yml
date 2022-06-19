@@ -1,0 +1,34 @@
+---
+- hosts: nas
+  become: true
+
+  vars:
+    hdds:
+      - label: HDD1
+        filesystem: ext4
+        path: /media/HDD1
+      - label: HDD2
+        filesystem: ext4
+        path: /media/HDD2
+      # - label: HDD3
+      #   filesystem: ntfs
+      #   path: /media/HDD3
+
+  tasks:
+    - name: hdd - store uuid to variable
+      command: blkid -t LABEL={{ item.label }} -s UUID -o value
+      loop: "{{ hdds }}"
+      register: hdd_uuid
+
+    - name: hdd - mount hdds on boot from fstab
+      lineinfile:
+        path: /etc/fstab
+        state: present
+        create: no
+        line: UUID={{ item.stdout }} {{ item.item.path }}  {{ item.item.filesystem }}  noatime,errors=remount-ro 0 1
+      with_items: "{{ hdd_uuid.results }}"
+
+    - name: hdd - validate fstab by mounting all
+      command: mount -a
+      args:
+        warn: no

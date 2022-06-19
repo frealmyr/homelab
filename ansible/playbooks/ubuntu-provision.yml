@@ -1,18 +1,6 @@
 ---
-- hosts: server_debian
+- hosts: all
   become: true
-
-  vars:
-    hdds:
-      - label: HDD1
-        filesystem: ext4
-        path: /media/HDD1
-      - label: HDD2
-        filesystem: ext4
-        path: /media/HDD2
-      # - label: HDD3
-      #   filesystem: ntfs
-      #   path: /media/HDD3
 
   tasks:
     ##################
@@ -25,7 +13,7 @@
           - docker
           - docker-engine
           - docker.io
-          - containerd
+          - containerd.io
           - runc
         state: absent
 
@@ -48,14 +36,14 @@
         url: "{{ item }}"
         state: present
       with_items:
-        - "https://download.docker.com/linux/debian/gpg"
+        - "https://download.docker.com/linux/ubuntu/gpg"
 
     - name: apt - add repositories
       ansible.builtin.apt_repository:
         repo: "{{ item }}"
         state: present
       with_items:
-        - "deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable"
+        - "deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable"
 
     - name: apt - install packages
       apt:
@@ -64,10 +52,6 @@
         pkg:
           - containerd.io
           - curl
-          - docker-ce
-          - docker-ce-cli
-          - docker-compose
-          - docker-compose-plugin
           - git
           - htop
           - inxi
@@ -129,28 +113,6 @@
         state: enabled
         policy: deny
 
-    ##########
-    ## HDDs ##
-    ##########
-
-    - name: hdd - store uuid to variable
-      command: blkid -t LABEL={{ item.label }} -s UUID -o value
-      loop: "{{ hdds }}"
-      register: hdd_uuid
-
-    - name: hdd - mount hdds on boot from fstab
-      lineinfile:
-        path: /etc/fstab
-        state: present
-        create: no
-        line: UUID={{ item.stdout }} {{ item.item.path }}  {{ item.item.filesystem }}  noatime,errors=remount-ro 0 1
-      with_items: "{{ hdd_uuid.results }}"
-
-    - name: hdd - validate fstab by mounting all
-      command: mount -a
-      args:
-        warn: no
-
     ###################
     ## Configuration ##
     ###################
@@ -169,9 +131,39 @@
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 
+    ##############
+    ## Hostname ##
+    ##############
+
+    - name: hostname - change if mismatch from inventory name
+      hostname: name="{{ inventory_hostname }}"
+      when: ansible_fqdn != ansible_ssh_host
+
+    - name: system - rebooting host
+      reboot:
+      when: ansible_fqdn != ansible_ssh_host
+
+    - name: hostname - fix /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1  {{ ansible_hostname }}"
+        state: present
+      when: ansible_fqdn != ansible_ssh_host
+
     ############
     ## Reboot ##
     ############
 
     - name: system - rebooting host
       reboot:
+
+    #################
+    ## Validations ##
+    #################
+
+    - name: hostname - validate ansible_fqdn == inventory_hostname
+      tags:
+        - validate
+      assert:
+        that: ansible_fqdn == inventory_hostname

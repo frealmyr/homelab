@@ -1,0 +1,233 @@
+---
+- hosts: k8s_master, k8s_workers
+  become: true
+
+  vars:
+    net_subnet: 10.244.0.0/16
+    sysctl_config:
+      net.ipv4.ip_forward: 1
+      net.ipv4.conf.all.forwarding: 1
+      net.ipv6.conf.all.forwarding: 1
+      net.bridge.bridge-nf-call-iptables: 1
+
+  tasks:
+    ##############
+    ## Firewall ##
+    ##############
+
+    - name: firewall - allow RFC1918 networks to this host
+      community.general.ufw:
+        rule: allow
+        src: "{{ item }}"
+      loop:
+        - "{{ net_subnet }}"
+
+    ##################
+    ## APT Packages ##
+    ##################
+
+    - name: apt - update & upgrade packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: apt - add signing key for Kubernetes
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: apt - add repository for Kubernetes
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        filename: kubernetes.list
+
+    - name: apt - install Kubernetes binaries
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - kubeadm
+          - kubectl
+          - kubelet
+          - kubernetes-cni
+
+    ##########
+    ## Swap ##
+    ##########
+
+    - name: swap - remove swapfile from /etc/fstab
+      mount:
+        name: "{{ item }}"
+        fstype: swap
+        state: absent
+      with_items:
+        - none
+        - swap
+
+    - name: swap - disable swap
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+
+    ########################
+    ## Modprobe / Systemd ##
+    ########################
+
+    - name: modprobe - enable modules
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - br_netfilter
+        - overlay
+
+    - name: modprobe - load modules on boot
+      lineinfile:
+        path: /etc/modules
+        line: "{{item}}"
+        state: present
+      with_items:
+        - br_netfilter
+        - overlay
+
+    - name: systemctl - allow ip forwarding
+      sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        sysctl_set: yes
+        state: present
+        reload: yes
+        ignoreerrors: no
+      with_dict: "{{ sysctl_config }}"
+
+    # ################
+    # ## Containerd ##
+    # ################
+
+    - name: containerd - create default config
+      shell: containerd config default>/etc/containerd/config.toml
+
+    - name: containerd - enable systemd runc backend
+      replace:
+        path: /etc/containerd/config.toml
+        regexp: "SystemdCgroup = false"
+        replace: "SystemdCgroup = true"
+
+    - name: containerd - restart and enable service
+      service:
+        name: containerd
+        enabled: yes
+        state: restarted
+
+    - name: system - rebooting host
+      reboot:
+
+    # ####################
+    # ## Create cluster ##
+    # ####################
+
+    - name: kublet - kubelet
+      service:
+        name: kubelet
+        daemon_reload: yes
+        state: restarted
+
+    - name: kubeadm - reset Kubernetes cluster
+      command: kubeadm reset -f
+
+    - name: kubeadm - remove cni folder
+      file:
+        path: /etc/cni/net.d
+        state: absent
+
+    - name: kubeadm - initialize the Kubernetes cluster
+      command: kubeadm init --node-name {{ ansible_hostname }} --pod-network-cidr={{ net_subnet }}
+      when: "'k8s_master' in group_names"
+
+    - name: ansible - sleep for 45 seconds (wait for cluster startup)
+      wait_for:
+        timeout: 45
+
+    ################
+    ## Kubeconfig ##
+    ################
+
+    - name: kubeconfig - copy admin kubeconfig
+      command: "{{ item }}"
+      with_items:
+        - mkdir -p /home/fredrick/.kube
+        - cp /etc/kubernetes/admin.conf /home/fredrick/.kube/config
+        - chown fredrick:fredrick /home/fredrick/.kube/config
+      when: "'k8s_master' in group_names"
+
+    - name: kubectl - copy clusterconfiguration.yaml
+      copy:
+        dest: /etc/kubernetes/ClusterConfiguration.yaml
+        content: "{{ clusterconfiguration }}"
+      vars:
+        clusterconfiguration: |
+          apiVersion: kubeadm.k8s.io/v1beta3
+          kind: ClusterConfiguration
+          clusterName: "homelab"
+          controlPlaneEndpoint: "{{ ansible_host }}:6443"
+          certificatesDir: "/etc/kubernetes/pki"
+      when: "'k8s_master' in group_names"
+
+    - name: kubeadm - create kubeconfig for terraform
+      command: kubeadm kubeconfig user --config /etc/kubernetes/ClusterConfiguration.yaml --client-name terraform --validity-period 8760h
+      register: kubeconfig_terraform
+      when: "'k8s_master' in group_names"
+
+    - name: kubectl - grant terraform user cluster-admin role
+      command: kubectl create clusterrolebinding terraform --clusterrole=cluster-admin --user=terraform
+      become_user: fredrick
+      when: "'k8s_master' in group_names"
+
+    - name: kubeconfig - create Terraform directory if it does not exist
+      file:
+        path: ../../terraform/.terraform
+        state: directory
+      delegate_to: localhost
+      become_user: fredrick
+      when: "'k8s_master' in group_names"
+
+    - name: kubeconfig - copy kubeconfig to Terraform directory
+      copy: content={{ kubeconfig_terraform.stdout }} dest=../../terraform/.terraform/kubeconfig
+      delegate_to: localhost
+      become_user: fredrick
+      when: "'k8s_master' in group_names"
+
+    ###########
+    ## Nodes ##
+    ###########
+
+    - name: kubectl - remove taints from master node
+      command: "kubectl taint nodes {{ ansible_hostname }} {{ item }}"
+      become_user: fredrick
+      when: "'k8s_master' in group_names"
+      with_items:
+        - node-role.kubernetes.io/master:NoSchedule-
+        - node-role.kubernetes.io/control-plane:NoSchedule-
+
+    - name: kubeadmin - create kubeadm join token
+      command: kubeadm token create --print-join-command
+      when: "'k8s_master' in group_names"
+      register: k8s_join_token
+
+    - set_fact:
+        k8s_join_command: "{{ k8s_join_token.stdout }}"
+      when: "'k8s_master' in group_names"
+
+    - name: kubedm - enroll worker nodes to master
+      command: "{{ hostvars['node-x300']['k8s_join_command'] }}"
+      when: "'k8s_workers' in group_names"
+
+    # ##################
+    # ## Post Install ##
+    # ##################
+
+    - name: system - rebooting host
+      reboot:
