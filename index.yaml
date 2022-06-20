@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  app:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-06-20T16:19:04.284694715Z"
+    description: A Helm chart for Kubernetes
+    digest: dc8b749072431fd3c01ec68ff08dc71c8883e1f701856017afe045794d36daf2
+    name: app
+    type: application
+    urls:
+    - https://github.com/frealmyr/homelab/releases/download/app-1.0.1/app-1.0.1.tgz
+    version: 1.0.1
+generated: "2022-06-20T16:19:04.284700416Z"
