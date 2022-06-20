@@ -16,7 +16,10 @@ spec:
     helm:
       releaseName: traefik
       valueFiles:
-      - default.yaml
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
+        - default.yaml
+  ignoreDifferences:
+    - group: ""
+      kind: ConfigMap
+      name: traefik-whitelist
+      jsonPointers:
+        - /data/whitelist

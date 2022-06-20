@@ -69,3 +69,37 @@ resource "helm_release" "metallb" {
 
   depends_on = [helm_release.tigera_operator]
 }
+
+#############
+## Traefik ##
+#############
+
+resource "kubernetes_namespace" "traefik_system" {
+  metadata {
+    name = "traefik-system"
+  }
+}
+
+data "google_secret_manager_secret_version" "sso" {
+  project = "cloudlab-267613"
+  secret  = "homelab-sso"
+}
+
+locals {
+  sso = jsondecode(data.google_secret_manager_secret_version.sso.secret_data)
+}
+
+resource "kubernetes_secret_v1" "traefik_sso" {
+  metadata {
+    name      = "traefik-sso-gcp"
+    namespace = kubernetes_namespace.traefik_system.metadata[0].name
+  }
+
+  data = {
+    client_id     = local.sso.client_id
+    client_secret = local.sso.client_secret
+    secret        = local.sso.secret
+  }
+
+  type = "Opaque"
+}

@@ -11,5 +11,5 @@ spec:
   dnsNames:
   - auth.fmlab.no
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-prod
     kind: ClusterIssuer

@@ -19,7 +19,7 @@ spec:
       namespace: traefik-system
       port: 4181
     middlewares:
-      - name: security
-      - name: sso # Required when using single auth-host mode
+      - name: traefik-system-security@kubernetescrd
+      - name: traefik-system-sso@kubernetescrd # Required when using single auth-host mode
   tls:
     secretName: traefik-forward-auth

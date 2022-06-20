@@ -27,16 +27,29 @@ spec:
         - containerPort: 4181
           protocol: TCP
         env:
-        - name: CONFIG
-          value: "/config/forward.ini"
         - name: LOG_LEVEL
           value: error
+        - name: COOKIE_DOMAIN
+          value: "fmlab.no"
+        - name: AUTH_HOST
+          value: "auth.fmlab.no"
         - name: SECRET
-          value: ""
-        volumeMounts:
-        - name: sso-secret
-          mountPath: /config
-      volumes:
-      - name: sso-secret
-        secret:
-          secretName: traefik-forward-auth-sso
+          valueFrom:
+            secretKeyRef:
+              name: traefik-sso-gcp
+              key: secret
+        - name: PROVIDERS_GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: traefik-sso-gcp
+              key: client_id
+        - name: PROVIDERS_GOOGLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: traefik-sso-gcp
+              key: client_secret
+        - name: WHITELIST
+          valueFrom:
+            configMapKeyRef:
+              name: traefik-whitelist
+              key: whitelist

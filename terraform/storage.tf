@@ -31,4 +31,5 @@ resource "helm_release" "local_path_storage" {
                 - node-x300
   EOF
   ]
+  depends_on = [helm_release.metallb]
 }
