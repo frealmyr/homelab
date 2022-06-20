@@ -28,7 +28,7 @@ spec:
   dnsNames:
   - traefik.fmlab.no
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-prod
     kind: ClusterIssuer
 ---
 apiVersion: traefik.containo.us/v1alpha1

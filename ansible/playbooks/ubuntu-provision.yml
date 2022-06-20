@@ -59,7 +59,6 @@
           - mc
           - net-tools
           - nvme-cli
-          - prometheus-node-exporter
           - smartmontools
           - tlp
           - tmux
