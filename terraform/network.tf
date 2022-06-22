@@ -103,3 +103,37 @@ resource "kubernetes_secret_v1" "traefik_sso" {
 
   type = "Opaque"
 }
+
+#####################
+## CloudFlare DDNS ##
+#####################
+
+resource "kubernetes_namespace" "cloudflare_ddns" {
+  metadata {
+    name = "cloudflare-ddns"
+  }
+}
+
+data "google_secret_manager_secret_version" "cloudflare_ddns" {
+  project = "cloudlab-267613"
+  secret  = "homelab-cloudflare"
+}
+
+locals {
+  cloudflare_ddns = jsondecode(data.google_secret_manager_secret_version.cloudflare_ddns.secret_data)
+}
+
+resource "kubernetes_secret_v1" "cloudflare_ddns" {
+  metadata {
+    name      = "cloudflare-credentials"
+    namespace = kubernetes_namespace.cloudflare_ddns.metadata[0].name
+  }
+
+  data = {
+    account_id = local.cloudflare_ddns.account_id
+    api_token  = local.cloudflare_ddns.api_token
+    zone_id    = local.cloudflare_ddns.zone_id
+  }
+
+  type = "Opaque"
+}

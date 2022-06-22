@@ -1,5 +1,5 @@
 apiVersion: v2
-name: ddns
+name: cloudflare-ddns
 description: CloudFlare Dynamic DNS
 
 type: application

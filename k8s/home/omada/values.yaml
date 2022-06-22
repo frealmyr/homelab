@@ -28,13 +28,13 @@ app:
     - name: SHOW_SERVER_LOGS
       value: "true"
     - name: MANAGE_HTTP_PORT
-      value: "80"
+      value: "8080"
     - name: PORTAL_HTTP_PORT
-      value: "80"
+      value: "8080"
     - name: MANAGE_HTTPS_PORT
-      value: "443"
+      value: "8443"
     - name: PORTAL_HTTPS_PORT
-      value: "443"
+      value: "8443"
     - name: SSL_CERT_NAME
       value: "/secrets/certificates/tls.crt"
     - name: SSL_KEY_NAME
@@ -42,7 +42,7 @@ app:
 
   containerPorts:
     - name: http
-      containerPort: 80
+      containerPort: 8080
       protocol: TCP
     - name: ctrl-1-tcp
       containerPort: 29810
@@ -80,8 +80,8 @@ app:
       type: ClusterIP
       ports:
         - name: http
-          port: 80
-          targetPort: 80
+          port: 8080
+          targetPort: 8080
     - name: controller-tcp
       type: LoadBalancer
       loadBalancerIP: 10.0.0.10
@@ -132,7 +132,7 @@ app:
       - name: frontend
         service:
           name: http
-          port: 80
+          port: 8080
         hosts:
           - host: omada.fmlab.no
             paths:

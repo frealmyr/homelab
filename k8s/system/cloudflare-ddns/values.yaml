@@ -8,7 +8,7 @@ app:
       valueFrom:
         secretKeyRef:
           name: cloudflare-credentials
-          key: apikey
+          key: api_token
     - name: ZONE
       value: "fmlab.no"
     - name: SUBDOMAIN

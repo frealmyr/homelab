@@ -1,19 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ddns
+  name: cloudflare-ddns
   namespace: argocd
 spec:
   destination:
     name: in-cluster
-    namespace: ddns
+    namespace: cloudflare-ddns
   project: default
   source:
     targetRevision: main
-    path: k8s/system/ddns
+    path: k8s/system/cloudflare-ddns
     repoURL: https://github.com/frealmyr/homelab
     helm:
       releaseName: ddns
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
