@@ -67,7 +67,7 @@ resource "helm_release" "argocd_app_homelab" {
       - apiVersion: argoproj.io/v1alpha1
         kind: Application
         metadata:
-          name: homelab-apps
+          name: homelab
           namespace: argocd
         spec:
           destination:
@@ -75,18 +75,15 @@ resource "helm_release" "argocd_app_homelab" {
             namespace: ''
             server: 'https://kubernetes.default.svc'
           source:
+            chart: argo
+            repoURL: 'https://frealmyr.github.io/homelab'
+            targetRevision: ^1.0.0
+            helm:
+              releaseName: homelab
+              valueFiles:
+                - stack.yaml
             path: k8s
-            repoURL: 'https://github.com/frealmyr/homelab'
-            targetRevision: main
-            directory:
-              recurse: false
           project: default
-          syncPolicy:
-            automated:
-              prune: true
-              selfHeal: true
-            syncOptions:
-              - CreateNamespace=true
     EOF
   ]
   depends_on = [helm_release.argocd]

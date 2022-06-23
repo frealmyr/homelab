@@ -1,0 +1,86 @@
+repoURL: https://github.com/frealmyr/homelab
+targetRevision: main
+basePath: k8s
+
+namespaces:
+  development:
+  entertainment:
+  monitoring:
+
+appProject:
+  development:
+    applications:
+      tekton:
+        namespace:
+          name: development
+
+  entertainment:
+    applications:
+      jackett:
+        namespace:
+          name: entertainment
+      jellyfin:
+        namespace:
+          name: entertainment
+      radarr:
+        namespace:
+          name: entertainment
+      sonarr:
+        namespace:
+          name: entertainment
+      transmission:
+        namespace:
+          name: entertainment
+
+  home:
+    applications:
+      adguard:
+        namespace:
+          create: true
+      homeassistant:
+        namespace:
+          create: true
+      omada:
+        namespace:
+          create: true
+
+  monitoring:
+    applications:
+      kubernetes-dashboard:
+        namespace:
+          name: monitoring
+      prometheus:
+        namespace:
+          name: monitoring
+
+  office:
+    applications:
+      miniflux:
+        namespace:
+          create: true
+
+  system:
+    applications:
+      cert-manager:
+        namespace:
+          create: true
+      cloudflare-ddns:
+        namespace:
+          create: true
+      keel:
+        namespace:
+          create: true
+      smarter-device-manager:
+        type: kustomization
+        namespace:
+          name: device-manager
+          create: true
+      traefik:
+        namespace:
+          name: traefik-system
+        ignoreDifferences:
+          - group: ""
+            kind: ConfigMap
+            name: traefik-whitelist
+            jsonPointers:
+              - /data/whitelist

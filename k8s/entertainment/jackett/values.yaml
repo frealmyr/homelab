@@ -49,3 +49,19 @@ app:
           - secretName: jackett-tls
             hosts:
               - jackett.fmlab.no
+
+  tolerations:
+    - key: hostname
+      operator: Equal
+      value: node-nuc
+      effect: NoSchedule
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - node-nuc

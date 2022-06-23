@@ -19,9 +19,17 @@ app:
         - path: /config
           subPath: config
     hostPath:
-      - name: ssd2
-        mountPath: /media/SSD2
-        hostPath: /media/SSD2
+      - name: hdd1
+        mountPath: /media/HDD1/Entertainment
+        hostPath: /media/HDD1/Entertainment
+        type: Directory
+      - name: hdd2
+        mountPath: /media/HDD2/Entertainment
+        hostPath: /media/HDD2/Entertainment
+        type: Directory
+      - name: ssd
+        mountPath: /home/fredrick/Storage/Downloads
+        hostPath: /home/fredrick/Storage/Downloads
         type: Directory
 
   containerPorts:
@@ -54,3 +62,19 @@ app:
           - secretName: sonarr-tls
             hosts:
               - sonarr.fmlab.no
+
+  tolerations:
+    - key: hostname
+      operator: Equal
+      value: node-nuc
+      effect: NoSchedule
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - node-nuc
