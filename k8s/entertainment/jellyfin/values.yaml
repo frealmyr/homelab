@@ -23,14 +23,6 @@ app:
         - path: /config
           subPath: config
     hostPath:
-      - name: hdd1
-        mountPath: /media/HDD1
-        hostPath: /media/HDD1
-        type: Directory
-      - name: ssd2
-        mountPath: /media/SSD2
-        hostPath: /media/SSD2
-        type: Directory
       - name: devdri
         mountPath: /dev/dri
         hostPath: /dev/dri
@@ -43,9 +35,9 @@ app:
 
   resources:
     limits:
-      smarter-devices/dri: '1'
+      smarter-devices/dri: "1"
     requests:
-      smarter-devices/dri: '1'
+      smarter-devices/dri: "1"
 
   containerPorts:
     - name: http

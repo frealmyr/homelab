@@ -1,8 +1,7 @@
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: system
+  name: homelab
   namespace: argocd
 spec:
   destination:
@@ -10,51 +9,10 @@ spec:
     namespace: argocd
   project: default
   source:
-    targetRevision: main
-    path: k8s/system
-    repoURL: https://github.com/frealmyr/homelab
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: office
-  namespace: argocd
-spec:
-  destination:
-    name: in-cluster
-    namespace: argocd
-  project: default
-  source:
-    targetRevision: main
-    path: k8s/office
-    repoURL: https://github.com/frealmyr/homelab
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: entertainment
-  namespace: argocd
-spec:
-  destination:
-    name: in-cluster
-    namespace: argocd
-  project: default
-  source:
-    targetRevision: main
-    path: k8s/entertainment
-    repoURL: https://github.com/frealmyr/homelab
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: home
-  namespace: argocd
-spec:
-  destination:
-    name: in-cluster
-    namespace: argocd
-  project: default
-  source:
-    targetRevision: main
-    path: k8s/home
-    repoURL: https://github.com/frealmyr/homelab
+    chart: argo
+    repoURL: https://frealmyr.github.io/homelab
+    targetRevision: 1.0.0
+    helm:
+      releaseName: homelab
+      valueFiles:
+        - values.yaml

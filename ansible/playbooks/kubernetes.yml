@@ -224,6 +224,13 @@
         - node-role.kubernetes.io/master:NoSchedule-
         - node-role.kubernetes.io/control-plane:NoSchedule-
 
+    - name: kubectl - add taints to worker nodes
+      command: "kubectl taint nodes {{ ansible_hostname }} {{ item }}"
+      become_user: fredrick
+      when: "'k8s_workers' in group_names"
+      with_items:
+        - hostname={{ ansible_hostname }}:NoSchedule
+
     - name: kubeadmin - create kubeadm join token
       command: kubeadm token create --print-join-command
       when: "'k8s_master' in group_names"

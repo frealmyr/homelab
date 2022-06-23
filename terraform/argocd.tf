@@ -81,12 +81,6 @@ resource "helm_release" "argocd_app_homelab" {
             directory:
               recurse: false
           project: default
-          syncPolicy:
-            automated:
-              prune: true
-              selfHeal: true
-            syncOptions:
-              - CreateNamespace=true
     EOF
   ]
   depends_on = [helm_release.argocd]

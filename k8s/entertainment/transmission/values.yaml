@@ -12,10 +12,6 @@ app:
       value: "Europe/Oslo"
     - name: TRANSMISSION_WEB_HOME
       value: "/flood-for-transmission/"
-    - name: USER
-      value: "foo"
-    - name: PASS
-      value: "bar"
     - name: PEERPORT
       value: "51413"
 
@@ -28,12 +24,16 @@ app:
           subPath: config
     hostPath:
       - name: hdd1
-        mountPath: /media/HDD1
-        hostPath: /media/HDD1
+        mountPath: /media/HDD1/Entertainment
+        hostPath: /media/HDD1/Entertainment
         type: Directory
-      - name: ssd2
-        mountPath: /media/SSD2
-        hostPath: /media/SSD2
+      - name: hdd2
+        mountPath: /media/HDD2/Entertainment
+        hostPath: /media/HDD2/Entertainment
+        type: Directory
+      - name: ssd
+        mountPath: /home/fredrick/Storage/Downloads
+        hostPath: /home/fredrick/Storage/Downloads
         type: Directory
 
   containerPorts:
@@ -84,3 +84,19 @@ app:
           - secretName: transmission-tls
             hosts:
               - transmission.fmlab.no
+
+  tolerations:
+    - key: hostname
+      operator: Equal
+      value: node-nuc
+      effect: NoSchedule
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - node-nuc
