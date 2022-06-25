@@ -104,8 +104,8 @@
         rule: allow
         src: "{{ item }}"
       loop:
-        - 10.0.0.0/24
-        - 192.168.0.0/16
+        - 10.0.0.0/24 # LAN
+        - 192.168.0.0/16 # Docker
 
     - name: firewall - enable ufw
       community.general.ufw:

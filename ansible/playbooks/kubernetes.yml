@@ -244,6 +244,11 @@
       command: "{{ hostvars['node-x300']['k8s_join_command'] }}"
       when: "'k8s_workers' in group_names"
 
+    - name: misc - create persistent volume folder
+      file:
+        path: /var/lib/k8s/volumes
+        state: directory
+
     # ##################
     # ## Post Install ##
     # ##################

@@ -6,19 +6,32 @@
     hdds:
       - label: HDD1
         filesystem: ext4
-        path: /media/HDD1
+        path: /mnt/HDD1
       - label: HDD2
         filesystem: ext4
-        path: /media/HDD2
+        path: /mnt/HDD2
       # - label: HDD3
       #   filesystem: ntfs
       #   path: /media/HDD3
+    nfs_exports:
+      - path: /mnt/HDD1/Entertainment
+        cidr:
+          - "10.244.0.0/16(rw,sync,no_root_squash,no_subtree_check)"
+      - path: /mnt/HDD2/Entertainment
+        cidr:
+          - "10.244.0.0/16(rw,sync,no_root_squash,no_subtree_check)"
 
   tasks:
     - name: hdd - store uuid to variable
       command: blkid -t LABEL={{ item.label }} -s UUID -o value
       loop: "{{ hdds }}"
       register: hdd_uuid
+
+    - name: hdd - create mount path
+      file:
+        path: "{{ item.item.path }}"
+        state: directory
+      with_items: "{{ hdd_uuid.results }}"
 
     - name: hdd - mount hdds on boot from fstab
       lineinfile:
@@ -32,3 +45,25 @@
       command: mount -a
       args:
         warn: no
+
+    - name: apt - install nfs server
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        pkg:
+          - nfs-kernel-server
+
+    - name: nfs - export hdds
+      lineinfile:
+        path: /etc/exports
+        state: present
+        regexp: "^{{ item.path }}"
+        create: no
+        line: "{{ item.path }} {{ item.cidr | join(' ') }}"
+      loop: "{{ nfs_exports }}"
+
+    - name: nfs - restart server
+      service:
+        name: nfs-kernel-server
+        daemon_reload: yes
+        state: restarted
