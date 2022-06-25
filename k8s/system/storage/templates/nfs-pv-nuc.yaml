@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-hdd1-entertainment
+spec:
+  storageClassName: nas
+  capacity:
+    storage: 1Mi # ignored as NFS server have quota disabled
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: node-nuc.default.svc.cluster.local
+    path: "/mnt/HDD1/Entertainment"
+  mountOptions:
+    - hard
+    - timeo=600
+    - retrans=3
+    - proto=tcp
+    - nfsvers=4.2
+    - port=2050
+    - rsize=4096
+    - wsize=4096
+    - noacl
+    - nocto
+    - noatime
+    - nodiratime
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-hdd2-entertainment
+spec:
+  storageClassName: nas
+  capacity:
+    storage: 1Mi # ignored as NFS server have quota disabled
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: node-nuc.default.svc.cluster.local
+    path: "/mnt/HDD2/Entertainment"
+  mountOptions:
+    - hard
+    - timeo=600
+    - retrans=3
+    - proto=tcp
+    - nfsvers=4.2
+    - port=2050
+    - rsize=4096
+    - wsize=4096
+    - noacl
+    - nocto
+    - noatime
+    - nodiratime

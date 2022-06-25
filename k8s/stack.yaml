@@ -72,6 +72,10 @@ appProject:
         namespace:
           name: device-manager
           create: true
+      storage:
+        namespace:
+          name: storage-system
+          create: true
       traefik:
         namespace:
           name: traefik-system
