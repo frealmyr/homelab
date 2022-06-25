@@ -16,10 +16,14 @@
     nfs_exports:
       - path: /mnt/HDD1/Entertainment
         cidr:
+          - "10.0.0.0/8(rw,sync,no_root_squash,no_subtree_check)"
           - "10.244.0.0/16(rw,sync,no_root_squash,no_subtree_check)"
+          - "192.168.0.0/16(rw,sync,no_root_squash,no_subtree_check)"
       - path: /mnt/HDD2/Entertainment
         cidr:
+          - "10.0.0.0/8(rw,sync,no_root_squash,no_subtree_check)"
           - "10.244.0.0/16(rw,sync,no_root_squash,no_subtree_check)"
+          - "192.168.0.0/16(rw,sync,no_root_squash,no_subtree_check)"
 
   tasks:
     - name: hdd - store uuid to variable

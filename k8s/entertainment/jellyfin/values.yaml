@@ -22,6 +22,14 @@ app:
         mounts:
           - path: /config
             subPath: config
+      - name: hdd1
+        accessMode: ReadWriteMany
+        storageClassName: nas
+        volumeName: nfs-hdd1-entertainment
+        size: 1Mi
+        mounts:
+          - path: /mnt/HDD1/Entertainment
+
     hostPath:
       - name: devdri
         mountPath: /dev/dri
