@@ -14,12 +14,9 @@ resource "helm_release" "local_path_storage" {
     storageClass:
       defaultClass: true
     nodePathMap:
-      - node: node-x300
+      - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
         paths:
-          - /home/fredrick/.PersistentVolumes
-      - node: node-nuc
-        paths:
-          - /home/fredrick/.PersistentVolumes
+          - /var/lib/k8s/volumes
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
