@@ -113,6 +113,9 @@ resource "helm_release" "argocd" {
   depends_on = [helm_release.metallb, kubernetes_secret_v1.sso_github]
 }
 
+# https://github.com/argoproj/argo-cd/issues/2789
+# This means that we cannot override values from a file in git
+# For now one need to use git and path for the chart, not ideal but works
 resource "helm_release" "argocd_app_homelab" {
   name       = "argocd-app-homelab"
   repository = "https://charts.itscontained.io"
@@ -132,14 +135,13 @@ resource "helm_release" "argocd_app_homelab" {
             namespace: ''
             server: 'https://kubernetes.default.svc'
           source:
-            chart: argo
-            repoURL: 'https://frealmyr.github.io/homelab'
-            targetRevision: ^1.0.0
+            repoURL: 'https://github.com/frealmyr/homelab.git'
+            targetRevision: main
             helm:
               releaseName: homelab
               valueFiles:
-                - stack.yaml
-            path: k8s
+                - ../../k8s/stack.yaml
+            path: charts/argo
           project: default
     EOF
   ]
