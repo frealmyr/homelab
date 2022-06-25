@@ -1,4 +1,0 @@
-# Docker
-
-## Remote docker contexts
-
