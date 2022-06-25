@@ -56,12 +56,14 @@ spec:
           {{- end }}
           {{- if or .persistentVolumes.create .persistentVolumes.hostPath }}
           volumeMounts:
-          {{- if .persistentVolumes.pvc.create }}
-          {{- range .persistentVolumes.pvc.mounts }}
-            - name: {{ include "app.fullname" (merge . $) }}
+          {{- if .persistentVolumes.pvc }}
+          {{- range .persistentVolumes.pvc }}
+            - name: {{ include "app.fullname" . }}-{{ .name }}
+              {{- range .mounts }}
               mountPath: {{ .path }}
               {{- if .subPath }}
               subPath: {{ .subPath }}
+              {{- end }}
               {{- end }}
           {{- end }}
           {{- end }}
@@ -102,14 +104,16 @@ spec:
               protocol: {{ .protocol }}
           {{- end }}
           {{- end }}
-          {{- if or .Values.persistentVolumes.pvc.create .Values.persistentVolumes.hostPath .Values.mountSecrets }}
+          {{- if or .Values.persistentVolumes.pvc .Values.persistentVolumes.hostPath .Values.mountSecrets }}
           volumeMounts:
-          {{- if .Values.persistentVolumes.pvc.create }}
-          {{- range .Values.persistentVolumes.pvc.mounts }}
-            - name: {{ include "app.fullname" (merge . $) }}
+          {{- if .Values.persistentVolumes.pvc }}
+          {{- range .Values.persistentVolumes.pvc }}
+            - name: "{{ include "app.fullname" . }}-{{ .name }}"
+              {{- range .mounts }}
               mountPath: {{ .path }}
               {{- if .subPath }}
               subPath: {{ .subPath }}
+              {{- end }}
               {{- end }}
           {{- end }}
           {{- end }}
@@ -137,12 +141,14 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- if or .Values.persistentVolumes.pvc.create .Values.persistentVolumes.hostPath .Values.mountSecrets }}
+      {{- if or .Values.persistentVolumes.pvc .Values.persistentVolumes.hostPath .Values.mountSecrets }}
       volumes:
-      {{- if .Values.persistentVolumes.pvc.create }}
-        - name: {{ include "app.fullname" . }}
+      {{- if .Values.persistentVolumes.pvc }}
+      {{- range .Values.persistentVolumes.pvc }}
+        - name: {{ include "app.fullname" . }}-{{ .name }}
           persistentVolumeClaim:
-            claimName: {{ include "app.fullname" . }}
+            claimName: {{ include "app.fullname" . }}-{{ .name }}
+      {{- end }}
       {{- end }}
       {{- range .Values.persistentVolumes.hostPath }}
         - name: {{ .name }}

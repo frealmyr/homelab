@@ -25,13 +25,16 @@ environmentVariables:
   # - name: TZ
   #   value: "Europe/Oslo"
 
-persistentVolumes:
-  pvc:
-    create: false
-  #   size: 10Gi
-  #   mounts:
-  #     - path: /config
-  #       subPath: config
+persistentVolumes: {}
+  # pvc:
+  #   - name: config
+  #     accessMode: ReadWriteMany
+  #     storageClassName: nas
+  #     size: 10Gi
+  #     volumeName: yolo-app
+  #     mounts:
+  #       - path: /config
+  #         subPath: config
   # hostPath:
   #   - name: videos
   #     mountPath: /mnt/videos

@@ -1,15 +1,23 @@
-{{- if .Values.persistentVolumes.pvc.create }}
+{{- if .Values.persistentVolumes.pvc -}}
+{{- range .Values.persistentVolumes.pvc }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: {{ include "app.fullname" (merge . $) }}-{{ .name }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
+    {{- include "app.labels" (merge . $) | nindent 4 }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    - {{ .accessMode | default "ReadWriteOnce" }}
+  {{- with .storageClassName }}
+  storageClassName: {{ . }}
+  {{- end }}
   resources:
     requests:
-      storage: {{ .Values.persistentVolumes.pvc.size }}
+      storage: {{ .size }}
+  {{- with .volumeName }}
+  volumeName: {{ . }}
+  {{- end }}
+{{- end }}
 {{- end }}
