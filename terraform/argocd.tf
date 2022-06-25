@@ -2,13 +2,44 @@
 ## ArgoCD ##
 ############
 
+resource "kubernetes_namespace" "argocd" {
+  metadata {
+    name = "argocd"
+  }
+}
+
+data "google_secret_manager_secret_version" "sso_github" {
+  project = "cloudlab-267613"
+  secret  = "homelab-sso-github"
+}
+
+locals {
+  sso_github = jsondecode(data.google_secret_manager_secret_version.sso_github.secret_data)
+}
+
+resource "kubernetes_secret_v1" "sso_github" {
+  metadata {
+    name      = "sso-github"
+    namespace = kubernetes_namespace.argocd.metadata[0].name
+    labels = {
+      "app.kubernetes.io/part-of" = "argocd" # Required for argocd to pick up the secret
+    }
+  }
+
+  data = {
+    client_id     = local.sso_github.client_id
+    client_secret = local.sso_github.client_secret
+  }
+
+  type = "Opaque"
+}
+
 resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
 
-  namespace        = "argocd"
-  create_namespace = true
+  namespace = "argocd"
 
   values = [<<EOF
     metrics:
@@ -36,10 +67,36 @@ resource "helm_release" "argocd" {
                 values:
                   - node-x300
     dex:
-      enabled: false
+      enabled: true
     server:
       config:
         url: https://argocd.fmlab.no
+        admin.enabled: "false"
+        exec.enabled: "true"
+        dex.config: |
+          logger:
+            level: debug
+            format: json
+          connectors:
+          - type: github
+            id: github
+            name: Github
+            config:
+              clientID: $sso-github:client_id
+              clientSecret: $sso-github:client_secret
+              orgs:
+                - name: fm-homelab
+      rbacConfig:
+        policy.default: role:readonly
+        policy.csv: |
+          p, role:org-admin, applications, *, */*, allow
+          p, role:org-admin, exec, *, */*, allow
+          p, role:org-admin, clusters, get, *, allow
+          p, role:org-admin, repositories, get, *, allow
+          p, role:org-admin, repositories, create, *, allow
+          p, role:org-admin, repositories, update, *, allow
+          p, role:org-admin, repositories, delete, *, allow
+          g, fm-homelab:Administrators, role:org-admin
       extraArgs:
         - --insecure # Using traefik for TLS termination instead of argocd
       affinity:
@@ -53,7 +110,7 @@ resource "helm_release" "argocd" {
                   - node-x300
   EOF
   ]
-  depends_on = [helm_release.metallb]
+  depends_on = [helm_release.metallb, kubernetes_secret_v1.sso_github]
 }
 
 resource "helm_release" "argocd_app_homelab" {
