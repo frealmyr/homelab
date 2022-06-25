@@ -11,13 +11,13 @@ app:
 
   persistentVolumes:
     pvc:
-      create: true
-      size: 10Gi
-      mounts:
-        - path: /opt/adguardhome/work
-          subPath: work
-        - path: /opt/adguardhome/conf
-          subPath: conf
+      - name: config
+        size: 10Gi
+        mounts:
+          - path: /opt/adguardhome/work
+            subPath: work
+          - path: /opt/adguardhome/conf
+            subPath: conf
 
   containerPorts:
     - name: http

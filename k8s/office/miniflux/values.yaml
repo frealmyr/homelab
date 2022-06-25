@@ -53,11 +53,11 @@ app:
         tag: 14-alpine
       persistentVolumes:
         pvc:
-          create: true
-          size: 20Gi
-          mounts:
-            - path: /var/lib/postgresql/data
-              subPath: postgres
+          - name: postgres
+            size: 10Gi
+            mounts:
+              - path: /var/lib/postgresql/data
+                subPath: postgres
       securityContext: {}
       liveness:
         enabled: false

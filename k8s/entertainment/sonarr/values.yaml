@@ -13,11 +13,11 @@ app:
 
   persistentVolumes:
     pvc:
-      create: true
-      size: 10Gi
-      mounts:
-        - path: /config
-          subPath: config
+      - name: config
+        size: 10Gi
+        mounts:
+          - path: /config
+            subPath: config
     hostPath:
       - name: hdd1
         mountPath: /media/HDD1/Entertainment

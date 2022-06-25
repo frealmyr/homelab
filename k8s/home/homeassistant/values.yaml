@@ -13,11 +13,11 @@ app:
 
   persistentVolumes:
     pvc:
-      create: true
-      size: 30Gi
-      mounts:
-        - path: /config
-          subPath: config
+      - name: config
+        size: 30Gi
+        mounts:
+          - path: /config
+            subPath: config
 
   podHostNetwork: true
 
