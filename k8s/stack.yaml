@@ -40,9 +40,6 @@ appProject:
       homeassistant:
         namespace:
           create: true
-      omada:
-        namespace:
-          create: true
 
   monitoring:
     applications:
