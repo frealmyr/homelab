@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: {{ include "app.name" . }}
   labels:
     {{- include "app.labels" . | nindent 4 }}
   {{- with .Values.annotations }}
@@ -58,7 +58,7 @@ spec:
           volumeMounts:
           {{- if .persistentVolumes.pvc }}
           {{- range .persistentVolumes.pvc }}
-            - name: {{ include "app.fullname" . }}-{{ .name }}
+            - name: {{ include "app.name" $ }}-{{ .name }}
               {{- range .mounts }}
               mountPath: {{ .path }}
               {{- if .subPath }}
@@ -108,7 +108,7 @@ spec:
           volumeMounts:
           {{- if .Values.persistentVolumes.pvc }}
           {{- range .Values.persistentVolumes.pvc }}
-            - name: "{{ include "app.fullname" . }}-{{ .name }}"
+            - name: "{{ include "app.name" $ }}-{{ .name }}"
               {{- range .mounts }}
               mountPath: {{ .path }}
               {{- if .subPath }}
@@ -145,9 +145,9 @@ spec:
       volumes:
       {{- if .Values.persistentVolumes.pvc }}
       {{- range .Values.persistentVolumes.pvc }}
-        - name: {{ include "app.fullname" . }}-{{ .name }}
+        - name: {{ include "app.name" $ }}-{{ .name }}
           persistentVolumeClaim:
-            claimName: {{ include "app.fullname" . }}-{{ .name }}
+            claimName: {{ include "app.name" $ }}-{{ .name }}
       {{- end }}
       {{- end }}
       {{- range .Values.persistentVolumes.hostPath }}
