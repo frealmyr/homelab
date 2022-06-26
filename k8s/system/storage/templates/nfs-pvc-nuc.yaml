@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-hdd1-entertainment
+  namespace: entertainment
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Mi # ignored as NFS server have quota disabled
+  storageClassName: nas
+  volumeName: nfs-hdd1-entertainment
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-hdd2-entertainment
+  namespace: entertainment
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Mi # ignored as NFS server have quota disabled
+  storageClassName: nas
+  volumeName: nfs-hdd2-entertainment

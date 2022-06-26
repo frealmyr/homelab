@@ -18,21 +18,20 @@ app:
   persistentVolumes:
     pvc:
       - name: config
+        create: true
         size: 10Gi
         mounts:
           - path: /config
             subPath: config
-      - name: hdd1
+      - name: nfs-hdd1-entertainment
         accessMode: ReadWriteMany
         storageClassName: nas
-        volumeName: nfs-hdd1-entertainment
         size: 1Mi
         mounts:
           - path: /mnt/HDD1/Entertainment
-      - name: hdd2
+      - name: nfs-hdd2-entertainment
         accessMode: ReadWriteMany
         storageClassName: nas
-        volumeName: nfs-hdd2-entertainment
         size: 1Mi
         mounts:
           - path: /mnt/HDD2/Entertainment
