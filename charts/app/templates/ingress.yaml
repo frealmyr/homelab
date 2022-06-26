@@ -4,7 +4,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "app.fullname" (merge . $) }}-{{ .name }}
+  name: {{ include "app.name" (merge . $) }}-{{ .name }}
   labels:
     {{- include "app.labels" (merge . $) | nindent 4 }}
   annotations:
@@ -45,7 +45,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ include "app.fullname" (merge . $) }}-{{ $serviceName }}
+                name: {{ include "app.name" (merge . $) }}-{{ $serviceName }}
                 port:
                   number: {{ $servicePort }}
           {{- end }}

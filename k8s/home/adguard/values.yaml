@@ -12,6 +12,7 @@ app:
   persistentVolumes:
     pvc:
       - name: config
+        create: true
         size: 10Gi
         mounts:
           - path: /opt/adguardhome/work
