@@ -29,6 +29,13 @@ app:
         size: 1Mi
         mounts:
           - path: /mnt/HDD1/Entertainment
+      - name: hdd2
+        accessMode: ReadWriteMany
+        storageClassName: nas
+        volumeName: nfs-hdd2-entertainment
+        size: 1Mi
+        mounts:
+          - path: /mnt/HDD2/Entertainment
 
     hostPath:
       - name: devdri

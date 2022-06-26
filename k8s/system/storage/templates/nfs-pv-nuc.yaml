@@ -9,6 +9,7 @@ spec:
     storage: 1Mi # ignored as NFS server have quota disabled
   accessModes:
     - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
   nfs:
     server: "10.0.0.11"
     path: "/mnt/HDD1/Entertainment"
@@ -35,6 +36,7 @@ spec:
     storage: 1Mi # ignored as NFS server have quota disabled
   accessModes:
     - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
   nfs:
     server: "10.0.0.11"
     path: "/mnt/HDD2/Entertainment"

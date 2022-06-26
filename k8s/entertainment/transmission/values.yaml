@@ -22,19 +22,20 @@ app:
         mounts:
           - path: /config
             subPath: config
-    hostPath:
       - name: hdd1
-        mountPath: /media/HDD1/Entertainment
-        hostPath: /media/HDD1/Entertainment
-        type: Directory
+        accessMode: ReadWriteMany
+        storageClassName: nas
+        volumeName: nfs-hdd1-entertainment
+        size: 1Mi
+        mounts:
+          - path: /mnt/HDD1/Entertainment
       - name: hdd2
-        mountPath: /media/HDD2/Entertainment
-        hostPath: /media/HDD2/Entertainment
-        type: Directory
-      - name: ssd
-        mountPath: /home/fredrick/Storage/Downloads
-        hostPath: /home/fredrick/Storage/Downloads
-        type: Directory
+        accessMode: ReadWriteMany
+        storageClassName: nas
+        volumeName: nfs-hdd2-entertainment
+        size: 1Mi
+        mounts:
+          - path: /mnt/HDD2/Entertainment
 
   containerPorts:
     - name: http
