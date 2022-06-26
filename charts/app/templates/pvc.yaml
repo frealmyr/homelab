@@ -1,5 +1,6 @@
-{{- if .Values.persistentVolumes.pvc -}}
+{{- if .Values.persistentVolumes.pvc }}
 {{- range .Values.persistentVolumes.pvc }}
+{{- if .create }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -19,5 +20,6 @@ spec:
   {{- with .volumeName }}
   volumeName: {{ . }}
   {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
