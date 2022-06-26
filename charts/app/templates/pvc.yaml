@@ -1,4 +1,4 @@
-{{- if .Values.persistentVolumes.pvc -}}
+{{- if .Values.persistentVolumes.pvc.create -}}
 {{- range .Values.persistentVolumes.pvc }}
 ---
 apiVersion: v1
