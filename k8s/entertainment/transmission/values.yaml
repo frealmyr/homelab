@@ -18,6 +18,7 @@ app:
   persistentVolumes:
     pvc:
       - name: config
+        create: true
         size: 100Gi
         mounts:
           - path: /config
