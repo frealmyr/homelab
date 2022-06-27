@@ -22,6 +22,19 @@ app:
 
   podHostNetwork: true
 
+  containerPorts:
+    - name: http
+      containerPort: 8123
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 8123
+          targetPort: 8123
+
   ingresses:
     enabled: true
     ingress:
