@@ -12,6 +12,6 @@ app:
     - name: ZONE
       value: "fmlab.no"
     - name: SUBDOMAIN
-      value: "auth"
+      value: "vpn"
     - name: CRON
       value: "* */1 * * *"
