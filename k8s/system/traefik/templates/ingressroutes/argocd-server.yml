@@ -16,7 +16,6 @@ spec:
           port: 80
       middlewares:
         - name: traefik-system-security@kubernetescrd
-        - name: traefik-system-sso@kubernetescrd
     - kind: Rule
       match: Host(`argocd.fmlab.no`) && Headers(`Content-Type`, `application/grpc`)
       priority: 11

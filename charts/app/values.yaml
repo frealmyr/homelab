@@ -183,7 +183,6 @@ ingresses:
     #       paths:
     #         - path: /
     #           pathType: ImplementationSpecific
-    #   forwardAuth: true # Google Forward Auth Proxy
     #   tls:
     #     - secretName: chart-example-tls
     #       hosts:
@@ -197,7 +196,6 @@ ingresses:
     #       paths:
     #         - path: /
     #           pathType: ImplementationSpecific
-    #   forwardAuth: false # Google Forward Auth Proxy
     #   tls: []
     #  - secretName: chart-example-tls
     #    hosts:

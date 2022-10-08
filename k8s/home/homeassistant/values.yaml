@@ -47,7 +47,6 @@ app:
             paths:
               - path: /
                 pathType: ImplementationSpecific
-        forwardAuth: false
         tls:
           - secretName: homeassistant
             hosts:

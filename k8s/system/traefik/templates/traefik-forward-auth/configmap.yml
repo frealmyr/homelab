@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: traefik-whitelist
-  namespace: traefik-system
-data:
-  whitelist: ""

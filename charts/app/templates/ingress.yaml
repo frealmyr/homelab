@@ -13,11 +13,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: 'websecure'
     traefik.ingress.kubernetes.io/router.tls: 'true'
     {{- end }}
-    {{- if .forwardAuth }}
-    traefik.ingress.kubernetes.io/router.middlewares: 'traefik-system-sso@kubernetescrd,traefik-system-security@kubernetescrd'
-    {{- else }}
     traefik.ingress.kubernetes.io/router.middlewares: 'traefik-system-security@kubernetescrd'
-    {{- end }}
     {{- with .Values.ingresses.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

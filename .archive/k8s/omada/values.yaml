@@ -138,7 +138,6 @@ app:
             paths:
               - path: /
                 pathType: ImplementationSpecific
-        forwardAuth: true
         tls:
           - secretName: certificate-omada
             hosts:
