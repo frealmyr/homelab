@@ -48,6 +48,10 @@ appProject:
       external-secrets:
         namespace:
           name: external-secrets
+      local-path-provisioner:
+        namespace:
+          name: local-path-provisioner
+          create: true
       traefik:
         namespace:
           name: traefik-system
