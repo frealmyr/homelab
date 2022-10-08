@@ -25,7 +25,7 @@ app:
   mountSecrets:
     - name: cert-omada
       secretName: certificate-omada
-      mountPath: /secrets/certificates
+      mountPath: /cert
 
   environmentVariables:
     - name: TLS_1_11_ENABLED
@@ -43,9 +43,9 @@ app:
     - name: PORTAL_HTTPS_PORT
       value: "8843"
     - name: SSL_CERT_NAME
-      value: "/secrets/certificates/tls.crt"
+      value: "tls.crt"
     - name: SSL_KEY_NAME
-      value: "/secrets/certificates/tls.key"
+      value: "tls.key"
 
   containerPorts:
     - name: http
@@ -139,7 +139,7 @@ app:
       - name: frontend
         service:
           name: http
-          port: 8088
+          port: 8043
         hosts:
           - host: omada.fmlab.no
             paths:
