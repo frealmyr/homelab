@@ -50,6 +50,7 @@ appProject:
           name: external-secrets
       traefik:
         namespace:
+          name: traefik-system
           create: true
         ignoreDifferences:
           - group: ""
