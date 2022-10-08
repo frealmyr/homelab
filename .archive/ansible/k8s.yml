@@ -2,7 +2,7 @@
 - hosts: localhost
   become: true
   vars:
-    node_ip: 10.0.0.10
+    node_ip: 10.0.0.4
     net_subnet: 10.244.0.0/16
     sysctl_config:
       net.ipv4.ip_forward: 1

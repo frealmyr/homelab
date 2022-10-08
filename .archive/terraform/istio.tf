@@ -37,7 +37,7 @@ resource "helm_release" "istio_gateway_loadbalancer" {
     labels:
       istio: ingressgateway
     service:
-      loadBalancerIP: 10.0.0.10
+      loadBalancerIP: 10.0.0.4
   EOF
   ]
 

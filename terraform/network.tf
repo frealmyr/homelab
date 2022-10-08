@@ -7,7 +7,7 @@ resource "helm_release" "tigera_operator" {
   repository = "https://docs.projectcalico.org/charts/"
   chart      = "tigera-operator"
 
-  version = "3.23.1"
+  version = "3.24.1"
 
   namespace        = "tigera-operator"
   create_namespace = true
@@ -29,21 +29,25 @@ resource "helm_release" "tigera_operator" {
 ## Metal LB ##
 ##############
 
+resource "kubernetes_namespace" "metallb" {
+  metadata {
+    name = "metallb-system"
+    labels = {
+      "pod-security.kubernetes.io/enforce" = "privileged"
+      "pod-security.kubernetes.io/audit" = "privileged"
+      "pod-security.kubernetes.io/warn" = "privileged"
+    }
+  }
+}
+
 resource "helm_release" "metallb" {
   name       = "metallb"
   repository = "https://metallb.github.io/metallb"
   chart      = "metallb"
 
-  namespace        = "metallb-system"
-  create_namespace = true
+  namespace        = kubernetes_namespace.metallb.metadata[0].name
 
   values = [<<EOF
-    configInline:
-      address-pools:
-      - name: default
-        protocol: layer2
-        addresses:
-        - 10.0.0.10/32
     controller:
       affinity:
         nodeAffinity:
@@ -53,7 +57,7 @@ resource "helm_release" "metallb" {
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - node-x300
+                - node-rpi-0
     speaker:
       affinity:
         nodeAffinity:
@@ -63,11 +67,40 @@ resource "helm_release" "metallb" {
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - node-x300
+                - node-rpi-0
   EOF
   ]
 
   depends_on = [helm_release.tigera_operator]
+}
+
+resource "helm_release" "metallb_address_pool" {
+  name       = "metallb-address-pool"
+  repository = "https://charts.itscontained.io"
+  chart      = "raw"
+  version    = "0.2.5"
+  values = [
+    <<-EOF
+    resources:
+      - apiVersion: metallb.io/v1beta1
+        kind: IPAddressPool
+        metadata:
+          name: default
+          namespace: metallb-system
+        spec:
+          addresses:
+            - 10.0.0.4/32
+      - apiVersion: metallb.io/v1beta1
+        kind: L2Advertisement
+        metadata:
+          name: default
+          namespace: metallb-system
+        spec:
+          ipAddressPools:
+          - default
+    EOF
+  ]
+  depends_on = [helm_release.metallb]
 }
 
 #############

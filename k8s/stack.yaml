@@ -4,7 +4,6 @@ basePath: k8s
 
 namespaces:
   development:
-  entertainment:
   monitoring:
 
 appProject:
@@ -13,24 +12,6 @@ appProject:
       tekton:
         namespace:
           name: development
-
-  entertainment:
-    applications:
-      jackett:
-        namespace:
-          name: entertainment
-      jellyfin:
-        namespace:
-          name: entertainment
-      radarr:
-        namespace:
-          name: entertainment
-      sonarr:
-        namespace:
-          name: entertainment
-      transmission:
-        namespace:
-          name: entertainment
 
   home:
     applications:
@@ -63,18 +44,6 @@ appProject:
           create: true
       cloudflare-ddns:
         namespace:
-          create: true
-      keel:
-        namespace:
-          create: true
-      smarter-device-manager:
-        type: kustomization
-        namespace:
-          name: device-manager
-          create: true
-      storage:
-        namespace:
-          name: storage-system
           create: true
       traefik:
         namespace:

@@ -65,13 +65,13 @@ resource "helm_release" "argocd" {
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                  - node-x300
+                  - node-rpi-0
     dex:
       enabled: true
     server:
       config:
         url: https://argocd.fmlab.no
-        admin.enabled: "false"
+        admin.enabled: "true"
         exec.enabled: "true"
         dex.config: |
           logger:
@@ -107,7 +107,7 @@ resource "helm_release" "argocd" {
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                  - node-x300
+                  - node-rpi-0
   EOF
   ]
   depends_on = [helm_release.metallb, kubernetes_secret_v1.sso_github]

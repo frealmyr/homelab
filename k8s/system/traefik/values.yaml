@@ -9,7 +9,7 @@ traefik:
     annotations:
       metallb.universe.tf/allow-shared-ip: "sharing-is-caring"
     spec:
-      loadBalancerIP: "10.0.0.10"
+      loadBalancerIP: "10.0.0.4"
   podSecurityPolicy:
     enabled: true
   tlsOptions:
