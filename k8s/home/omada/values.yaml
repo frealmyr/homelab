@@ -1,7 +1,7 @@
 app:
   image:
     repository: mbentley/omada-controller
-    tag: 5.4
+    tag: 5.5
 
   persistentVolumes:
     pvc:
