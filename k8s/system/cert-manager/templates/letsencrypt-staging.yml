@@ -11,9 +11,8 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
-    - http01:
-        ingress:
-          ingressTemplate:
-            metadata:
-              annotations:
-                kubernetes.io/ingress.class: traefik
+    - dns01:
+        cloudflare:
+          apiTokenSecretRef:
+            name: cloudflare-credentials
+            key: api_token
