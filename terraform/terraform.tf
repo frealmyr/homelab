@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "google" {
-  project = "cloudlab"
+  project = "cloudlab-267613"
   region  = "us-west1"
 }
 
