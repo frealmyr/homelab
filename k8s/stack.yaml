@@ -45,6 +45,9 @@ appProject:
       cloudflare-ddns:
         namespace:
           create: true
+      external-secrets:
+        namespace:
+          name: external-secrets
       traefik:
         namespace:
           name: traefik-system
