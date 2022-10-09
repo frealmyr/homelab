@@ -83,7 +83,7 @@ app:
       protocol: UDP
 
   services:
-    - name: http
+    - name: https
       type: ClusterIP
       ports:
         - name: https

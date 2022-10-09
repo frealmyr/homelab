@@ -9,7 +9,7 @@ spec:
   routes:
   - match: HostSNI(`omada.fmlab.no`)
     services:
-      - name: omada-http
+      - name: omada-https
         port: 443
   tls:
     passthrough: true
