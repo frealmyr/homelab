@@ -3,10 +3,19 @@ targetRevision: main
 basePath: k8s
 
 namespaces:
+  databases:
   development:
   monitoring:
 
 appProject:
+  databases:
+    mariadb:
+      namespace:
+        name: databases
+    redis:
+      namespace:
+        name: databases
+
   development:
     applications:
       tekton:

@@ -1,0 +1,42 @@
+app:
+  image:
+    repository: mariadb
+    tag: 10
+
+  persistentVolumes:
+    pvc:
+      - name: data
+        create: true
+        size: 25Gi
+        mounts:
+          - path: /var/lib/mysql
+            subPath: mysql
+
+  mountSecrets:
+    - name: credentials-sql-root
+      secretName: credentials-sql-root
+      mountPath: /run/secrets
+    - name: credentials-sql-crossplane
+      secretName: credentials-sql-crossplane
+      mountPath: /run/secrets
+
+  environmentVariables:
+    - name: MARIADB_ROOT_PASSWORD_FILE
+      value: "/run/secrets/root_password"
+    - name: MARIADB_USER
+      value: "/run/secrets/username"
+    - name: MARIADB_PASSWORD
+      value: "/run/secrets/password"
+
+  containerPorts:
+    - name: mysql
+      containerPort: 3309
+      protocol: TCP
+
+  services:
+    - name: mysql
+      type: ClusterIP
+      ports:
+        - name: mysql
+          port: 3309
+          targetPort: 3309
