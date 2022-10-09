@@ -6,7 +6,7 @@ metadata:
   namespace: traefik-system
 spec:
   headers:
-    customrequestheaders:
+    customRequestHeaders:
       Host: omada.fmlab.no:8043
-    customresponseheaders:
+    customResponseHeaders:
       Host: omada.fmlab.no:443
