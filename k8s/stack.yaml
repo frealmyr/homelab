@@ -61,6 +61,10 @@ appProject:
       cloudflare-ddns:
         namespace:
           create: true
+      crossplane:
+        namespace:
+          name: crossplane-system
+          create: true
       external-secrets:
         namespace:
           name: external-secrets
