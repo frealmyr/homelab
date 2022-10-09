@@ -1,15 +1,16 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRouteTCP
 metadata:
-  name: ingressroutetcpfoo
-
+  name: omada-ingressroute-tcp
+  namespace: omada
 spec:
   entryPoints:
     - websecure
   routes:
   - match: Host(`omada.fmlab.no`)
     services:
-      - name: https
+      - name: omada-https
+        namespace: omada
         port: 8043
   tls:
     passthrough: true
