@@ -1,17 +1,5 @@
 ---
 apiVersion: traefik.containo.us/v1alpha1
-kind: MiddlewareTCP
-metadata:
-  name: omada-headers
-  namespace: traefik-system
-spec:
-  headers:
-    customRequestHeaders:
-      Host: omada.fmlab.no:8043
-    customResponseHeaders:
-      Host: omada.fmlab.no:443
----
-apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRouteTCP
 metadata:
   name: ingressroute-tcp
@@ -20,8 +8,6 @@ spec:
     - websecure
   routes:
   - match: HostSNI(`omada.fmlab.no`)
-    middlewares:
-      - name: headers
     services:
       - name: omada-http
         port: 8043
