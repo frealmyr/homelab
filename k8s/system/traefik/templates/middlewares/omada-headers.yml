@@ -1,0 +1,12 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: omada-headers
+  namespace: traefik-system
+spec:
+  headers:
+    customrequestheaders:
+      Host: omada.fmlab.no:8043
+    customresponseheaders:
+      Host: omada.fmlab.no:443
