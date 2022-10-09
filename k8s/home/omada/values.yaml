@@ -48,8 +48,8 @@ app:
       value: "tls.key"
 
   containerPorts:
-    - name: http
-      containerPort: 8088
+    - name: https
+      containerPort: 8043
       protocol: TCP
     - name: ctrl-1-tcp
       containerPort: 29810
@@ -86,9 +86,9 @@ app:
     - name: http
       type: ClusterIP
       ports:
-        - name: http
-          port: 8088
-          targetPort: 8088
+        - name: https
+          port: 8043
+          targetPort: 8043
     - name: controller-tcp
       type: LoadBalancer
       loadBalancerIP: 10.0.0.4
@@ -134,18 +134,18 @@ app:
           protocol: UDP
 
   ingresses:
-    enabled: true
-    ingress:
-      - name: frontend
-        service:
-          name: http
-          port: 8043
-        hosts:
-          - host: omada.fmlab.no
-            paths:
-              - path: /
-                pathType: ImplementationSpecific
-        tls:
-          - secretName: certificate-omada
-            hosts:
-              - omada.fmlab.no
+    enabled: false
+    # ingress:
+    #   - name: frontend
+    #     service:
+    #       name: http
+    #       port: 8043
+    #     hosts:
+    #       - host: omada.fmlab.no
+    #         paths:
+    #           - path: /
+    #             pathType: ImplementationSpecific
+    #     tls:
+    #       - secretName: certificate-omada
+    #         hosts:
+    #           - omada.fmlab.no
