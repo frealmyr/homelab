@@ -23,6 +23,7 @@ spec:
   - match: HostSNI(`omada.fmlab.no`)
     middlewares:
       - name: headers
+        namespace: omada
     services:
       - name: omada-http
         port: 8043
