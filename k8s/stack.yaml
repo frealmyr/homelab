@@ -27,6 +27,9 @@ appProject:
 
   monitoring:
     applications:
+      grafana:
+        namespace:
+          name: monitoring
       kubernetes-dashboard:
         namespace:
           name: monitoring

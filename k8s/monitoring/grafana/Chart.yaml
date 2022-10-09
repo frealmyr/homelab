@@ -1,0 +1,12 @@
+apiVersion: v2
+name: grafana
+description: Metrics dashboards
+
+type: application
+
+version: 1.0.0
+
+dependencies:
+- name: grafana
+  version: 6.40.3
+  repository: https://grafana.github.io/helm-charts
