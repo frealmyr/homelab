@@ -133,6 +133,11 @@ app:
           targetPort: 29814
           protocol: UDP
 
+  securityContext:
+    sysctls:
+      - name: net.ipv4.ip_unprivileged_port_start
+        value: "1"
+
   ingresses:
     enabled: false
     # ingress:
