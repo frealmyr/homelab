@@ -9,12 +9,13 @@ namespaces:
 
 appProject:
   databases:
-    mariadb:
-      namespace:
-        name: databases
-    redis:
-      namespace:
-        name: databases
+    applications:
+      mariadb:
+        namespace:
+          name: databases
+      redis:
+        namespace:
+          name: databases
 
   development:
     applications:
