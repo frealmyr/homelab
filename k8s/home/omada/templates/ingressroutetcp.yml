@@ -1,14 +1,3 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: omada-service
-spec:
-  ports:
-    - protocol: TCP
-      name: https
-      port: 8043
-  selector:
-    app: omada
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRouteTCP
@@ -20,7 +9,7 @@ spec:
   routes:
   - match: Host(`omada.fmlab.no`)
     services:
-      - name: omada-service
+      - name: omada-http
         port: 8043
   tls:
     passthrough: true
