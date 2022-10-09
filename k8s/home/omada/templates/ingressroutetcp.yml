@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`omada.fmlab.no`)
+  - match: HostSNI(`omada.fmlab.no`)
     services:
       - name: omada-http
         port: 8043
