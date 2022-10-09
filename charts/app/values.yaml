@@ -27,14 +27,22 @@ environmentVariables:
 
 persistentVolumes: {}
   # pvc:
-  #   - name: config
+  #   - name: shared
   #     accessMode: ReadWriteMany
   #     storageClassName: nas
   #     size: 10Gi
   #     volumeName: yolo-app
   #     mounts:
+  #       - path: /shared
+  #         subPath: shared
+  #   - name: config
+  #     create: true
+  #     size: 10Gi
+  #     mounts:
   #       - path: /config
   #         subPath: config
+  #       - path: /config/backups
+  #         subPath: backups
   # hostPath:
   #   - name: videos
   #     mountPath: /mnt/videos
