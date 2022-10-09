@@ -139,18 +139,4 @@ app:
         value: "1"
 
   ingresses:
-    enabled: false
-    # ingress:
-    #   - name: frontend
-    #     service:
-    #       name: http
-    #       port: 8043
-    #     hosts:
-    #       - host: omada.fmlab.no
-    #         paths:
-    #           - path: /
-    #             pathType: ImplementationSpecific
-    #     tls:
-    #       - secretName: certificate-omada
-    #         hosts:
-    #           - omada.fmlab.no
+    enabled: false # Treafik TCP routing defined in templates/ingressroutetcp.yml
