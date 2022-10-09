@@ -37,6 +37,8 @@ prometheus:
 grafana:
   admin:
     existingSecret: grafana-admin-credentials
+    userKey: username
+    passwordKey: password
   persistence:
     enabled: true
   ingress:
