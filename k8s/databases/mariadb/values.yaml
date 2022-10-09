@@ -23,9 +23,9 @@ app:
   environmentVariables:
     - name: MARIADB_ROOT_PASSWORD_FILE
       value: "/run/secrets/root/root_password"
-    - name: MARIADB_USER
+    - name: MARIADB_USER_FILE
       value: "/run/secrets/crossplane/username"
-    - name: MARIADB_PASSWORD
+    - name: MARIADB_PASSWORD_FILE
       value: "/run/secrets/crossplane/password"
 
   containerPorts:
