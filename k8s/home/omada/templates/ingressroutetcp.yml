@@ -10,6 +10,6 @@ spec:
   - match: HostSNI(`omada.fmlab.no`)
     services:
       - name: omada-http
-        port: 8043
+        port: 443
   tls:
     passthrough: true

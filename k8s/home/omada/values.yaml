@@ -39,7 +39,7 @@ app:
     - name: PORTAL_HTTP_PORT
       value: "8088"
     - name: MANAGE_HTTPS_PORT
-      value: "8043"
+      value: "443"
     - name: PORTAL_HTTPS_PORT
       value: "8843"
     - name: SSL_CERT_NAME
@@ -49,7 +49,7 @@ app:
 
   containerPorts:
     - name: https
-      containerPort: 8043
+      containerPort: 443
       protocol: TCP
     - name: ctrl-1-tcp
       containerPort: 29810
@@ -87,8 +87,8 @@ app:
       type: ClusterIP
       ports:
         - name: https
-          port: 8043
-          targetPort: 8043
+          port: 443
+          targetPort: 443
     - name: controller-tcp
       type: LoadBalancer
       loadBalancerIP: 10.0.0.4
