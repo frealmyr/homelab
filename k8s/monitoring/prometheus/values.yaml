@@ -11,7 +11,7 @@ prometheus:
       hosts:
         - prometheus.fmlab.no
       tls:
-        - secretName: prometheus-server-certificate
+        - secretName: certificate-prometheus-server
           hosts:
             - prometheus.fmlab.no
     persistentVolume:
@@ -28,8 +28,28 @@ prometheus:
       hosts:
         - alertmanager.fmlab.no
       tls:
-        - secretName: alertmanager-certificate
+        - secretName: certificate-alertmanager
           hosts:
             - alertmanager.fmlab.no
     persistentVolume:
       enabled: true
+
+grafana:
+  admin:
+    existingSecret: grafana-admin-credentials
+  persistence:
+    enabled: true
+  ingress:
+    enable: true
+      annotations:
+        kubernetes.io/ingress.class: traefik
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-system-security@kubernetescrd
+      hosts:
+        - grafana.fmlab.no
+      tls:
+        - secretName: certificate-grafana
+          hosts:
+            - grafana.fmlab.no
