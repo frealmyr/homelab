@@ -57,6 +57,11 @@ mountSecrets: {}
 #    secretName: certificate-app
 #    mountPath: /secrets/cert-app
 
+mountConfigmaps: {}
+#  - name: config-app
+#    configMap: config-app
+#    mountPath: /configmaps/conf-app
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
