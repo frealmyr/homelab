@@ -55,23 +55,23 @@ app:
         name: credentials-db-lychee
         key: port
 
-additionalContainers:
-  - name: cloudflare-tunnel
-    secretEnvironmentVariables:
-      - name: TUNNEL_TOKEN
-        secret:
-          name: credentials-cloudflare-tunnel
-          key: token
-    image:
-      repository: milgradesec/cloudflared
-      tag: latest
-    # securityContext:
-    #   capabilities:
-    #     drop:
-    #       - ALL
-    #   readOnlyRootFilesystem: true
-    #   runAsNonRoot: true
-    #   runAsUser: 1000
+  additionalContainers:
+    - name: cloudflare-tunnel
+      secretEnvironmentVariables:
+        - name: TUNNEL_TOKEN
+          secret:
+            name: credentials-cloudflare-tunnel
+            key: token
+      image:
+        repository: milgradesec/cloudflared
+        tag: latest
+      # securityContext:
+      #   capabilities:
+      #     drop:
+      #       - ALL
+      #   readOnlyRootFilesystem: true
+      #   runAsNonRoot: true
+      #   runAsUser: 1000
 
   # securityContext:
   #   capabilities:
