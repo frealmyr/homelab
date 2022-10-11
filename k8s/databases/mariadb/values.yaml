@@ -30,7 +30,7 @@ app:
 
   containerPorts:
     - name: mysql
-      containerPort: 3309
+      containerPort: 3306
       protocol: TCP
 
   services:
@@ -38,5 +38,5 @@ app:
       type: ClusterIP
       ports:
         - name: mysql
-          port: 3309
-          targetPort: 3309
+          port: 3306
+          targetPort: 3306
