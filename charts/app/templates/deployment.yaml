@@ -106,15 +106,19 @@ spec:
         - name: {{ .Chart.Name }}
           {{- if or .Values.environmentVariables .Values.secretEnvironmentVariables }}
           env:
+          {{- if .Values.environmentVariables }}
           {{- with .Values.environmentVariables }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- end }}
+          {{- if .Values.secretEnvironmentVariables }}
           {{- with .Values.secretEnvironmentVariables }}
             - name: {{ .name }}
               valueFrom:
                 secretKeyRef:
                   name: {{ .secret.name }}
                   key: {{ .secret.key }}
+          {{- end }}
           {{- end }}
           {{- end }}
           securityContext:
