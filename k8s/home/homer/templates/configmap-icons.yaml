@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homer-icons
+binaryData:
+  sonarr.png: |
+    {{ .Files.Get "files/icons/sonarr.png" | b64enc }}
