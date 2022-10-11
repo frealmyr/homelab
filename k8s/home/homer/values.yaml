@@ -39,7 +39,7 @@ app:
       - name: frontend
         service:
           name: http
-          port: 3000
+          port: 8080
         hosts:
           - host: home.fmlab.no
             paths:
