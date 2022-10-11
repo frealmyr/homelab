@@ -88,13 +88,13 @@ spec:
               mountPath: {{ .mountPath }}
           {{- end }}
           {{- end }}
-          {{- if .liveness.enabled }}
+          {{- if .liveness }}
           livenessProbe:
             httpGet:
               path: {{ .liveness.path }}
               port: {{ .liveness.port }}
           {{- end }}
-          {{- if .liveness.enabled }}
+          {{- if .readiness }}
           readinessProbe:
             httpGet:
               path: {{ .readiness.path }}
@@ -160,13 +160,13 @@ spec:
               mountPath: {{ .mountPath }}
           {{- end }}
           {{- end }}
-          {{- if .Values.liveness.enabled }}
+          {{- if .Values.liveness }}
           livenessProbe:
             httpGet:
               path: {{ .Values.liveness.path }}
               port: {{ .Values.liveness.port }}
           {{- end }}
-          {{- if .Values.liveness.enabled }}
+          {{- if .Values.readiness }}
           readinessProbe:
             httpGet:
               path: {{ .Values.readiness.path }}

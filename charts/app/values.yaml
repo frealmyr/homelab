@@ -198,14 +198,13 @@ additionalContainers:
   #       cpu: 100m
   #       memory: 128Mi
 
-liveness:
-  enabled: false
-  path: /
-  port: http
-readiness:
-  enabled: false
-  path: /
-  port: http
+liveness: {}
+  # path: /
+  # port: http
+
+readiness: {}
+  # path: /
+  # port: http
 
 ingresses:
   enabled: false
