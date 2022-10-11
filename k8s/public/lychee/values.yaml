@@ -58,7 +58,11 @@ app:
       image:
         repository: milgradesec/cloudflared
         tag: latest
-      command: ["tunnel", "run"]
+      command: 
+        - /usr/local/bin/cloudflared
+        - '--no-autoupdate'
+        - tunnel
+        - run
       secretEnvironmentVariables:
         - name: TUNNEL_TOKEN
           secret:
