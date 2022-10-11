@@ -13,20 +13,17 @@ app:
             subPath: mysql
 
   mountSecrets:
-    - name: credentials-sql-root
-      secretName: credentials-sql-root
-      mountPath: /run/secrets/root
-    - name: credentials-sql-crossplane
-      secretName: credentials-sql-crossplane
-      mountPath: /run/secrets/crossplane
+    - name: credentials-sql
+      secretName: credentials-sql
+      mountPath: /run/secrets/sql
 
   environmentVariables:
     - name: MARIADB_ROOT_PASSWORD_FILE
-      value: "/run/secrets/root/root_password"
+      value: "/run/secrets/sql/root_password"
     - name: MARIADB_USER_FILE
-      value: "/run/secrets/crossplane/username"
+      value: "/run/secrets/sql/username"
     - name: MARIADB_PASSWORD_FILE
-      value: "/run/secrets/crossplane/password"
+      value: "/run/secrets/sql/password"
 
   containerPorts:
     - name: mysql
