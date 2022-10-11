@@ -31,6 +31,4 @@ apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: Database
 metadata:
   name: example-db
-spec:
-  forProvider:
-    allowConnections: true
+spec: {}
