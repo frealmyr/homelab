@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: homer-icons
 binaryData:
-  sonarr.png: |
+  sonarr.png: |-
     {{ .Files.Get "files/icons/sonarr.png" | b64enc | indent 4 }}
