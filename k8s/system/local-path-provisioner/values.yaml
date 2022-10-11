@@ -1,7 +1,7 @@
 local-path-provisioner:
   storageClass:
     defaultClass: true
-    reclaimPolicy: Retain
+    reclaimPolicy: Delete
   nodePathMap:
     - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
       paths:
