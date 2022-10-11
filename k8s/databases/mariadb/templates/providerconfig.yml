@@ -10,7 +10,7 @@ spec:
       namespace: databases
       name: credentials-sql-crossplane
   # tls one of preferred(default), skip-verify, or true
-  tls: skip-verify
+  tls: preferred
 ---
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: User
