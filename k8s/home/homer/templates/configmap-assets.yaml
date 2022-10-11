@@ -29,11 +29,10 @@ data:
         icon: "fas fa-tv"
         items:
           - name: "Jellyfin"
-            logo: "assets/tools/sample2.png"
+            logo: "fas fa-tv"
             subtitle: "Streaming"
             url: "https://sonarr.fmlab.no"
           - name: "Sonarr"
-            logo: "assets/tools/sample2.png"
             subtitle: "Fetch TV-Series"
             url: "https://sonarr.fmlab.no"
           - name: "Radarr"
