@@ -32,3 +32,16 @@ kind: Database
 metadata:
   name: example-db
 spec: {}
+---
+apiVersion: mysql.sql.crossplane.io/v1alpha1
+kind: Grant
+metadata:
+  name: example-grant
+spec:
+  forProvider:
+    privileges:
+      - ALL
+    userRef:
+      name: example-user
+    databaseRef:
+      name: example-db
