@@ -1,0 +1,90 @@
+app:
+  image:
+    repository: lycheeorg/lychee
+    tag: latest
+
+  environmentVariables:
+    - name: PUID
+      value: "1000"
+    - name: PGID
+      value: "1000"
+    - name: USER
+      value: "lychee"
+    - name: PHP_TZ
+      value: "Europe/Oslo"
+    - name: TIMEZONE
+      value: "Europe/Oslo"
+    - name: STARTUP_DELAY
+      value: "30"
+    - name: APP_NAME
+      value: "FMLab"
+    - name: APP_ENV
+      value: "production"
+    - name: APP_URL
+      value: "APP_URL"
+    - name: SECURITY_HEADER_HSTS_ENABLE
+      value: "false"
+    - name: LYCHEE_UPLOADS
+      value: "/uploads"
+    - name: APP_DEBUG
+      value: "false"
+    - name: LOG_CHANNEL
+      value: "warning"
+    - name: DB_CONNECTION
+      value: "mysql"
+    - name: DB_HOST
+      value: "mariadb-mysql.databases.svc.cluster.local"
+    - name: DB_PORT
+      value: "3306"
+
+  secretEnvironmentVariables:
+    - name: DB_DATABASE
+      secret:
+        name: credentials-db-lychee
+        key: database
+    - name: DB_USERNAME
+      secret:
+        name: credentials-db-lychee
+        key: username
+    - name: DB_PASSWORD
+      secret:
+        name: credentials-db-lychee
+        key: password
+
+  # securityContext:
+  #   capabilities:
+  #     drop:
+  #     - ALL
+  #   readOnlyRootFilesystem: true
+  #   runAsNonRoot: true
+  #   runAsUser: 1000
+
+  containerPorts:
+    - name: http
+      containerPort: 80
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 80
+          targetPort: 80
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 80
+        hosts:
+          - host: photos.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        tls:
+          - secretName: lychee
+            hosts:
+              - photos.fmlab.no

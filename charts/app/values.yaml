@@ -25,6 +25,20 @@ environmentVariables:
   # - name: TZ
   #   value: "Europe/Oslo"
 
+  secretEnvironmentVariables: {}
+    # - name: DB_DATABASE
+    #   secret:
+    #     name: credentials-db
+    #     key: database
+    # - name: DB_USERNAME
+    #   secret:
+    #     name: credentials-db
+    #     key: username
+    # - name: DB_PASSWORD
+    #   secret:
+    #     name: credentials-db
+    #     key: password
+
 persistentVolumes: {}
   # pvc:
   #   - name: shared
