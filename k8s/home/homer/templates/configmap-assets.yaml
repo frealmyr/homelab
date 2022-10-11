@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: homer-assets
 data:
-  config.yml: >
+  config.yml: |
     ---
     title: "Fredrick's Nerdebule"
     header: false
@@ -72,7 +72,7 @@ data:
             subtitle: "Reverse-Proxy"
             url: "https://traefik.fmlab.no"
 
-  custom.css: >
+  custom.css: |
     @charset "UTF-8";
     /* Dracula theme for Homer */
     #app.theme-default.is-light {
