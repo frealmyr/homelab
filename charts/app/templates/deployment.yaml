@@ -112,7 +112,7 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.secretEnvironmentVariables }}
-          {{- with .Values.secretEnvironmentVariables }}
+          {{- range .Values.secretEnvironmentVariables }}
             - name: {{ .name }}
               valueFrom:
                 secretKeyRef:

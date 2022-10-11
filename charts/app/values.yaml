@@ -183,11 +183,9 @@ additionalContainers:
   #         hostPath: /media/HDD1
   #         type: Directory
   #   liveness:
-  #     enabled: false
   #     path: /
   #     port: http
   #   readiness:
-  #     enabled: false
   #     path: /
   #     port: http
   #   resources:
