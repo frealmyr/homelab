@@ -19,7 +19,6 @@ metadata:
 spec:
   providerConfigRef:
     name: default
-    namespace: databases
 ---
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: User
