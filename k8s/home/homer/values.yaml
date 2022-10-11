@@ -8,11 +8,8 @@ app:
       value: "1"
 
   mountConfigmaps:
-    - name: cfg
-      configMap: homer-config
-      mountPath: /www/assets
-    - name: css
-      configMap: homer-custom-css
+    - name: assets
+      configMap: homer-assets
       mountPath: /www/assets
 
 securityContext:

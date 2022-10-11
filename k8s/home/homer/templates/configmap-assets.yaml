@@ -1,9 +1,82 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: homer-custom-css
+  name: homer-assets
 data:
-  custom.css: |
+  config.yml: |
+    ---
+    title: "Fredrick's Nerdebule"
+    header: false
+    footer: false
+    links: false
+
+    columns: "3"
+    connectivityCheck: true
+
+    stylesheet:
+      - "assets/custom.css"
+
+    services:
+      - name: "Home"
+        icon: "fas fa-house"
+        items:
+          - name: "Home Assistant"
+            logo: "assets/tools/sample.png"
+            subtitle: "Smart Home Dashboard"
+            url: "https://ha.fmlab.no"
+          - name: "Grocy"
+            logo: "assets/tools/sample2.png"
+            subtitle: "Pantry Inventory"
+            url: "https://grocy.fmlab.no"
+      - name: "Entertainment"
+        icon: "fas fa-tv"
+        items:
+          - name: "Jellyfin"
+            logo: "assets/tools/sample2.png"
+            subtitle: "Streaming"
+            url: "https://sonarr.fmlab.no"
+          - name: "Sonarr"
+            logo: "assets/tools/sample2.png"
+            subtitle: "Fetch TV-Series"
+            url: "https://sonarr.fmlab.no"
+          - name: "Radarr"
+            logo: "assets/tools/sample2.png"
+            subtitle: "Fetch Movies"
+            url: "https://radarr.fmlab.no"
+
+      - name: "Public"
+        icon: "fas fa-cloud"
+        items:
+          - name: "Lychee"
+            logo: "assets/tools/sample.png"
+            subtitle: "Photo Gallery"
+            url: "https://photos.fmlab.no"
+          - name: "Another one"
+            logo: "assets/tools/sample2.png"
+            subtitle: "Another application"
+            tag: "app"
+            url: "#"
+      - name: "Homelab"
+        icon: "fas fa-cloud"
+        items:
+          - name: "Transmission"
+            logo: "assets/tools/sample.png"
+            subtitle: "Torrent Downloader"
+            url: "https://photos.fmlab.no"
+          - name: "Prowlarr"
+            logo: "assets/tools/sample2.png"
+            subtitle: "Configure Trackers"
+            url: "https://prowlarr.fmlab.no"
+          - name: "AdGuard"
+            logo: "assets/tools/sample2.png"
+            subtitle: "Ad-Blocker and DNS Cache"
+            url: "https://prowlarr.fmlab.no"
+          - name: "Traefik"
+            logo: "assets/tools/sample2.png"
+            subtitle: "Reverse-Proxy"
+            url: "https://traefik.fmlab.no"
+
+custom.css: |
     ---
     @charset "UTF-8";
 
