@@ -56,6 +56,12 @@ appProject:
         namespace:
           create: true
 
+  public: 
+    applications:
+      lychee:
+        namespace:
+          create: true
+
   system:
     applications:
       cert-manager:
