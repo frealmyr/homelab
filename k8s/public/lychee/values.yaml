@@ -57,29 +57,14 @@ app:
 
   additionalContainers:
     - name: cloudflare-tunnel
+      image:
+        repository: milgradesec/cloudflared
+        tag: latest
       secretEnvironmentVariables:
         - name: TUNNEL_TOKEN
           secret:
             name: credentials-cloudflare-tunnel
             key: token
-      image:
-        repository: milgradesec/cloudflared
-        tag: latest
-      # securityContext:
-      #   capabilities:
-      #     drop:
-      #       - ALL
-      #   readOnlyRootFilesystem: true
-      #   runAsNonRoot: true
-      #   runAsUser: 1000
-
-  # securityContext:
-  #   capabilities:
-  #     drop:
-  #     - ALL
-  #   readOnlyRootFilesystem: true
-  #   runAsNonRoot: true
-  #   runAsUser: 1000
 
   containerPorts:
     - name: http
@@ -93,20 +78,3 @@ app:
         - name: http
           port: 80
           targetPort: 80
-
-  ingresses:
-    enabled: true
-    ingress:
-      - name: frontend
-        service:
-          name: http
-          port: 80
-        hosts:
-          - host: bilder.fmlab.no
-            paths:
-              - path: /
-                pathType: ImplementationSpecific
-        tls:
-          - secretName: lychee
-            hosts:
-              - bilder.fmlab.no
