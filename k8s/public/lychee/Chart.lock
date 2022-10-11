@@ -1,6 +1,0 @@
-dependencies:
-- name: app
-  repository: https://frealmyr.github.io/homelab/
-  version: 1.1.16
-digest: sha256:6e7cf5ca51e5e96c06b7fd1fdb649ac22151ca0371c85c43a3b9690f1c764142
-generated: "2022-10-11T22:15:02.631865119+02:00"
