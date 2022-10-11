@@ -3,7 +3,8 @@ kind: ConfigMap
 metadata:
   name: homer-icons
 binaryData:
-  sonarr.png: |-
-    {{ .Files.Get "files/icons/sonarr.png" | b64enc | indent 4 }}
-  radarr.png: |-
-    {{ .Files.Get "files/icons/radarr.png" | b64enc | indent 4 }}
+  {{ $root := . }}
+  {{ range $path, $bytes := .Files.Glob "files/icons/*" }}
+  {{ base $path }}: |
+    {{ $root.Files.Get $path | b64enc }}
+  {{ end }}
