@@ -3,6 +3,8 @@ apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
   name: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   credentials:
     source: MySQLConnectionSecret
@@ -16,6 +18,8 @@ apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: User
 metadata:
   name: example-user
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   forProvider:
     resourceOptions:
@@ -31,12 +35,16 @@ apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: Database
 metadata:
   name: example-db
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec: {}
 ---
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: Grant
 metadata:
   name: example-grant
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   forProvider:
     privileges:
