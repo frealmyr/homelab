@@ -11,3 +11,18 @@ spec:
       name: credentials-sql-crossplane
   # tls one of preferred(default), skip-verify, or true
   tls: skip-verify
+---
+apiVersion: mysql.sql.crossplane.io/v1alpha1
+kind: User
+metadata:
+  name: example-user
+spec:
+  forProvider:
+    resourceOptions:
+      maxQueriesPerHour: 1000
+      maxUpdatesPerHour: 1000
+      maxConnectionsPerHour: 100
+      maxUserConnections: 10
+  writeConnectionSecretToRef:
+    name: example-connection-secret
+    namespace: databases
