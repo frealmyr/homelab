@@ -9,13 +9,10 @@ data:
     header: false
     footer: false
     links: false
-
     columns: "3"
     connectivityCheck: true
-
     stylesheet:
       - "assets/custom.css"
-
     services:
       - name: "Home"
         icon: "fas fa-house"
@@ -43,7 +40,6 @@ data:
             logo: "assets/tools/sample2.png"
             subtitle: "Fetch Movies"
             url: "https://radarr.fmlab.no"
-
       - name: "Public"
         icon: "fas fa-cloud"
         items:
@@ -77,11 +73,8 @@ data:
             url: "https://traefik.fmlab.no"
 
   custom.css: >
-    ---
     @charset "UTF-8";
-
     /* Dracula theme for Homer */
-
     #app.theme-default.is-light {
       --dracula-background: #282a36;
       --dracula-current-line: #44475a;
@@ -94,7 +87,6 @@ data:
       --dracula-purple: #bd93f9;
       --dracula-red: #ff5555;
       --dracula-yellow: #f1fa8c;
-
       --highlight-primary: transparent;
       --highlight-secondary: var(--dracula-current-line);
       --highlight-hover: var(--dracula-current-line);
@@ -108,129 +100,98 @@ data:
       --link: var(--dracula-green);
       --link-hover: var(--dracula-green);
     }
-
     /* Header */
-
     /* Comment the following section out if you want no header image. Also, set --highlight-primary to var(--dracula-current-line). */
-
     #app.theme-default.is-light #bighead {
       background-image: url("../assets/dracula-background.png");
       background-size: cover;
       background-position: center;
     }
-
     #app.theme-default.is-light .logo {
       color: var(--dracula-purple);
     }
-
     #app.theme-default.is-light .first-line .headline {
       color: var(--dracula-yellow);
     }
-
     #app.theme-default.is-light .navbar-start i {
       color: var(--dracula-cyan);
     }
-
     #app.theme-default.is-light [title="Auto-switch"] {
       color: var(--dracula-purple);
     }
-
     #app.theme-default.is-light [title="Dark theme"] {
       color: var(--dracula-orange);
     }
-
     #app.theme-default.is-light .navbar-item .fa-columns {
       color: var(--dracula-green);
     }
-
     #app.theme-default.is-light .navbar-item .fa-list {
       color: var(--dracula-cyan);
     }
-
     #app.theme-default.is-light .search-bar .search-label:before {
       color: var(--dracula-yellow);
     }
-
     #app.theme-default.is-light .search-bar input {
       background-color: var(--dracula-background);
     }
-
     #app.theme-default.is-light .search-bar>input:nth-child(2) {
       color: var(--dracula-foreground);
     }
-
     #app.theme-default.is-light .search-bar input:focus-visible {
       outline: none;
     }
-
     /* Message */
-
     #app.theme-default.is-light .message-header {
       color: var(--dracula-foreground);
       background-color: var(--dracula-current-line);
       border-style: none none solid none;
       border-width: thin;
     }
-
     #app.theme-default.is-light .is-info .message-header {
       border-color: var(--dracula-cyan);
     }
-
     #app.theme-default.is-light .is-info .message-header i {
       color: var(--dracula-cyan);
     }
-
     #app.theme-default.is-light .is-success .message-header {
       border-color: var(--dracula-green);
     }
-
     #app.theme-default.is-light .is-success .message-header i {
       color: var(--dracula-green);
     }
-
     #app.theme-default.is-light .is-warning .message-header {
       border-color: var(--dracula-orange);
     }
-
     #app.theme-default.is-light .is-warning .message-header i {
       color: var(--dracula-orange);
     }
-
     #app.theme-default.is-light .is-danger .message-header {
       border-color: var(--dracula-red);
     }
-
     #app.theme-default.is-light .is-danger .message-header i {
       color: var(--dracula-red);
     }
-
     /* Cards */
-
     #app.theme-default.is-light .tag {
       background-color: var(--dracula-pink);
       color: var(--dracula-foreground);
     }
-
     #app.theme-default.is-light .status.unknown::before {
       background-color: var(--dracula-yellow);
       border-color: var(--dracula-yellow);
       box-shadow: 0 0 5px 1px var(--dracula-yellow);
     }
-
     #app.theme-default.is-light .status.bad::before {
       background-color: var(--dracula-red);
       border-color: var(--dracula-red);
       box-shadow: 0 0 5px 1px var(--dracula-red);
     }
-
     #app.theme-default.is-light .status.running::before {
       background-color: var(--dracula-green);
       border-color: var(--dracula-green);
       box-shadow: 0 0 5px 1px var(--dracula-green);
     }
-
     /* Footer */
-
     #app.theme-default.is-light .footer {
       color: var(--dracula-foreground);
     }
