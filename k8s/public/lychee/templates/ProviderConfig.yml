@@ -40,6 +40,7 @@ spec:
       maxUserConnections: 10
   writeConnectionSecretToRef:
     name: credentials-db-lychee
+    namespace: lychee
 ---
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: Grant
