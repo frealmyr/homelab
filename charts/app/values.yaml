@@ -25,19 +25,19 @@ environmentVariables:
   # - name: TZ
   #   value: "Europe/Oslo"
 
-  secretEnvironmentVariables: {}
-    # - name: DB_DATABASE
-    #   secret:
-    #     name: credentials-db
-    #     key: database
-    # - name: DB_USERNAME
-    #   secret:
-    #     name: credentials-db
-    #     key: username
-    # - name: DB_PASSWORD
-    #   secret:
-    #     name: credentials-db
-    #     key: password
+secretEnvironmentVariables: {}
+  # - name: DB_DATABASE
+  #   secret:
+  #     name: credentials-db
+  #     key: database
+  # - name: DB_USERNAME
+  #   secret:
+  #     name: credentials-db
+  #     key: username
+  # - name: DB_PASSWORD
+  #   secret:
+  #     name: credentials-db
+  #     key: password
 
 persistentVolumes: {}
   # pvc:
@@ -152,6 +152,20 @@ additionalContainers:
   #     repository: docker-image
   #     pullPolicy: IfNotPresent
   #     tag: latest
+  #   command: ["printenv"]
+  #   secretEnvironmentVariables:
+  #     - name: DB_DATABASE
+  #       secret:
+  #         name: credentials-db
+  #         key: database
+  #     - name: DB_USERNAME
+  #       secret:
+  #         name: credentials-db
+  #         key: username
+  #     - name: DB_PASSWORD
+  #       secret:
+  #         name: credentials-db
+  #         key: password
   #   containerPorts:
   #     - name: http
   #       containerPort: 80

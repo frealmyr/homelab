@@ -38,14 +38,26 @@ spec:
       containers:
         {{- range .Values.additionalContainers }}
         - name: {{ .name }}
-          {{- with .environmentVariables }}
+          {{- if or .environmentVariables .secretEnvironmentVariables }}
           env:
+          {{- with .environmentVariables }}
             {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .secretEnvironmentVariables }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secret.name }}
+                  key: {{ .secret.key }}
+          {{- end }}
           {{- end }}
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
           image: "{{ .image.repository }}:{{ .image.tag }}"
           imagePullPolicy: {{ .image.pullPolicy }}
+          {{- if .command }}
+          command: {{ .command }}
+          {{- end }}
           {{- if .containerPorts }}
           ports:
           {{- range .containerPorts }}
