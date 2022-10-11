@@ -76,7 +76,7 @@ data:
             subtitle: "Reverse-Proxy"
             url: "https://traefik.fmlab.no"
 
-custom.css: |
+  custom.css: |
     ---
     @charset "UTF-8";
 
