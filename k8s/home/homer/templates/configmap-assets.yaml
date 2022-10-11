@@ -33,6 +33,7 @@ data:
             subtitle: "Streaming"
             url: "https://sonarr.fmlab.no"
           - name: "Sonarr"
+            logo: "https://github.com/Sonarr/sonarr.github.io/raw/master/logo/sonarr-32.png"
             subtitle: "Fetch TV-Series"
             url: "https://sonarr.fmlab.no"
           - name: "Radarr"
