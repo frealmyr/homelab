@@ -1,10 +1,10 @@
+---
 apiVersion: pkg.crossplane.io/v1
 kind: Provider
 metadata:
- name: provider-azure
+ name: provider-sql
 spec:
  package: "crossplane/provider-sql:master"
----
 ---
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: ProviderConfig
