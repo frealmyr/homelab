@@ -1,4 +1,4 @@
-app:
+homer:
   image:
     repository: b4bz/homer
     tag: latest
