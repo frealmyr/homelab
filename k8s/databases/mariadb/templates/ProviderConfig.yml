@@ -13,6 +13,15 @@ spec:
   tls: preferred
 ---
 apiVersion: mysql.sql.crossplane.io/v1alpha1
+kind: Database
+metadata:
+  name: example-db
+spec:
+  providerConfigRef:
+    name: default
+    namespace: databases
+---
+apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: User
 metadata:
   name: example-user
@@ -26,12 +35,6 @@ spec:
   writeConnectionSecretToRef:
     name: example-connection-secret
     namespace: databases
----
-apiVersion: mysql.sql.crossplane.io/v1alpha1
-kind: Database
-metadata:
-  name: example-db
-spec: {}
 ---
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: Grant

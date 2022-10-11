@@ -9,6 +9,8 @@
       net.ipv4.conf.all.forwarding: 1
       net.ipv6.conf.all.forwarding: 1
       net.bridge.bridge-nf-call-iptables: 1
+      fs.inotify.max_user_watches: 524288
+      fs.inotify.max_user_instances: 512
 
   tasks:
     ##############
