@@ -5,3 +5,5 @@ metadata:
 binaryData:
   sonarr.png: |-
     {{ .Files.Get "files/icons/sonarr.png" | b64enc | indent 4 }}
+  radarr.png: |-
+    {{ .Files.Get "files/icons/radarr.png" | b64enc | indent 4 }}
