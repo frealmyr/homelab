@@ -32,10 +32,6 @@ app:
       value: "warning"
     - name: DB_CONNECTION
       value: "mysql"
-    - name: DB_HOST
-      value: "mariadb-mysql.databases.svc.cluster.local"
-    - name: DB_PORT
-      value: "3306"
 
   secretEnvironmentVariables:
     - name: DB_DATABASE
@@ -50,6 +46,14 @@ app:
       secret:
         name: credentials-db-lychee
         key: password
+    - name: DB_HOST
+      secret:
+        name: credentials-db-lychee
+        key: endpoint
+    - name: DB_PORT
+      secret:
+        name: credentials-db-lychee
+        key: port
 
   # securityContext:
   #   capabilities:
@@ -80,11 +84,11 @@ app:
           name: http
           port: 80
         hosts:
-          - host: photos.fmlab.no
+          - host: bilder.fmlab.no
             paths:
               - path: /
                 pathType: ImplementationSpecific
         tls:
           - secretName: lychee
             hosts:
-              - photos.fmlab.no
+              - bilder.fmlab.no
