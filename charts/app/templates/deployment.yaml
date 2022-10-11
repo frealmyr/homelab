@@ -43,7 +43,7 @@ spec:
           {{- with .environmentVariables }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .secretEnvironmentVariables }}
+          {{- range .secretEnvironmentVariables }}
             - name: {{ .name }}
               valueFrom:
                 secretKeyRef:
