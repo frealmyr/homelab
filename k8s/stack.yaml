@@ -31,6 +31,9 @@ appProject:
       homeassistant:
         namespace:
           create: true
+      homer:
+        namespace:
+          create: true
       omada:
         namespace:
           create: true
