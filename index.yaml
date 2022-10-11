@@ -3,6 +3,16 @@ entries:
   app:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2022-10-11T20:14:09.208994337Z"
+    description: A Helm chart for Kubernetes
+    digest: 30da424c5e43bbb2ad2b6b4688417c318c5edf3d9f4e3472719721aeab814b51
+    name: app
+    type: application
+    urls:
+    - https://github.com/frealmyr/homelab/releases/download/app-1.1.16/app-1.1.16.tgz
+    version: 1.1.16
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2022-10-11T20:08:35.005263472Z"
     description: A Helm chart for Kubernetes
     digest: d7a560e133a3b59a1f662eb9004952d2223c3239ca2b9864425ce8ea1477d9f9
@@ -152,4 +162,4 @@ entries:
     urls:
     - https://github.com/frealmyr/homelab/releases/download/argo-1.0.0/argo-1.0.0.tgz
     version: 1.0.0
-generated: "2022-10-11T20:08:35.005425372Z"
+generated: "2022-10-11T20:14:09.209220736Z"
