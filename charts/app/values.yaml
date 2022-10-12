@@ -10,6 +10,11 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+command: {}
+  # - redis-server
+  # - '--save 60 1' 
+  # - '--loglevel warning'
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

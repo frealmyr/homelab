@@ -1,0 +1,31 @@
+app:
+  image:
+    repository: arm64v8/redis
+    tag: 7-alpine
+
+  persistentVolumes:
+    pvc:
+      - name: data
+        create: true
+        size: 25Gi
+        mounts:
+          - path: /data
+            subPath: data
+
+  command:
+    - redis-server
+    - '--save 60 1' 
+    - '--loglevel warning'
+
+  containerPorts:
+    - name: redis
+      containerPort: 6379
+      protocol: TCP
+
+  services:
+    - name: redis
+      type: ClusterIP
+      ports:
+        - name: redis
+          port: 6379
+          targetPort: 6379

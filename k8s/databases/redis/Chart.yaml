@@ -1,0 +1,12 @@
+apiVersion: v2
+name: redis
+description: Redis db for caching
+
+type: application
+
+version: 1.0.0
+
+dependencies:
+  - name: app
+    version: ^1.0.0
+    repository: "https://frealmyr.github.io/homelab/"

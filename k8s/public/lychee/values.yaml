@@ -34,6 +34,14 @@ app:
       value: "mysql"
     - name: DB_DATABASE
       value: "lychee"
+    - name: CACHE_DRIVER
+      value: "redis"
+    - name: REDIS_HOST
+      value: "redis-redis.databases.svc.cluster.local"
+    - name: REDIS_PASSWORD
+      value: "null"
+    - name: REDIS_PORT
+      value: "6379"
 
   secretEnvironmentVariables:
     - name: DB_USERNAME
