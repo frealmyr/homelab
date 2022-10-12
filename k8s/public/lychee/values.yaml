@@ -14,8 +14,6 @@ app:
       value: "Europe/Oslo"
     - name: TIMEZONE
       value: "Europe/Oslo"
-    - name: STARTUP_DELAY
-      value: "30"
     - name: APP_NAME
       value: "FMLab"
     - name: APP_ENV
