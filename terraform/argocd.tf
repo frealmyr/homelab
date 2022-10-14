@@ -143,6 +143,10 @@ resource "helm_release" "argocd_app_homelab" {
                 - ../../k8s/stack.yaml
             path: charts/argo
           project: default
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
     EOF
   ]
   depends_on = [helm_release.argocd]

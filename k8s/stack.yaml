@@ -65,23 +65,29 @@ appProject:
   system:
     applications:
       cert-manager:
+        autoSync: true
         namespace:
           create: true
       cloudflare-ddns:
+        autoSync: true
         namespace:
           create: true
       crossplane:
+        autoSync: true
         namespace:
           name: crossplane-system
           create: true
       external-secrets:
+        autoSync: true
         namespace:
           name: external-secrets
       local-path-provisioner:
+        autoSync: true
         namespace:
           name: local-path-provisioner
           create: true
       traefik:
+        autoSync: true
         namespace:
           name: traefik-system
           create: true

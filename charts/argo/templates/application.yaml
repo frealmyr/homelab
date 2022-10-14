@@ -27,10 +27,16 @@ spec:
   ignoreDifferences:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if ($app_value.namespace).create }}
+  {{- if or ($app_value.namespace).create $app_value.autoSync }}
   syncPolicy:
+  {{- if ($app_value.namespace).create }}
     syncOptions:
       - CreateNamespace=true
+  {{- end }}
+  {{- if $app_value.autoSync }}
+    automated:
+      selfHeal: true
+  {{- end }}
   {{- end }}
 {{- end }}
 {{- end }}
