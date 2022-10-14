@@ -222,4 +222,25 @@ entries:
     urls:
     - https://github.com/frealmyr/homelab/releases/download/argo-1.0.0/argo-1.0.0.tgz
     version: 1.0.0
-generated: "2022-10-14T16:45:51.694601683Z"
+  raw:
+  - apiVersion: v2
+    created: "2022-10-14T16:53:46.578699257Z"
+    description: A place for all the Kubernetes resources which don't already have
+      a home
+    digest: 0453dbd1fc2579fd44c2118d57a1d4051226d95aca9702532fab8c6bf00bddd4
+    home: https://github.com/itscontained/charts/blob/master/itscontained/raw
+    keywords:
+    - raw
+    - incubator
+    - incubator-raw
+    kubeVersion: '>=1.16.0-0'
+    maintainers:
+    - email: nick@cajun.pro
+      name: DirtyCajunRice
+    name: raw
+    sources:
+    - https://github.com/helm/charts/blob/master/incubator/raw
+    urls:
+    - https://github.com/frealmyr/homelab/releases/download/raw-v0.2.5/raw-v0.2.5.tgz
+    version: v0.2.5
+generated: "2022-10-14T16:53:46.578927958Z"
