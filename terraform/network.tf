@@ -76,7 +76,7 @@ resource "helm_release" "metallb" {
 
 resource "helm_release" "metallb_address_pool" {
   name       = "metallb-address-pool"
-  repository = "https://charts.itscontained.io"
+  repository = "https://frealmyr.github.io/homelab"
   chart      = "raw"
   version    = "0.2.5"
   values = [

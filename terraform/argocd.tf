@@ -118,7 +118,7 @@ resource "helm_release" "argocd" {
 # For now one need to use git and path for the chart, not ideal but works
 resource "helm_release" "argocd_app_homelab" {
   name       = "argocd-app-homelab"
-  repository = "https://charts.itscontained.io"
+  repository = "https://frealmyr.github.io/homelab"
   chart      = "raw"
   version    = "0.2.5"
   values = [
