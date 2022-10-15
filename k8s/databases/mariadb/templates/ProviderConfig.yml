@@ -2,48 +2,13 @@
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
-  name: default
+  name: mariadb
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
 spec:
   credentials:
     source: MySQLConnectionSecret
     connectionSecretRef:
-      namespace: databases
       name: credentials-sql
-  # tls one of preferred(default), skip-verify, or true
+      namespace: databases
   tls: preferred
----
-apiVersion: mysql.sql.crossplane.io/v1alpha1
-kind: Database
-metadata:
-  name: example-db
-spec:
-  providerConfigRef:
-    name: default
----
-apiVersion: mysql.sql.crossplane.io/v1alpha1
-kind: User
-metadata:
-  name: example-user
-spec:
-  forProvider:
-    resourceOptions:
-      maxQueriesPerHour: 1000
-      maxUpdatesPerHour: 1000
-      maxConnectionsPerHour: 100
-      maxUserConnections: 10
-  writeConnectionSecretToRef:
-    name: example-connection-secret
-    namespace: databases
----
-apiVersion: mysql.sql.crossplane.io/v1alpha1
-kind: Grant
-metadata:
-  name: example-grant
-spec:
-  forProvider:
-    privileges:
-      - ALL
-    userRef:
-      name: example-user
-    databaseRef:
-      name: example-db
