@@ -5,5 +5,6 @@ metadata:
   name: provider-sql
   annotations:
     argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   package: "crossplane/provider-sql:v0.5.0"
