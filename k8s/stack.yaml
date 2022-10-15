@@ -49,6 +49,11 @@ appProject:
           create: true
         sync:
           autoSync: true
+      yarr:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
 
   monitoring:
     applications:
