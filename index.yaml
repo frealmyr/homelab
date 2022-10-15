@@ -3,6 +3,16 @@ entries:
   app:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2022-10-15T17:24:27.182256445Z"
+    description: A Helm chart for Kubernetes
+    digest: 0cfdad728ffcfc81633a9ce675cffcb8ece679d20bc2c1f3aa4c1256357c0834
+    name: app
+    type: application
+    urls:
+    - https://github.com/frealmyr/homelab/releases/download/app-1.3.2/app-1.3.2.tgz
+    version: 1.3.2
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2022-10-15T16:39:35.326087023Z"
     description: A Helm chart for Kubernetes
     digest: ea354fafad14248c3bc1c25db183849c63cfb422848f41393c842e29cfc7cfc5
@@ -262,6 +272,17 @@ entries:
     urls:
     - https://github.com/frealmyr/homelab/releases/download/argo-1.0.0/argo-1.0.0.tgz
     version: 1.0.0
+  external-services:
+  - apiVersion: v2
+    created: "2022-10-15T17:24:27.322895692Z"
+    description: For hooking up external services from other devices on the network
+      to Traefik
+    digest: 7945bef922febeb13aa192dbe75bcb1b2624c9060bda23fc77f9ad358de3f404
+    name: external-services
+    type: application
+    urls:
+    - https://github.com/frealmyr/homelab/releases/download/external-services-0.1.0/external-services-0.1.0.tgz
+    version: 0.1.0
   raw:
   - apiVersion: v2
     created: "2022-10-14T16:53:46.578699257Z"
@@ -283,4 +304,4 @@ entries:
     urls:
     - https://github.com/frealmyr/homelab/releases/download/raw-v0.2.5/raw-v0.2.5.tgz
     version: v0.2.5
-generated: "2022-10-15T16:39:35.326249822Z"
+generated: "2022-10-15T17:24:27.323058793Z"
