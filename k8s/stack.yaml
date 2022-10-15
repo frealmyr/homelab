@@ -29,6 +29,11 @@ appProject:
           create: true
         sync:
           autoSync: true
+      firefly:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
       homeassistant:
         namespace:
           create: true
