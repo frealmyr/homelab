@@ -14,9 +14,9 @@ app:
       mountPath: /run/secrets/sql
 
   environmentVariables:
-    - MARIADB_ROOT_PASSWORD_FILE: "/run/secrets/sql/root_password"
-    - MARIADB_USER_FILE: "/run/secrets/sql/username"
-    - MARIADB_PASSWORD_FILE: "/run/secrets/sql/password"
+    MARIADB_ROOT_PASSWORD_FILE: "/run/secrets/sql/root_password"
+    MARIADB_USER_FILE: "/run/secrets/sql/username"
+    MARIADB_PASSWORD_FILE: "/run/secrets/sql/password"
 
   containerPorts:
     - name: mysql

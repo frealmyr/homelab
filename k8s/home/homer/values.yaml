@@ -4,7 +4,7 @@ app:
     tag: latest
 
   environmentVariables:
-    - INIT_ASSETS: "1"
+    INIT_ASSETS: "1"
 
   mountConfigmaps:
     - name: assets

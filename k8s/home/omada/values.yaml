@@ -23,24 +23,15 @@ app:
       mountPath: /cert
 
   environmentVariables:
-    - name: TLS_1_11_ENABLED
-      value: "true"
-    - name: TZ
-      value: "Europe/Oslo"
-    - name: SHOW_SERVER_LOGS
-      value: "true"
-    - name: MANAGE_HTTP_PORT
-      value: "8088"
-    - name: PORTAL_HTTP_PORT
-      value: "8088"
-    - name: MANAGE_HTTPS_PORT
-      value: "443"
-    - name: PORTAL_HTTPS_PORT
-      value: "8843"
-    - name: SSL_CERT_NAME
-      value: "tls.crt"
-    - name: SSL_KEY_NAME
-      value: "tls.key"
+    TLS_1_11_ENABLED: "true"
+    TZ: "Europe/Oslo"
+    SHOW_SERVER_LOGS: "true"
+    MANAGE_HTTP_PORT: "8088"
+    PORTAL_HTTP_PORT: "8088"
+    MANAGE_HTTPS_PORT: "443"
+    PORTAL_HTTPS_PORT: "8843"
+    SSL_CERT_NAME: "tls.crt"
+    SSL_KEY_NAME: "tls.key"
 
   containerPorts:
     - name: https

@@ -4,9 +4,9 @@ app:
     tag: latest
 
   environmentVariables:
-    - ZONE: "fmlab.no"
-    - SUBDOMAIN: "vpn"
-    - CRON: "* */1 * * *"
+    ZONE: "fmlab.no"
+    SUBDOMAIN: "vpn"
+    CRON: "* */1 * * *"
 
   secretEnvironmentVariables:
     - name: API_KEY
