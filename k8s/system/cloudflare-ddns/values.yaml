@@ -4,14 +4,12 @@ app:
     tag: latest
 
   environmentVariables:
+    - ZONE: "fmlab.no"
+    - SUBDOMAIN: "vpn"
+    - CRON: "* */1 * * *"
+
+  secretEnvironmentVariables:
     - name: API_KEY
-      valueFrom:
-        secretKeyRef:
-          name: cloudflare-credentials
-          key: api_token
-    - name: ZONE
-      value: "fmlab.no"
-    - name: SUBDOMAIN
-      value: "vpn"
-    - name: CRON
-      value: "* */1 * * *"
+      secret:
+        name: cloudflare-credentials
+        key: api_token

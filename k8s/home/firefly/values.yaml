@@ -1,0 +1,84 @@
+app:
+  image:
+    repository: fireflyiii/core
+    tag: latest
+
+  environmentVariables:
+    - APP_ENV: 'local'
+    - APP_DEBUG: 'false'
+    - DEFAULT_LANGUAGE: 'en_US'
+    - DEFAULT_LOCALE: 'no_NB'
+    - TZ: 'Europe/Amsterdam'
+    - TRUSTED_PROXIES: '**'
+    - LOG_CHANNEL: 'daily'
+    - APP_LOG_LEVEL: 'notice'
+    - AUDIT_LOG_LEVEL: 'info'
+    - DB_CONNECTION: 'mysql'
+    - DB_DATABASE: 'firefly'
+    - MYSQL_USE_SSL: 'false'
+    - CACHE_DRIVER: 'redis'
+    - SESSION_DRIVER: 'file'
+    - REDIS_SCHEME: 'tcp'
+    - REDIS_HOST: 'redis-redis.databases.svc.cluster.local'
+    - REDIS_PORT: '6379'
+
+  persistentVolumes:
+    static:
+      - name: upload
+        mountPath: /var/www/html/storage/upload
+
+  secretEnvironmentVariables:
+    - name: APP_KEY
+      secret:
+        name: credentials-app-firefly
+        key: encryption-key
+    - name: SITE_OWNER
+      secret:
+        name: credentials-app-firefly
+        key: site-owner
+    - name: DB_USERNAME
+      secret:
+        name: credentials-db-firefly
+        key: username
+    - name: DB_PASSWORD
+      secret:
+        name: credentials-db-firefly
+        key: password
+    - name: DB_HOST
+      secret:
+        name: credentials-db-firefly
+        key: endpoint
+    - name: DB_PORT
+      secret:
+        name: credentials-db-firefly
+        key: port
+
+  containerPorts:
+    - name: http
+      containerPort: 8080
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 8080
+          targetPort: 8080
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 8080
+        hosts:
+          - host: finance.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        tls:
+          - secretName: finance
+            hosts:
+              - finance.fmlab.no

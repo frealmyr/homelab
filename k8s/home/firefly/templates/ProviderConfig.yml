@@ -1,0 +1,60 @@
+---
+apiVersion: mysql.sql.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: mariadb
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+spec:
+  credentials:
+    source: MySQLConnectionSecret
+    connectionSecretRef:
+      name: credentials-sql
+      namespace: databases
+  tls: preferred
+---
+apiVersion: mysql.sql.crossplane.io/v1alpha1
+kind: Database
+metadata:
+  name: firefly
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  providerConfigRef:
+    name: mariadb
+---
+apiVersion: mysql.sql.crossplane.io/v1alpha1
+kind: User
+metadata:
+  name: firefly
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  providerConfigRef:
+    name: mariadb
+  forProvider:
+    resourceOptions:
+      maxQueriesPerHour: 1000
+      maxUpdatesPerHour: 1000
+      maxConnectionsPerHour: 100
+      maxUserConnections: 10
+  writeConnectionSecretToRef:
+    name: credentials-db-firefly
+    namespace: firefly
+---
+apiVersion: mysql.sql.crossplane.io/v1alpha1
+kind: Grant
+metadata:
+  name: firefly
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  providerConfigRef:
+    name: mariadb
+  forProvider:
+    privileges:
+      - ALL
+    userRef:
+      name: firefly
+    databaseRef:
+      name: firefly

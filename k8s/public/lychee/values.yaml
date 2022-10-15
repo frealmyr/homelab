@@ -4,63 +4,45 @@ app:
     tag: latest
 
   environmentVariables:
-    - name: PUID
-      value: "1000"
-    - name: PGID
-      value: "1000"
-    - name: USER
-      value: "lychee"
-    - name: PHP_TZ
-      value: "Europe/Oslo"
-    - name: TIMEZONE
-      value: "Europe/Oslo"
-    - name: APP_NAME
-      value: "FMLab"
-    - name: APP_ENV
-      value: "production"
-    - name: APP_URL
-      value: "APP_URL"
-    - name: SECURITY_HEADER_HSTS_ENABLE
-      value: "false"
-    - name: LYCHEE_UPLOADS
-      value: "/uploads"
-    - name: APP_DEBUG
-      value: "false"
-    - name: LOG_CHANNEL
-      value: "warning"
-    - name: DB_CONNECTION
-      value: "mysql"
-    - name: DB_DATABASE
-      value: "lychee"
-    - name: CACHE_DRIVER
-      value: "redis"
-    - name: REDIS_HOST
-      value: "redis-redis.databases.svc.cluster.local"
-    - name: REDIS_PASSWORD
-      value: "null"
-    - name: REDIS_PORT
-      value: "6379"
+    - PUID: "1000"
+    - PGID: "1000"
+    - USER: "lychee"
+    - PHP_TZ: "Europe/Oslo"
+    - TIMEZONE: "Europe/Oslo"
+    - APP_NAME: "FMLab"
+    - APP_ENV: "production"
+    - APP_URL: "APP_URL"
+    - SECURITY_HEADER_HSTS_ENABLE: "false"
+    - LYCHEE_UPLOADS: "/uploads"
+    - APP_DEBUG: "false"
+    - LOG_CHANNEL: "warning"
+    - DB_CONNECTION: "mysql"
+    - DB_DATABASE: "lychee"
+    - CACHE_DRIVER: "redis"
+    - REDIS_HOST: "redis-redis.databases.svc.cluster.local"
+    - REDIS_PASSWORD: "null"
+    - REDIS_PORT: "6379"
 
   secretEnvironmentVariables:
-    - name: DB_USERNAME
+    - DB_USERNAME
       secret:
-        name: credentials-db-lychee
+        credentials-db-lychee
         key: username
-    - name: DB_PASSWORD
+    - DB_PASSWORD
       secret:
-        name: credentials-db-lychee
+        credentials-db-lychee
         key: password
-    - name: DB_HOST
+    - DB_HOST
       secret:
-        name: credentials-db-lychee
+        credentials-db-lychee
         key: endpoint
-    - name: DB_PORT
+    - DB_PORT
       secret:
-        name: credentials-db-lychee
+        credentials-db-lychee
         key: port
 
   additionalContainers:
-    - name: cloudflare-tunnel
+    - cloudflare-tunnel
       image:
         repository: milgradesec/cloudflared
         tag: latest
@@ -70,20 +52,20 @@ app:
         - tunnel
         - run
       secretEnvironmentVariables:
-        - name: TUNNEL_TOKEN
+        - TUNNEL_TOKEN
           secret:
-            name: credentials-cloudflare-tunnel
+            credentials-cloudflare-tunnel
             key: token
 
   containerPorts:
-    - name: http
+    - http
       containerPort: 80
       protocol: TCP
 
   services:
-    - name: http
+    - http
       type: ClusterIP
       ports:
-        - name: http
+        - http
           port: 80
           targetPort: 80

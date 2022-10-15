@@ -4,12 +4,9 @@ app:
     tag: latest
 
   environmentVariables:
-    - name: PID
-      value: "1000"
-    - name: PGID
-      value: "1000"
-    - name: TZ
-      value: "Europe/Oslo"
+    - PID: "1000"
+    - PGID: "1000"
+    - TZ: "Europe/Oslo"
 
   persistentVolumes:
     static:
