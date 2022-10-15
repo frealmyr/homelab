@@ -214,6 +214,16 @@ entries:
   argo:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2022-10-15T09:29:10.158680287Z"
+    description: Create argo applications under projects
+    digest: d565aaf4473c9e2d6c75cc95899fea20344c40f7540299c576611d89eb24c991
+    name: argo
+    type: application
+    urls:
+    - https://github.com/frealmyr/homelab/releases/download/argo-1.2.0/argo-1.2.0.tgz
+    version: 1.2.0
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2022-10-14T16:45:51.694338086Z"
     description: Create argo applications under projects
     digest: 4ee8e4a118589c4e6e0024ccfdc7caa140acd3e10ae7b951eea0444130fda7d9
@@ -253,4 +263,4 @@ entries:
     urls:
     - https://github.com/frealmyr/homelab/releases/download/raw-v0.2.5/raw-v0.2.5.tgz
     version: v0.2.5
-generated: "2022-10-15T09:22:42.117830445Z"
+generated: "2022-10-15T09:29:10.158862989Z"
