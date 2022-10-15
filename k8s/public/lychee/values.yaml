@@ -24,25 +24,25 @@ app:
     REDIS_PORT: "6379"
 
   secretEnvironmentVariables:
-    - DB_USERNAME
+    - DB_USERNAME:
       secret:
-        credentials-db-lychee
+        name: credentials-db-lychee
         key: username
-    - DB_PASSWORD
+    - DB_PASSWORD:
       secret:
-        credentials-db-lychee
+        name: credentials-db-lychee
         key: password
-    - DB_HOST
+    - DB_HOST:
       secret:
-        credentials-db-lychee
+        name: credentials-db-lychee
         key: endpoint
-    - DB_PORT
+    - DB_PORT:
       secret:
-        credentials-db-lychee
+        name: credentials-db-lychee
         key: port
 
   additionalContainers:
-    - cloudflare-tunnel
+    - name: cloudflare-tunnel
       image:
         repository: milgradesec/cloudflared
         tag: latest
@@ -52,20 +52,20 @@ app:
         - tunnel
         - run
       secretEnvironmentVariables:
-        - TUNNEL_TOKEN
+        - name: TUNNEL_TOKEN
           secret:
-            credentials-cloudflare-tunnel
+            name: credentials-cloudflare-tunnel
             key: token
 
   containerPorts:
-    - http
+    - name: http
       containerPort: 80
       protocol: TCP
 
   services:
-    - http
+    - name: http
       type: ClusterIP
       ports:
-        - http
+        - name: http
           port: 80
           targetPort: 80
