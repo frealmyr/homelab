@@ -24,19 +24,19 @@ app:
     REDIS_PORT: "6379"
 
   secretEnvironmentVariables:
-    - DB_USERNAME:
+    - name: DB_USERNAME
       secret:
         name: credentials-db-lychee
         key: username
-    - DB_PASSWORD:
+    - name: DB_PASSWORD
       secret:
         name: credentials-db-lychee
         key: password
-    - DB_HOST:
+    - name: DB_HOST
       secret:
         name: credentials-db-lychee
         key: endpoint
-    - DB_PORT:
+    - name: DB_PORT
       secret:
         name: credentials-db-lychee
         key: port
