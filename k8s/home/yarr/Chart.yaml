@@ -1,0 +1,12 @@
+apiVersion: v2
+name: yarr
+description: For all your entertainment needs
+
+type: application
+
+version: 1.0.0
+
+dependencies:
+  - name: external-services
+    version: ^1.0.0
+    repository: "https://frealmyr.github.io/homelab/"

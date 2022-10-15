@@ -1,0 +1,19 @@
+{{- range .Values.services }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  type: ExternalName
+  ports:
+    - name: {{ .name }}
+      port: {{ .port }}
+      targetPort: {{ .port }}
+  externalName: {{ .ipAddress }}
+  selector:
+    app.kubernetes.io/instance: traefik
+    app.kubernetes.io/name: traefik
+{{- end }}

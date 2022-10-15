@@ -1,0 +1,20 @@
+{{- range .Values.services }}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .name }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`{{ .name }}.fmlab.no`)
+      services:
+        - name: {{ .name }}
+          port: {{ .port }}
+      middlewares:
+        - name: traefik-system-security@kubernetescrd
+  tls:
+    secretName: {{ .name }}
+{{- end }}
