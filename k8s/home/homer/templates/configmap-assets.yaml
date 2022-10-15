@@ -71,7 +71,7 @@ data:
             subtitle: "Index manager/proxy"
             url: "https://prowlarr.fmlab.no"
       - name: "Monitoring"
-        icon: "fas fa-chart-line-up"
+        icon: "fas fa-chart"
         items:
           - name: "Grafana"
             logo: "assets/icons/grafana.png"
