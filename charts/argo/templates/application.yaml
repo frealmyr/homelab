@@ -6,6 +6,10 @@ kind: Application
 metadata:
   name: {{ $app_key }}
   namespace: argocd
+  {{- if ($app_value.sync).wave }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ $app_value.sync.wave }}
+  {{- end }}
 spec:
   destination:
     name: in-cluster
@@ -33,7 +37,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
   {{- end }}
-  {{- if $app_value.autoSync }}
+  {{- if ($app_value.sync).autoSync }}
     automated:
       selfHeal: true
   {{- end }}
