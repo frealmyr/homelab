@@ -62,6 +62,10 @@ data:
       - name: "Configuration"
         icon: "fas fa-gear"
         items:
+          - name: "ArgoCD"
+            logo: "assets/icons/argo.png"
+            subtitle: "GitOps controller"
+            url: "https://argocd.fmlab.no"
           - name: "Transmission"
             logo: "assets/icons/transmission.png"
             subtitle: "Download torrents"
@@ -71,7 +75,7 @@ data:
             subtitle: "Index manager/proxy"
             url: "https://prowlarr.fmlab.no"
       - name: "Monitoring"
-        icon: "fas fa-chart"
+        icon: "fa fa-line-chart"
         items:
           - name: "Grafana"
             logo: "assets/icons/grafana.png"

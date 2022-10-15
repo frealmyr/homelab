@@ -74,11 +74,11 @@ app:
           name: http
           port: 8080
         hosts:
-          - host: finance.fmlab.no
+          - host: firefly.fmlab.no
             paths:
               - path: /
                 pathType: ImplementationSpecific
         tls:
-          - secretName: finance
+          - secretName: firefly
             hosts:
-              - finance.fmlab.no
+              - firefly.fmlab.no
