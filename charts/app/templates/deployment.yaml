@@ -36,77 +36,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       {{- end }}
       containers:
-        {{- range .Values.additionalContainers }}
-        - name: {{ .name }}
-          {{- if or .environmentVariables .secretEnvironmentVariables }}
-          env:
-          {{- with .environmentVariables }}
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- range .secretEnvironmentVariables }}
-            - name: {{ .name }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .secret.name }}
-                  key: {{ .secret.key }}
-          {{- end }}
-          {{- end }}
-          securityContext:
-            {{- toYaml .securityContext | nindent 12 }}
-          image: "{{ .image.repository }}:{{ .image.tag }}"
-          imagePullPolicy: {{ .image.pullPolicy }}
-          {{- if .command }}
-          {{- with .command }}
-          command:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- end }}
-          {{- if .containerPorts }}
-          ports:
-          {{- range .containerPorts }}
-            - name: {{ .name }}
-              containerPort: {{ .containerPort }}
-              protocol: {{ .protocol }}
-          {{- end }}
-          {{- end }}
-          {{- if .persistentVolumes }}
-          volumeMounts:
-          {{- if .persistentVolumes.pvc }}
-          {{- range .persistentVolumes.pvc }}
-          {{- if .create }}
-            - name: {{ include "app.name" $ }}-{{ .name }}
-          {{- else }}
-            - name: {{ .name }}
-          {{- end }}
-              {{- range .mounts }}
-              mountPath: {{ .path }}
-              {{- if .subPath }}
-              subPath: {{ .subPath }}
-              {{- end }}
-              {{- end }}
-          {{- end }}
-          {{- end }}
-          {{- range .persistentVolumes.hostPath }}
-            - name: {{ .name }}
-              mountPath: {{ .mountPath }}
-          {{- end }}
-          {{- end }}
-          {{- if .liveness }}
-          livenessProbe:
-            httpGet:
-              path: {{ .liveness.path }}
-              port: {{ .liveness.port }}
-          {{- end }}
-          {{- if .readiness }}
-          readinessProbe:
-            httpGet:
-              path: {{ .readiness.path }}
-              port: {{ .readiness.port }}
-          {{- end }}
-          resources:
-            {{- toYaml .resources | nindent 12 }}
-        {{- end }}
-        - name: {{ .Chart.Name }}
+        - name: {{ include "app.name" . }}
           {{- if or .Values.environmentVariables .Values.secretEnvironmentVariables }}
           env:
           {{- if .Values.environmentVariables }}
@@ -142,10 +72,10 @@ spec:
               protocol: {{ .protocol }}
           {{- end }}
           {{- end }}
-          {{- if or .Values.persistentVolumes.pvc .Values.persistentVolumes.hostPath .Values.mountSecrets .Values.mountConfigmaps }}
+          {{- if or .Values.persistentVolumes.static .Values.persistentVolumes.dynamic .Values.persistentVolumes.hostPath .Values.mountSecrets .Values.mountConfigmaps }}
           volumeMounts:
           {{- if .Values.persistentVolumes }}
-          {{- range .Values.persistentVolumes.pvc }}
+          {{- range .Values.persistentVolumes.dynamic }}
           {{- if .create }}
             - name: {{ include "app.name" $ }}-{{ .name }}
           {{- else }}
@@ -158,6 +88,10 @@ spec:
               {{- end }}
               {{- end }}
           {{- end }}
+          {{- end }}
+          {{- range .Values.persistentVolumes.static }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
           {{- end }}
           {{- range .Values.persistentVolumes.hostPath }}
             - name: {{ .name }}
@@ -187,10 +121,86 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- if or .Values.persistentVolumes.pvc .Values.persistentVolumes.hostPath .Values.mountSecrets .Values.mountConfigmaps }}
+
+        {{- range .Values.additionalContainers }}
+        - name: {{ .name }}
+          {{- if or .environmentVariables .secretEnvironmentVariables }}
+          env:
+          {{- with .environmentVariables }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- range .secretEnvironmentVariables }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secret.name }}
+                  key: {{ .secret.key }}
+          {{- end }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          {{- if .command }}
+          {{- with .command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .containerPorts }}
+          ports:
+          {{- range .containerPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+              protocol: {{ .protocol }}
+          {{- end }}
+          {{- end }}
+          {{- if .persistentVolumes }}
+          volumeMounts:
+          {{- if .persistentVolumes.dynamic }}
+          {{- range .persistentVolumes.dynamic }}
+          {{- if .create }}
+            - name: {{ include "app.name" $ }}-{{ .name }}
+          {{- else }}
+            - name: {{ .name }}
+          {{- end }}
+              {{- range .mounts }}
+              mountPath: {{ .path }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- range .persistentVolumes.static }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- range .persistentVolumes.hostPath }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- end }}
+          {{- if .liveness }}
+          livenessProbe:
+            httpGet:
+              path: {{ .liveness.path }}
+              port: {{ .liveness.port }}
+          {{- end }}
+          {{- if .readiness }}
+          readinessProbe:
+            httpGet:
+              path: {{ .readiness.path }}
+              port: {{ .readiness.port }}
+          {{- end }}
+          resources:
+            {{- toYaml .resources | nindent 12 }}
+        {{- end }}
+
+      {{- if or .Values.persistentVolumes.dynamic .Values.persistentVolumes.static .Values.persistentVolumes.hostPath .Values.mountSecrets .Values.mountConfigmaps }}
       volumes:
       {{- if .Values.persistentVolumes }}
-      {{- range .Values.persistentVolumes.pvc }}
+      {{- range .Values.persistentVolumes.dynamic }}
       {{- if .create }}
         - name: {{ include "app.name" $ }}-{{ .name }}
           persistentVolumeClaim:
@@ -201,6 +211,12 @@ spec:
             claimName: {{ .name }}
       {{- end }}
       {{- end }}
+      {{- end }}
+      {{- range .Values.persistentVolumes.static }}
+        - name: {{ .name }}
+          hostPath:
+            path: /var/lib/k8s/volumes/{{ include "app.name" $ }}/{{ .name }}
+            type: {{ default "DirectoryOrCreate" .type }}
       {{- end }}
       {{- range .Values.persistentVolumes.hostPath }}
         - name: {{ .name }}

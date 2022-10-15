@@ -10,15 +10,11 @@ app:
     keel.sh/approvals: "1"
 
   persistentVolumes:
-    pvc:
-      - name: config
-        create: true
-        size: 10Gi
-        mounts:
-          - path: /opt/adguardhome/work
-            subPath: work
-          - path: /opt/adguardhome/conf
-            subPath: conf
+    static:
+      - name: work
+        mountPath: /opt/adguardhome/work
+      - name: conf
+        mountPath: /opt/adguardhome/conf
 
   containerPorts:
     - name: http

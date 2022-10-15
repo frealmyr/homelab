@@ -45,31 +45,37 @@ secretEnvironmentVariables: {}
   #     key: password
 
 persistentVolumes: {}
-  # pvc:
-  #   - name: shared
-  #     accessMode: ReadWriteMany
-  #     storageClassName: nas
-  #     size: 10Gi
-  #     volumeName: yolo-app
-  #     mounts:
-  #       - path: /shared
-  #         subPath: shared
-  #   - name: config
-  #     create: true
-  #     size: 10Gi
-  #     mounts:
-  #       - path: /config
-  #         subPath: config
-  #       - path: /config/backups
-  #         subPath: backups
-  # hostPath:
-  #   - name: videos
-  #     mountPath: /mnt/videos
-  #     hostPath: /media/SSD2/Videos
-  #     type: Directory
-  #   - name: downloads
-  #     mountPath: /mnt/downloads
-  #     hostPath: /media/SSD2/Downloads
+#  static:
+#    - name: config
+#      mountPath: /config
+#    - name: backups
+#      mountPath: /config
+#      type: Directory
+#  dynamic:
+#    - name: shared
+#      accessMode: ReadWriteMany
+#      storageClassName: nas
+#      size: 10Gi
+#      volumeName: yolo-app
+#      mounts:
+#        - path: /shared
+#          subPath: shared
+#    - name: config
+#      create: true
+#      size: 10Gi
+#      mounts:
+#        - path: /config
+#          subPath: config
+#        - path: /config/backups
+#          subPath: backups
+#  hostPath:
+#    - name: videos
+#      mountPath: /mnt/videos
+#      hostPath: /media/SSD2/Videos
+#      type: Directory
+#    - name: downloads
+#      mountPath: /mnt/downloads
+#      hostPath: /media/SSD2/Downloads
 
 mountSecrets: {}
 #  - name: cert-app

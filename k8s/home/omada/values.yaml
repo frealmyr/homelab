@@ -4,23 +4,18 @@ app:
     tag: 5.5
 
   persistentVolumes:
-    pvc:
+    static:
       - name: data
-        create: true
-        size: 10Gi
-        mounts:
-          - path: /opt/tplink/EAPController/data
-            subPath: data
-          - path: /opt/tplink/EAPController/work
-            subPath: work
-          - path: /opt/tplink/EAPController/logs
-            subPath: logs
+        mountPath: /opt/tplink/EAPController/data
+      - name: work
+        mountPath: /opt/tplink/EAPController/work
+      - name: logs
+        mountPath: /opt/tplink/EAPController/logs
+    hostPath:
       - name: backups
-        create: true
-        size: 10Gi
-        mounts:
-          - path: /opt/tplink/EAPController/data/autobackup
-            subPath: autobackup
+        mountPath: /opt/tplink/EAPController/data/autobackup
+        hostPath: /backups/omada
+        type: DirectoryOrCreate
 
   mountSecrets:
     - name: cert-omada

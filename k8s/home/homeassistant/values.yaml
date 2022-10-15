@@ -12,13 +12,9 @@ app:
       value: "Europe/Oslo"
 
   persistentVolumes:
-    pvc:
+    static:
       - name: config
-        create: true
-        size: 30Gi
-        mounts:
-          - path: /config
-            subPath: config
+        mountPath: /config
 
   podHostNetwork: true
 
