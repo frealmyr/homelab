@@ -8,7 +8,7 @@ metadata:
   namespace: argocd
   {{- if ($app_value.sync).wave }}
   annotations:
-    argocd.argoproj.io/sync-wave: {{ $app_value.sync.wave }}
+    argocd.argoproj.io/sync-wave: "{{ $app_value.sync.wave }}"
   {{- end }}
 spec:
   destination:
