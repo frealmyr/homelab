@@ -14,6 +14,14 @@ app:
       secret:
         name: credentials-importer-firefly
         key: access-token
+    - name: NORDIGEN_ID
+      secret:
+        name: credentials-nordigen-firefly
+        key: nordigen-id
+    - name: NORDIGEN_KEY
+      secret:
+        name: credentials-nordigen-firefly
+        key: nordigen-key
 
   containerPorts:
     - name: http
