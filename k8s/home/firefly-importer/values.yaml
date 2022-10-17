@@ -4,8 +4,7 @@ app:
     tag: latest
 
   environmentVariables:
-    FIREFLY_III_URL: 'http://firefly-http.firefly.svc.cluster.local:8080'
-    VANITY_URL: 'https://firefly.fmlab.no'
+    FIREFLY_III_URL: 'https://firefly.fmlab.no'
     TZ: 'Europe/Oslo'
     TRUSTED_PROXIES: '*'
 
