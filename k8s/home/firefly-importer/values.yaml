@@ -4,7 +4,10 @@ app:
     tag: latest
 
   environmentVariables:
-    FIREFLY_III_URL: 'firefly.firefly.svc.cluster.local'
+    FIREFLY_III_URL: 'http://firefly.firefly.svc.cluster.local'
+    VANITY_URL: 'https://firefly.fmlab.no'
+    TZ: 'Europe/Oslo'
+    TRUSTED_PROXIES: '*'
 
   secretEnvironmentVariables:
     - name: FIREFLY_III_ACCESS_TOKEN
