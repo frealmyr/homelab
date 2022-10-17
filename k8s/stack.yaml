@@ -34,6 +34,11 @@ appProject:
           create: true
         sync:
           autoSync: true
+      firefly-importer:
+        namespace:
+          name: firefly
+        sync:
+          autoSync: true
       homeassistant:
         namespace:
           create: true
