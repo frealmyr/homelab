@@ -6,6 +6,7 @@ app:
   environmentVariables:
     FIREFLY_III_URL: 'https://firefly.fmlab.no'
     TZ: 'Europe/Oslo'
+    LOG_LEVEL: 'notice'
     TRUSTED_PROXIES: '*'
 
   secretEnvironmentVariables:
