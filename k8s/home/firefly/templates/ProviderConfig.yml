@@ -18,6 +18,7 @@ metadata:
 spec:
   providerConfigRef:
     name: mariadb
+  forProvider: {}
   writeConnectionSecretToRef:
     name: credentials-db-firefly
     namespace: firefly
