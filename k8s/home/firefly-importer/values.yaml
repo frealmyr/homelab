@@ -5,6 +5,8 @@ app:
 
   environmentVariables:
     FIREFLY_III_URL: 'https://firefly.fmlab.no'
+    VANITY_URL: 'https://firefly-importer.fmlab.no'
+    APP_URL: 'https://firefly-importer.fmlab.no'
     TZ: 'Europe/Oslo'
     LOG_LEVEL: 'notice'
     TRUSTED_PROXIES: '*'
