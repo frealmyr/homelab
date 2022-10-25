@@ -1,6 +1,8 @@
 #/bin/zsh
 
-tf state rm \
+cd ../terraform
+
+terraform state rm \
   helm_release.argocd \
   helm_release.argocd_app_homelab \
   helm_release.metallb \

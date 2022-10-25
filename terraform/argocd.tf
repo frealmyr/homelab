@@ -69,23 +69,6 @@ resource "helm_release" "argocd" {
     dex:
       enabled: true
     server:
-      config:
-        url: https://argocd.fmlab.no
-        admin.enabled: "true"
-        exec.enabled: "true"
-        dex.config: |
-          logger:
-            level: debug
-            format: json
-          connectors:
-          - type: github
-            id: github
-            name: Github
-            config:
-              clientID: $sso-github:client_id
-              clientSecret: $sso-github:client_secret
-              orgs:
-                - name: fm-homelab
       rbacConfig:
         policy.default: role:readonly
         policy.csv: |
@@ -108,6 +91,51 @@ resource "helm_release" "argocd" {
                 operator: In
                 values:
                   - node-rpi-0
+    configs:
+      cm:
+        create: false # Create a custom one in extraObjects, because i like working syncWaves in apps-of-apps
+    extraObjects:
+      - apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: argocd-cm
+          labels:
+            app.kubernetes.io/component: server
+            app.kubernetes.io/instance: argocd
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/part-of: argocd
+        data:
+          admin.enabled: "true"
+          exec.enabled: "true"
+          url: https://argocd.fmlab.no
+          dex.config: |
+            logger:
+              level: debug
+              format: json
+            connectors:
+            - type: github
+              id: github
+              name: Github
+              config:
+                clientID: $sso-github:client_id
+                clientSecret: $sso-github:client_secret
+                orgs:
+                  - name: fm-homelab
+          resource.customizations: |
+            argoproj.io/Application:
+              health.lua: |
+                hs = {}
+                hs.status = "Progressing"
+                hs.message = ""
+                if obj.status ~= nil then
+                  if obj.status.health ~= nil then
+                    hs.status = obj.status.health.status
+                    if obj.status.health.message ~= nil then
+                      hs.message = obj.status.health.message
+                    end
+                  end
+                end
+                return hs
   EOF
   ]
   depends_on = [helm_release.metallb, kubernetes_secret_v1.sso_github]

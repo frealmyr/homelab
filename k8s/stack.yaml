@@ -72,7 +72,7 @@ appProject:
           name: monitoring
         sync:
           autoSync: true
-          wave: "-6"
+          wave: "-1"
 
   office:
     applications:
