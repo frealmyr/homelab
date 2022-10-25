@@ -10,11 +10,11 @@ appProject:
   databases:
     applications:
       mariadb:
+        namespace:
+          name: databases
         sync:
           autoSync: true
           wave: "-1"
-        namespace:
-          name: databases
       redis:
         namespace:
           name: databases
@@ -82,7 +82,7 @@ appProject:
         sync:
           autoSync: true
 
-  public: 
+  public:
     applications:
       lychee:
         namespace:
@@ -97,26 +97,26 @@ appProject:
           name: external-secrets
         sync:
           autoSync: true
-          wave: "-6"
+          wave: "-4"
       cloudflare-ddns:
         namespace:
           create: true
         sync:
           autoSync: true
-          wave: "-5"
+          wave: "-3"
       cert-manager:
         namespace:
           create: true
         sync:
           autoSync: true
-          wave: "-4"
+          wave: "-3"
       local-path-provisioner:
         namespace:
           name: local-path-provisioner
           create: true
         sync:
           autoSync: true
-          wave: "-3"
+          wave: "-2"
       crossplane:
         namespace:
           name: crossplane-system
@@ -130,6 +130,7 @@ appProject:
           create: true
         sync:
           autoSync: true
+          wave: "-1"
         ignoreDifferences:
           - group: ""
             kind: ConfigMap
