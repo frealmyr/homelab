@@ -46,7 +46,7 @@ app:
       image:
         repository: milgradesec/cloudflared
         tag: latest
-      command: 
+      command:
         - /usr/local/bin/cloudflared
         - '--no-autoupdate'
         - tunnel
