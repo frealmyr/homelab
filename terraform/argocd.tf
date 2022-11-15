@@ -127,7 +127,7 @@ resource "helm_release" "argocd" {
 resource "helm_release" "argocd_apps_homelab" {
   name       = "argocd-apps-homelab"
   repository = "https://argoproj.github.io/argo-helm"
-  chart      = "argo/argocd-apps"
+  chart      = "argocd-apps"
 
   version    = "0.0.3"
 
@@ -151,6 +151,7 @@ resource "helm_release" "argocd_apps_homelab" {
           automated:
             prune: true
             selfHeal: true
-  EOF]
+  EOF
+  ]
   depends_on = [helm_release.argocd]
 }
