@@ -1,7 +1,4 @@
 traefik:
-  ingressClass:
-    enabled: true
-    isDefaultClass: true
   ingressRoute:
     dashboard:
       enabled: false
@@ -9,7 +6,7 @@ traefik:
     annotations:
       metallb.universe.tf/allow-shared-ip: "sharing-is-caring"
     spec:
-      loadBalancerIP: "10.0.0.4"
+      loadBalancerIP: "10.8.0.10"
   podSecurityPolicy:
     enabled: false
   tlsOptions:
@@ -32,3 +29,16 @@ traefik:
       allowExternalNameServices: true
       publishedService:
         enabled: true
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8s-controller-0

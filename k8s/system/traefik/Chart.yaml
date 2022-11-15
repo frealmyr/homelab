@@ -9,5 +9,5 @@ appVersion: 2.7.1
 
 dependencies:
   - name: traefik
-    version: 12.0.2
+    version: 19.0.3kubernetes.io/hostname=k8s-controller-0
     repository: https://helm.traefik.io/traefik

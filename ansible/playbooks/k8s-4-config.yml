@@ -1,0 +1,145 @@
+---
+- hosts: k8s_master, k8s_workers
+  become: true
+
+  vars:
+    synology_ip: 10.10.0.11
+    sysctl_config:
+      net.ipv4.ip_forward: 1
+      net.ipv4.conf.all.forwarding: 1
+      net.ipv6.conf.all.forwarding: 1
+      net.bridge.bridge-nf-call-iptables: 1
+      net.bridge.bridge-nf-call-ip6tables: 1
+      fs.inotify.max_user_watches: 524288
+      fs.inotify.max_user_instances: 512
+
+  tasks:
+    ##################
+    ## Raspberry Pi ##
+    ##################
+
+    - name: rpi - enable container related cgroups
+      replace:
+        path: /boot/cmdline.txt
+        regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
+        replace: '\1 {{ item }}'
+      with_items:
+        - "cgroup_enable=cpuset"
+        - "cgroup_memory=1"
+        - "cgroup_enable=memory"
+        - "swapaccount=1"
+
+    - name: rpi - set config parameters
+      lineinfile:
+        path: /boot/config.txt
+        regexp: "{{ item.original }}"
+        line: "{{ item.tweaked }}"
+        state: present
+      with_items:
+        - original: ^gpu_mem=.*
+          tweaked: gpu_mem=16
+        - original: ^dtparam=audio=on
+          tweaked: "#dtparam=audio=on"
+        - original: ^dtoverlay=disable-bt
+          tweaked: dtoverlay=disable-bt
+        - original: ^dtoverlay=disable-wifi
+          tweaked: dtoverlay=disable-wifi
+
+    - name: rpi - disable services
+      service:
+        name: "{{ item }}"
+        enabled: no
+        masked: yes
+        state: stopped
+      with_items:
+        - hciuart
+
+    #########
+    ## UPS ##
+    #########
+
+    # Here we piggyback the UPS running on Synology NAS, simply need to allowlist the IPs of clients.
+    - name: ups - configure nut to use netclient
+      replace:
+        path: /etc/nut/nut.conf
+        regexp: '^MODE=none'
+        replace: 'MODE=netclient'
+
+    - name: ups - configure nut to monitor nas
+      lineinfile:
+        path: /etc/nut/upsmon.conf
+        regexp: '^MONITOR.*'
+        line: "MONITOR ups@{{ synology_ip }} 1 monuser secret slave"
+        state: present
+
+    - name: ups - restart and enable service
+      service:
+        name: nut-client
+        enabled: yes
+        state: restarted
+
+    ########################
+    ## Modprobe / Systemd ##
+    ########################
+
+    - name: modprobe - enable modules
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - br_netfilter
+        - overlay
+
+    - name: modprobe - load modules on boot
+      lineinfile:
+        path: /etc/modules
+        line: "{{item}}"
+        state: present
+      with_items:
+        - br_netfilter
+        - overlay
+
+    - name: systemctl - allow ip forwarding
+      sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        sysctl_set: yes
+        state: present
+        reload: yes
+        ignoreerrors: no
+      with_dict: "{{ sysctl_config }}"
+
+    ################
+    ## Containerd ##
+    ################
+
+    - name: containerd - create default config
+      shell: containerd config default>/etc/containerd/config.toml
+
+    - name: containerd - enable systemd runc backend
+      replace:
+        path: /etc/containerd/config.toml
+        regexp: "SystemdCgroup = false"
+        replace: "SystemdCgroup = true"
+
+    - name: containerd - restart and enable service
+      service:
+        name: containerd
+        enabled: yes
+        state: restarted
+
+    #########
+    ## K8s ##
+    #########
+
+    - name: k8s - create directory fo persistent hostPath "volumes"
+      file:
+        path: /var/lib/k8s/volumes
+        state: directory
+
+    # ############
+    # ## Reboot ##
+    # ############
+
+    - name: system - reboot (configuration)
+      reboot:

@@ -1,0 +1,90 @@
+---
+- hosts: k8s_master, k8s_workers
+  become: true
+
+  vars:
+    subnet_pod: 10.244.0.0/16
+    subnet_svc: 10.122.0.0/16
+
+  tasks:
+    #####################
+    ## Destroy cluster ##
+    #####################
+
+    - name: kublet - kubelet
+      service:
+        name: kubelet
+        daemon_reload: yes
+        state: restarted
+
+    - name: kubeadm - reset Kubernetes cluster
+      command: kubeadm reset -f
+
+    - name: kubeadm - remove cni folder
+      file:
+        path: /etc/cni/net.d
+        state: absent
+
+    ####################
+    ## Create cluster ##
+    ####################
+
+    - name: modprobe - double-check that modules are enabled
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - br_netfilter
+        - overlay
+
+    - name: kubectl - copy KubeletConfiguration.yaml
+      copy:
+        dest: /etc/kubernetes/kube-init-config.yaml
+        content: "{{ content }}"
+      vars:
+        content: |
+          ---
+          apiVersion: kubeadm.k8s.io/v1beta2
+          kind: InitConfiguration
+          nodeRegistration:
+            name: "{{ ansible_hostname }}"
+            criSocket: "/run/containerd/containerd.sock"
+          localAPIEndpoint:
+            advertiseAddress: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}"
+            bindPort: 6443
+          ---
+          apiVersion: kubelet.config.k8s.io/v1beta1
+          kind: KubeletConfiguration
+          cgroupDriver: systemd
+          systemReserved:
+            cpu: '0.25'
+            memory: '500Mi'
+          kubeReserved:
+            cpu: '0.25'
+            memory: '500Mi'
+          ---
+          apiVersion: kubeadm.k8s.io/v1beta3
+          kind: ClusterConfiguration
+          clusterName: "homelab"
+          networking:
+            podSubnet: "{{ subnet_pod }}"
+            serviceSubnet: "{{ subnet_svc }}"
+            dnsDomain: cluster.local
+          controlPlaneEndpoint: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}:6443"
+          ---
+          apiVersion: kubeproxy.config.k8s.io/v1alpha1
+          kind: KubeProxyConfiguration
+          mode: iptables
+      when: "'k8s_master' in group_names"
+
+    - name: kubeadm - pull images
+      command: kubeadm config images pull -v 5
+      when: "'k8s_master' in group_names"
+
+    - name: kubeadm - initialize the Kubernetes cluster
+      command: kubeadm init --config /etc/kubernetes/kube-init-config.yaml
+      when: "'k8s_master' in group_names"
+
+    - name: ansible - sleep for 45 seconds (wait for cluster startup)
+      wait_for:
+        timeout: 45

@@ -1,0 +1,70 @@
+---
+- hosts: k8s_master, k8s_workers
+  become: true
+
+  tasks:
+    - name: apt - update & upgrade packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: system - reboot (kernel update)
+      reboot:
+
+    - name: apt - download gpg key
+      get_url:
+        url: "{{ item.url }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - url: https://download.docker.com/linux/debian/gpg
+          dest: /etc/apt/trusted.gpg.d/docker.asc
+        - url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+          dest: /usr/share/keyrings/apt-key.gpg
+
+    - name: apt - add repository
+      apt_repository:
+        repo: "{{ item.repo }}"
+        state: present
+        filename: "{{ item.filename }}"
+      with_items:
+        - repo: deb [arch=arm64 signed-by=/etc/apt/trusted.gpg.d/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+          filename: docker.list
+        - repo: deb [arch=arm64 signed-by=/usr/share/keyrings/apt-key.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
+          filename: kubernetes.list
+
+    - name: apt - install misc packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - curl
+          - htop
+          - inxi
+          - nut
+          - ufw
+          - xfsprogs
+
+    - name: apt - install docker packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+
+    - name: apt - install Kubernetes binaries
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - kubeadm
+          - kubectl
+          - kubelet
+          - kubernetes-cni

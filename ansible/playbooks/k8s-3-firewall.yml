@@ -1,0 +1,32 @@
+---
+- hosts: k8s_master, k8s_workers
+  become: true
+
+  vars:
+    net_subnet: 10.244.0.0/16
+
+  tasks:
+    - name: firewall - allow RFC1918 networks to this host
+      community.general.ufw:
+        rule: allow
+        src: "{{ item }}"
+      loop:
+        - "{{ net_subnet }}"
+        - 10.10.0.0/24 # Servers
+        - 10.8.0.0/24 # Kubernetes
+        - 10.0.0.0/24 # LAN
+
+    - name: firewall - allow ingress ports
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - "22"
+        - "80"
+        - "443"
+
+    # - name: firewall - enable ufw
+    #   community.general.ufw:
+    #     state: enabled
+    #     policy: deny

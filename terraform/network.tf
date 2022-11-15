@@ -7,20 +7,32 @@ resource "helm_release" "tigera_operator" {
   repository = "https://docs.projectcalico.org/charts/"
   chart      = "tigera-operator"
 
-  version = "3.24.1"
+  version = "3.24.5"
 
   namespace        = "tigera-operator"
   create_namespace = true
+
+  timeout = 600 # toleration for not-ready kicks in after 300s
 
   values = [<<EOF
     installation:
       cni:
         type: Calico
       calicoNetwork:
-        bgp: Enabled
+        mtu: 1450
+        bgp: Disabled
         ipPools:
         - cidr: 10.244.0.0/16
-          encapsulation: None
+          encapsulation: VXLAN
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+              - k8s-controller-0
   EOF
   ]
 }
@@ -45,10 +57,16 @@ resource "helm_release" "metallb" {
   repository = "https://metallb.github.io/metallb"
   chart      = "metallb"
 
+  version = "0.13.7"
+
   namespace        = kubernetes_namespace.metallb.metadata[0].name
 
   values = [<<EOF
     controller:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -57,8 +75,12 @@ resource "helm_release" "metallb" {
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - node-rpi-0
+                - k8s-controller-0
     speaker:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -67,10 +89,9 @@ resource "helm_release" "metallb" {
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                - node-rpi-0
+                - k8s-controller-0
   EOF
   ]
-
   depends_on = [helm_release.tigera_operator]
 }
 
@@ -89,7 +110,9 @@ resource "helm_release" "metallb_address_pool" {
           namespace: metallb-system
         spec:
           addresses:
-            - 10.0.0.4/32
+            - 10.8.0.10/32
+            - 10.8.0.11/32
+            - 10.8.0.12/32
       - apiVersion: metallb.io/v1beta1
         kind: L2Advertisement
         metadata:

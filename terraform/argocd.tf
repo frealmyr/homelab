@@ -26,18 +26,19 @@ resource "kubernetes_secret_v1" "sso_github" {
     }
   }
 
+  type = "Opaque"
   data = {
     client_id     = local.sso_github.client_id
     client_secret = local.sso_github.client_secret
   }
-
-  type = "Opaque"
 }
 
 resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
+
+  version = "5.13.8"
 
   namespace = "argocd"
 
@@ -57,15 +58,6 @@ resource "helm_release" "argocd" {
             - all
         readOnlyRootFilesystem: true
         runAsNonRoot: true
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                  - node-rpi-0
     dex:
       enabled: true
     server:
@@ -82,18 +74,9 @@ resource "helm_release" "argocd" {
           g, fm-homelab:Administrators, role:org-admin
       extraArgs:
         - --insecure # Using traefik for TLS termination instead of argocd
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                  - node-rpi-0
     configs:
       cm:
-        create: false # Create a custom one in extraObjects, because i like working syncWaves in apps-of-apps
+        create: false # Create a custom one in extraObjects, because I enjoy working syncWaves in apps-of-apps
     extraObjects:
       - apiVersion: v1
         kind: ConfigMap
@@ -141,41 +124,33 @@ resource "helm_release" "argocd" {
   depends_on = [helm_release.metallb, kubernetes_secret_v1.sso_github]
 }
 
-# https://github.com/argoproj/argo-cd/issues/2789
-# This means that we cannot override values from a file in git
-# For now one need to use git and path for the chart, not ideal but works
-resource "helm_release" "argocd_app_homelab" {
-  name       = "argocd-app-homelab"
-  repository = "https://frealmyr.github.io/homelab"
-  chart      = "raw"
-  version    = "0.2.5"
-  values = [
-    <<-EOF
-    resources:
-      - apiVersion: argoproj.io/v1alpha1
-        kind: Application
-        metadata:
-          name: homelab
-          namespace: argocd
-        spec:
-          destination:
-            name: ''
-            namespace: ''
-            server: 'https://kubernetes.default.svc'
-          source:
-            repoURL: 'https://github.com/frealmyr/homelab.git'
-            targetRevision: main
-            helm:
-              releaseName: homelab
-              valueFiles:
-                - ../../k8s/stack.yaml
-            path: charts/argo
-          project: default
-          syncPolicy:
-            automated:
-              prune: true
-              selfHeal: true
-    EOF
-  ]
+resource "helm_release" "argocd_apps_homelab" {
+  name       = "argocd-apps-homelab"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo/argocd-apps"
+
+  version    = "0.0.3"
+
+  values = [<<EOF
+    applications:
+      - name: homelab
+        namespace: argocd
+        finalizers:
+          - resources-finalizer.argocd.argoproj.io
+        project: default
+        source:
+          repoURL: 'https://github.com/frealmyr/homelab.git'
+          targetRevision: main
+          helm:
+            releaseName: homelab
+            valueFiles:
+              - ../../k8s/stack.yaml
+        destination:
+          server: 'https://kubernetes.default.svc'
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+  EOF]
   depends_on = [helm_release.argocd]
 }

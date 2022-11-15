@@ -1,0 +1,7 @@
+---
+- hosts: k8s_master, k8s_workers
+  become: true
+
+  tasks:
+    - name: system - rebooting (cluster created)
+      reboot:
