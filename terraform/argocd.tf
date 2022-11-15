@@ -141,6 +141,7 @@ resource "helm_release" "argocd_apps_homelab" {
         source:
           repoURL: 'https://github.com/frealmyr/homelab.git'
           targetRevision: main
+          path: charts/argo
           helm:
             releaseName: homelab
             valueFiles:
