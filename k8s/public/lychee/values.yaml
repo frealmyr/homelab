@@ -3,6 +3,25 @@ app:
     repository: lycheeorg/lychee
     tag: latest
 
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8s-worker-0
+
+  persistentVolumes:
+    static:
+      - name: conf
+        mountPath: /lychee/conf
+      - name: uploads
+        mountPath: /lychee/uploads
+      - name: sym
+        mountPath: /lychee/sym
+
   environmentVariables:
     PUID: "1000"
     PGID: "1000"

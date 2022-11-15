@@ -1,4 +1,13 @@
 grafana:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8s-worker-1
   admin:
     existingSecret: grafana-admin-credentials
     userKey: username
