@@ -92,6 +92,7 @@ app:
           targetPort: 443
     - name: controller-tcp
       type: LoadBalancer
+      loadBalancerIP: 10.8.0.10
       ports:
         - name: ctrl-1-tcp
           port: 29810
@@ -110,6 +111,7 @@ app:
           targetPort: 29814
     - name: controller-udp
       type: LoadBalancer
+      loadBalancerIP: 10.8.0.10
       ports:
         - name: ctrl-1-udp
           port: 29810

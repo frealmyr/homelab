@@ -43,6 +43,22 @@ resource "helm_release" "argocd" {
   namespace = "argocd"
 
   values = [<<EOF
+    applicationSet:
+      enabled: false
+    redis:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - k8s-controller-0
     metrics:
       enabled: true
       serviceMonitor:
