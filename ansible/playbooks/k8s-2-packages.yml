@@ -44,6 +44,9 @@
           - htop
           - inxi
           - nut
+          - prometheus-node-exporter
+          - prometheus-node-exporter-collectors
+          - prometheus-process-exporter
           - ufw
           - xfsprogs
 

@@ -32,27 +32,52 @@
     - name: rpi - set config parameters
       lineinfile:
         path: /boot/config.txt
-        regexp: "{{ item.original }}"
-        line: "{{ item.tweaked }}"
+        regexp: "{{ item.find }}"
+        line: "{{ item.value }}"
         state: present
       with_items:
-        - original: ^gpu_mem=.*
-          tweaked: gpu_mem=16
-        - original: ^dtparam=audio=on
-          tweaked: "#dtparam=audio=on"
-        - original: ^dtoverlay=disable-bt
-          tweaked: dtoverlay=disable-bt
-        - original: ^dtoverlay=disable-wifi
-          tweaked: dtoverlay=disable-wifi
+        - find: ^gpu_mem=.*
+          value: gpu_mem=16
+        - find: ^dtparam=audio=on
+          value: "#dtparam=audio=on"
+        - find: ^dtoverlay=disable-bt
+          value: dtoverlay=disable-bt
+        - find: ^dtoverlay=disable-wifi
+          value: dtoverlay=disable-wifi
 
     - name: rpi - disable services
-      service:
+      systemd:
         name: "{{ item }}"
         enabled: no
         masked: yes
         state: stopped
       with_items:
-        - hciuart
+        - apt-daily-upgrade.timer
+        - apt-daily.timer
+        - hciuart.service
+        - man-db.timer
+        - raspi-config.service
+        - rpi-eeprom-update.service
+        - wpa_supplicant.service
+
+    - name: rpi - fstab move logs to RAM
+      lineinfile:
+        path: /etc/fstab
+        regexp: "^tmpfs \/var\/log.*"
+        line: "tmpfs /var/log tmpfs defaults,noatime,mode=0755 0 0"
+        state: present
+
+    # - name: rpi - overclock to 1.7GHz
+    #   lineinfile:
+    #     path: /boot/config.txt
+    #     regexp: "{{ item.find }}"
+    #     line: "{{ item.value }}"
+    #     state: present
+    #   with_items:
+    #     - find: .*over_voltage=.*
+    #       value: over_voltage=2
+    #     - find: .*arm_freq=.*
+    #       value: arm_freq=1700
 
     #########
     ## UPS ##
