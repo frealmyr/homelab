@@ -60,9 +60,9 @@ prometheus:
     persistentVolume:
       enabled: true
 
+  # Exporters for nodes are already installed with apt in ansible
   prometheus-node-exporter:
-    enabled: false # Exporters for nodes are already installed with apt in ansible
-
+    enabled: false
   serverFiles:
     prometheus.yml:
       scrape_configs:
