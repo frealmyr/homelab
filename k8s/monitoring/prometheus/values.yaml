@@ -22,7 +22,10 @@ prometheus:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: traefik-system-security@kubernetescrd
       hosts:
-        - prometheus.fmlab.no
+        - host: prometheus.fmlab.no
+          paths:
+            - path: /
+              pathType: Prefix
       tls:
         - secretName: certificate-prometheus-server
           hosts:
@@ -48,7 +51,10 @@ prometheus:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: traefik-system-security@kubernetescrd
       hosts:
-        - alertmanager.fmlab.no
+        - host: alertmanager.fmlab.no
+          paths:
+            - path: /
+              pathType: Prefix
       tls:
         - secretName: certificate-alertmanager
           hosts:
