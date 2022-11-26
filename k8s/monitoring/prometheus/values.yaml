@@ -29,6 +29,7 @@ prometheus:
             - prometheus.fmlab.no
     persistentVolume:
       enabled: true
+
   alertmanager:
     affinity:
       nodeAffinity:
@@ -58,5 +59,18 @@ prometheus:
             - alertmanager.fmlab.no
     persistentVolume:
       enabled: true
+
   prometheus-node-exporter:
     enabled: false # Exporters for nodes are already installed with apt in ansible
+
+  serverFiles:
+    prometheus.yml:
+      scrape_configs:
+        - job_name: node-exporter
+          scrape_interval: 30m
+          scrape_timeout: 30s
+          static_configs:
+            - targets:
+              - 10.8.0.10:9090
+              - 10.8.0.11:9090
+              - 10.8.0.12:9090
