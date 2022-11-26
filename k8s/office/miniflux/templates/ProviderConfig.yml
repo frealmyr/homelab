@@ -1,0 +1,41 @@
+---
+apiVersion: postgresql.sql.crossplane.io/v1alpha1
+kind: Database
+metadata:
+  name: miniflux
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  providerConfigRef:
+    name: postgres
+---
+apiVersion: postgresql.sql.crossplane.io/v1alpha1
+kind: User
+metadata:
+  name: miniflux
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  providerConfigRef:
+    name: postgres
+  forProvider: {}
+  writeConnectionSecretToRef:
+    name: credentials-db-miniflux
+    namespace: miniflux
+---
+apiVersion: postgresql.sql.crossplane.io/v1alpha1
+kind: Grant
+metadata:
+  name: miniflux
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  providerConfigRef:
+    name: postgres
+  forProvider:
+    privileges:
+      - ALL
+    userRef:
+      name: miniflux
+    databaseRef:
+      name: miniflux

@@ -3,8 +3,6 @@ apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
   name: mariadb
-  annotations:
-    argocd.argoproj.io/sync-wave: "-3"
 spec:
   credentials:
     source: MySQLConnectionSecret

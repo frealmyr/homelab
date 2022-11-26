@@ -3,26 +3,25 @@ app:
     repository: miniflux/miniflux
     tag: latest
 
+  secretEnvironmentVariables:
+    - name: CREATE_ADMIN
+      secret:
+        name: credentials-db-firefly
+        key: username
+    - name: ADMIN_PASSWORD
+      secret:
+        name: credentials-db-firefly
+        key: password
+    - name: DATABASE_URL
+      secret:
+        name: credentials-db-firefly
+        key: endpoint
+
   environmentVariables:
     - name: RUN_MIGRATIONS
       value: "1"
     - name: CREATE_ADMIN
       value: "1"
-    - name: ADMIN_USERNAME
-      valueFrom:
-        secretKeyRef:
-          name: miniflux-db-creds
-          key: username
-    - name: ADMIN_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: miniflux-db-creds
-          key: password
-    - name: DATABASE_URL
-      valueFrom:
-        secretKeyRef:
-          name: miniflux-db-creds
-          key: url
 
   containerPorts:
     - name: http

@@ -3,8 +3,6 @@ apiVersion: postgresql.sql.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
   name: postgres
-  annotations:
-    argocd.argoproj.io/sync-wave: "-3"
 spec:
   credentials:
     source: PostgreSQLConnectionSecret
