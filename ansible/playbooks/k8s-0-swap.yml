@@ -1,10 +1,11 @@
 ---
-- hosts: k8s_master, k8s_workers
+- hosts: all
   become: true
+  max_fail_percentage: 0
 
   tasks:
-    # Swapping to disk is bad business when we have the entire rootfs on NFS share.
-    # Also, k8s requires swap to be disabled. So might as well start there.
+    # Kubernetes requires swap to be disabled
+    # removing swap also speeds up reboots on rpi
     - name: swap - remove swapfile from /etc/fstab if it exist
       mount:
         name: "{{ item }}"

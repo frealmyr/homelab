@@ -2,20 +2,23 @@
 - hosts: all
   become: true
 
-# - name: k8s - disable swap to speed up reboots
-#   import_playbook: playbooks/k8s-0-swap.yml
+- name: checks
+  import_playbook: playbooks/checks.yml
 
-# - name: k8s - ensure hostname is correct
-#   import_playbook: playbooks/k8s-1-hostname.yml
+- name: k8s - disable swap
+  import_playbook: playbooks/k8s-0-swap.yml
 
-# - name: k8s - install packages
-#   import_playbook: playbooks/k8s-2-packages.yml
+- name: k8s - ensure hostname is correct
+  import_playbook: playbooks/k8s-1-hostname.yml
 
-# - name: k8s - configure firewall
-#   import_playbook: playbooks/k8s-3-firewall.yml
+- name: k8s - install packages
+  import_playbook: playbooks/k8s-2-packages.yml
 
-# - name: k8s - configure host for kubeadm
-#   import_playbook: playbooks/k8s-4-config.yml
+- name: k8s - configure firewall
+  import_playbook: playbooks/k8s-3-firewall.yml
+
+- name: k8s - configure host for kubeadm
+  import_playbook: playbooks/k8s-4-config.yml
 
 - name: k8s - create kubeadm cluster
   import_playbook: playbooks/k8s-5-create-cluster.yml

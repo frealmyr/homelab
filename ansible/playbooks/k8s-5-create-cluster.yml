@@ -1,5 +1,5 @@
 ---
-- hosts: k8s_master, k8s_workers
+- hosts: k8s_master
   become: true
 
   vars:
@@ -75,15 +75,12 @@
           apiVersion: kubeproxy.config.k8s.io/v1alpha1
           kind: KubeProxyConfiguration
           mode: iptables
-      when: "'k8s_master' in group_names"
 
     - name: kubeadm - pull images
       command: kubeadm config images pull -v 5
-      when: "'k8s_master' in group_names"
 
     - name: kubeadm - initialize the Kubernetes cluster
       command: kubeadm init --config /etc/kubernetes/kube-init-config.yaml
-      when: "'k8s_master' in group_names"
 
     - name: ansible - sleep for 45 seconds (wait for cluster startup)
       wait_for:

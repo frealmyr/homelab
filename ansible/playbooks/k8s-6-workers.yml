@@ -3,7 +3,24 @@
   become: true
 
   tasks:
-    - name: kubeadmin - create kubeadm join token
+    - name: kublet - restart service
+      service:
+        name: kubelet
+        daemon_reload: yes
+        state: restarted
+      when: "'k8s_workers' in group_names"
+
+    - name: kubeadm - reset existing kubernetes configuration
+      command: kubeadm reset -f
+      when: "'k8s_workers' in group_names"
+
+    - name: kubeadm - remove cni folder
+      file:
+        path: /etc/cni/net.d
+        state: absent
+      when: "'k8s_workers' in group_names"
+
+    - name: kubeadm - create kubeadm join token
       command: kubeadm token create --print-join-command
       when: "'k8s_master' in group_names"
       register: k8s_join_token

@@ -3,7 +3,6 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: traefik-dashboard
-  namespace: traefik-system
 spec:
   secretName: traefik-dashboard
   dnsNames:

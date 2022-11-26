@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  become: true
+  vars:
+    local_user: fredrick
+
+  tasks:
+    - name: checks - ensure access to google secret manager
+      shell: gcloud secrets describe homelab-kubeconfig
+      delegate_to: localhost
+      become_user: "{{ local_user }}"
+      register: gcpsm_upload_kubectl_output
