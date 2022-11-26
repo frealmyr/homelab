@@ -1,0 +1,12 @@
+apiVersion: v2
+name: postgres
+description: Postgresql for the Homelab
+
+type: application
+
+version: 1.0.0
+
+dependencies:
+  - name: app
+    version: ^1.0.0
+    repository: "https://frealmyr.github.io/homelab/"

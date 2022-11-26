@@ -15,6 +15,12 @@ appProject:
         sync:
           autoSync: true
           wave: "-1"
+      postgres:
+        namespace:
+          name: databases
+        sync:
+          autoSync: true
+          wave: "-1"
       redis:
         namespace:
           name: databases
