@@ -4,6 +4,7 @@ basePath: k8s
 
 namespaces:
   databases:
+  entertainment:
   monitoring:
 
 appProject:
@@ -27,6 +28,12 @@ appProject:
         sync:
           autoSync: true
           wave: "-1"
+
+  entertainment:
+    applications:
+      transmission:
+        namespace:
+          name: entertainment
 
   home:
     applications:
