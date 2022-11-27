@@ -90,7 +90,7 @@ app:
         - name: https
           port: 443
           targetPort: 443
-    - name: controller-tcp
+    - name: controller
       type: NodePort
       ports:
         - name: ctrl-1-tcp
@@ -113,9 +113,6 @@ app:
           port: 29814
           targetPort: 29814
           nodePort: 29814
-    - name: controller-udp
-      type: NodePort
-      ports:
         - name: ctrl-1-udp
           port: 29810
           targetPort: 29810
