@@ -91,47 +91,55 @@ app:
           port: 443
           targetPort: 443
     - name: controller-tcp
-      type: LoadBalancer
-      loadBalancerIP: 10.8.0.10
+      type: NodePort
       ports:
         - name: ctrl-1-tcp
           port: 29810
           targetPort: 29810
+          nodePort: 29810
         - name: ctrl-2-tcp
           port: 29811
           targetPort: 29811
+          nodePort: 29811
         - name: ctrl-3-tcp
           port: 29812
           targetPort: 29812
+          nodePort: 29812
         - name: ctrl-4-tcp
           port: 29813
           targetPort: 29813
+          nodePort: 29813
         - name: ctrl-5-tcp
           port: 29814
           targetPort: 29814
+          nodePort: 29814
     - name: controller-udp
-      type: LoadBalancer
-      loadBalancerIP: 10.8.0.10
+      type: NodePort
       ports:
         - name: ctrl-1-udp
           port: 29810
           targetPort: 29810
+          nodePort: 29810
           protocol: UDP
         - name: ctrl-2-udp
           port: 29811
           targetPort: 29811
+          nodePort: 29811
           protocol: UDP
         - name: ctrl-3-udp
           port: 29812
           targetPort: 29812
+          nodePort: 29812
           protocol: UDP
         - name: ctrl-4-udp
           port: 29813
           targetPort: 29813
+          nodePort: 29813
           protocol: UDP
         - name: ctrl-5-udp
           port: 29814
           targetPort: 29814
+          nodePort: 29814
           protocol: UDP
 
   podSecurityContext:
