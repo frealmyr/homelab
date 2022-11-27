@@ -71,6 +71,9 @@
             serviceSubnet: "{{ subnet_svc }}"
             dnsDomain: cluster.local
           controlPlaneEndpoint: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}:6443"
+          apiServer:
+            extraArgs:
+              service-node-port-range: 1-65535
           ---
           apiVersion: kubeproxy.config.k8s.io/v1alpha1
           kind: KubeProxyConfiguration
