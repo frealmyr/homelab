@@ -35,6 +35,12 @@ app:
         - name: https
           port: 9091
           targetPort: 9091
+    - name: test
+      type: NodePort
+      ports:
+        - name: test
+          port: 9091
+          targetPort: 9091
     - name: peer-tcp
       type: NodePort
       ports:
