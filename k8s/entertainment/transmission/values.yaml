@@ -41,6 +41,7 @@ app:
         - name: test
           port: 9091
           targetPort: 9091
+          nodePort: 9091
     - name: peer-tcp
       type: NodePort
       ports:
