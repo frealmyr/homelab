@@ -59,11 +59,11 @@ app:
           name: http
           port: 9091
         hosts:
-          - host: transmission.fmlab.no
+          - host: down.fmlab.no
             paths:
               - path: /
                 pathType: ImplementationSpecific
         tls:
           - secretName: transmission
             hosts:
-              - transmission.fmlab.no
+              - down.fmlab.no
