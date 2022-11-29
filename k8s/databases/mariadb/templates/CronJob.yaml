@@ -11,8 +11,13 @@ spec:
         spec:
           containers:
           - name: mysqldump
-            image: mariadb:10
+            image: {{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}
             imagePullPolicy: IfNotPresent
+            command: [ "/bin/sh", "-c" ]
+            args:
+              - cd backup/;
+                DUMP_FILE_NAME="mariadb-dump-`date +%Y-%m-%d-%H-%M`.sql";
+                mariadb-dump --all-databases -h $HOST -u$USER -p$PASSWORD > $DUMP_FILE_NAME;
             env:
               - name: HOST
                 valueFrom:
@@ -29,13 +34,6 @@ spec:
                   secretKeyRef:
                     name: credentials-sql
                     key: root_password
-            command:
-                - sh
-                - -c
-                - |
-                - cd backup/ \
-                - DUMP_FILE_NAME="mariadb-dump-`date +%Y-%m-%d-%H-%M`.sql" \
-                - mysqldump -A -h $HOST -u$USER -p$PASSWORD > $DUMP_FILE_NAME
             volumeMounts:
             - mountPath: /backup
               name: backup-volume
