@@ -1,0 +1,47 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mariadb-backup
+spec:
+  schedule: "* 1 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: mysqldump
+            image: mariadb:10
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: HOST
+                valueFrom:
+                  secretKeyRef:
+                    name: credentials-sql
+                    key: endpoint
+              - name: USER
+                valueFrom:
+                  secretKeyRef:
+                    name: credentials-sql
+                    key: username
+              - name: PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: credentials-sql
+                    key: root_password
+            command:
+                - sh
+                - -c
+                - |
+                - cd backup/ \
+                - DUMP_FILE_NAME="mariadb-dump-`date +%Y-%m-%d-%H-%M`.sql" \
+                - mysqldump -A -h $HOST -u$USER -p$PASSWORD > $DUMP_FILE_NAME
+            volumeMounts:
+            - mountPath: /backup
+              name: backup-volume
+          volumes:
+            - name: backup-volume
+              hostPath:
+                path: /var/lib/k8s/volumes/{{ include "app.name" $ }}/backups
+                type: DirectoryOrCreate
+          restartPolicy: OnFailure
