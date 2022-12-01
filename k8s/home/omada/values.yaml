@@ -48,10 +48,38 @@ app:
     SSL_CERT_NAME: "tls.crt"
     SSL_KEY_NAME: "tls.key"
 
+  additionalContainers:
+    - name: prometheus-exporter
+      image:
+        repository: chhaley/omada_exporter
+        pullPolicy: IfNotPresent
+        tag: latest
+      environmentVariables:
+        - name: OMADA_HOST
+          value: "https://127.0.0.1"
+        - name: OMADA_SITE
+          value: "KG28"
+        - name: OMADA_USER
+          valueFrom:
+            secretKeyRef:
+              name: omada-credentials-viewer
+              key: username
+        - name: OMADA_PASS
+          valueFrom:
+            secretKeyRef:
+              name: omada-credentials-viewer
+              key: password
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+
   containerPorts:
     - name: https
       containerPort: 443
       protocol: TCP
+    - name: prometheus
+      containerPort: 9202
     - name: ctrl-1-tcp
       containerPort: 29810
       protocol: TCP

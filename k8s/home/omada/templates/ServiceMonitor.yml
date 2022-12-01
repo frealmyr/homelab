@@ -1,0 +1,10 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: omada
+spec:
+  selector:
+    matchLabels:
+      app: omada
+  endpoints:
+  - port: prometheus
