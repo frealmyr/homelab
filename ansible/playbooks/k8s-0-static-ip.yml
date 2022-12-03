@@ -4,10 +4,6 @@
   max_fail_percentage: 0
 
   tasks:
-    ###############
-    ## Static IP ##
-    ###############
-
     - name: network - configure static ip
       blockinfile:
         path: /etc/dhcpcd.conf

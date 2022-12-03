@@ -9,4 +9,3 @@ spec:
     connectionSecretRef:
       name: credentials-postgres
       namespace: databases
-  tls: preferred

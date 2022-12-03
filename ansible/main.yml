@@ -9,31 +9,31 @@
   import_playbook: playbooks/k8s-0-static-ip.yml
 
 - name: k8s - disable swap
-  import_playbook: playbooks/k8s-0-swap.yml
+  import_playbook: playbooks/k8s-1-swap.yml
 
 - name: k8s - ensure hostname is correct
-  import_playbook: playbooks/k8s-1-hostname.yml
+  import_playbook: playbooks/k8s-2-hostname.yml
 
 - name: k8s - install packages
-  import_playbook: playbooks/k8s-2-packages.yml
+  import_playbook: playbooks/k8s-3-packages.yml
 
 - name: k8s - configure firewall
-  import_playbook: playbooks/k8s-3-firewall.yml
+  import_playbook: playbooks/k8s-4-firewall.yml
 
 - name: k8s - configure host for kubeadm
-  import_playbook: playbooks/k8s-4-config.yml
+  import_playbook: playbooks/k8s-5-config.yml
 
 - name: k8s - create kubeadm cluster
-  import_playbook: playbooks/k8s-5-create-cluster.yml
+  import_playbook: playbooks/k8s-6-create-cluster.yml
 
 - name: k8s - enroll worker nodes to cluster
-  import_playbook: playbooks/k8s-6-workers.yml
+  import_playbook: playbooks/k8s-7-workers.yml
 
 - name: k8s - generate kubectl for terraform
-  import_playbook: playbooks/k8s-7-kubeconfig.yml
+  import_playbook: playbooks/k8s-8-kubeconfig.yml
 
 - name: k8s - configure taints on nodes
-  import_playbook: playbooks/k8s-8-taints.yml
+  import_playbook: playbooks/k8s-9-taints.yml
 
 - name: k8s - reboot to ensure everything is working on boot
-  import_playbook: playbooks/k8s-9-reboot.yml
+  import_playbook: playbooks/k8s-10-reboot.yml
