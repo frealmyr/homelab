@@ -3,15 +3,8 @@ app:
     repository: mbentley/omada-controller
     tag: 5.7
 
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: kubernetes.io/hostname
-            operator: In
-            values:
-            - k8s-worker-0
+  nodeSelector:
+    kubernetes.io/hostname: k8s-worker-0
 
   persistentVolumes:
     static:
@@ -43,32 +36,6 @@ app:
     SSL_CERT_NAME: "tls.crt"
     SSL_KEY_NAME: "tls.key"
 
-  # additionalContainers:
-  #   - name: prometheus-exporter
-  #     image:
-  #       repository: chhaley/omada_exporter
-  #       pullPolicy: IfNotPresent
-  #       tag: latest
-  #     environmentVariables:
-  #       - name: OMADA_HOST
-  #         value: "https://127.0.0.1"
-  #       - name: OMADA_SITE
-  #         value: "KG28"
-  #       - name: OMADA_USER
-  #         valueFrom:
-  #           secretKeyRef:
-  #             name: omada-credentials-viewer
-  #             key: username
-  #       - name: OMADA_PASS
-  #         valueFrom:
-  #           secretKeyRef:
-  #             name: omada-credentials-viewer
-  #             key: password
-  #     liveness:
-  #       enabled: false
-  #     readiness:
-  #       enabled: false
-
   containerPorts:
     - name: https
       containerPort: 443
@@ -76,30 +43,30 @@ app:
     - name: ctrl-1-tcp
       containerPort: 29810
       protocol: TCP
-    - name: ctrl-1-udp
-      containerPort: 29810
-      protocol: UDP
     - name: ctrl-2-tcp
       containerPort: 29811
       protocol: TCP
-    - name: ctrl-2-udp
-      containerPort: 29811
-      protocol: UDP
     - name: ctrl-3-tcp
       containerPort: 29812
       protocol: TCP
-    - name: ctrl-3-udp
-      containerPort: 29812
-      protocol: UDP
     - name: ctrl-4-tcp
       containerPort: 29813
       protocol: TCP
-    - name: ctrl-4-udp
-      containerPort: 29813
-      protocol: UDP
     - name: ctrl-5-tcp
       containerPort: 29814
       protocol: TCP
+    - name: ctrl-1-udp
+      containerPort: 29810
+      protocol: UDP
+    - name: ctrl-2-udp
+      containerPort: 29811
+      protocol: UDP
+    - name: ctrl-3-udp
+      containerPort: 29812
+      protocol: UDP
+    - name: ctrl-4-udp
+      containerPort: 29813
+      protocol: UDP
     - name: ctrl-5-udp
       containerPort: 29814
       protocol: UDP
@@ -118,42 +85,42 @@ app:
           port: 29810
           targetPort: 29810
           nodePort: 29810
+        - name: ctrl-2-tcp
+          port: 29811
+          targetPort: 29811
+          nodePort: 29811
+        - name: ctrl-3-tcp
+          port: 29812
+          targetPort: 29812
+          nodePort: 29812
+        - name: ctrl-4-tcp
+          port: 29813
+          targetPort: 29813
+          nodePort: 29813
+        - name: ctrl-5-tcp
+          port: 29814
+          targetPort: 29814
+          nodePort: 29814
         - name: ctrl-1-udp
           port: 29810
           targetPort: 29810
           nodePort: 29810
           protocol: UDP
-        - name: ctrl-2-tcp
-          port: 29811
-          targetPort: 29811
-          nodePort: 29811
         - name: ctrl-2-udp
           port: 29811
           targetPort: 29811
           nodePort: 29811
           protocol: UDP
-        - name: ctrl-3-tcp
-          port: 29812
-          targetPort: 29812
-          nodePort: 29812
         - name: ctrl-3-udp
           port: 29812
           targetPort: 29812
           nodePort: 29812
           protocol: UDP
-        - name: ctrl-4-tcp
-          port: 29813
-          targetPort: 29813
-          nodePort: 29813
         - name: ctrl-4-udp
           port: 29813
           targetPort: 29813
           nodePort: 29813
           protocol: UDP
-        - name: ctrl-5-tcp
-          port: 29814
-          targetPort: 29814
-          nodePort: 29814
         - name: ctrl-5-udp
           port: 29814
           targetPort: 29814
