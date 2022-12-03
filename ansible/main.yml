@@ -5,6 +5,9 @@
 - name: checks
   import_playbook: playbooks/checks.yml
 
+- name: k8s - configure static ip
+  import_playbook: playbooks/k8s-0-static-ip.yml
+
 - name: k8s - disable swap
   import_playbook: playbooks/k8s-0-swap.yml
 

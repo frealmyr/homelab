@@ -76,7 +76,7 @@ appProject:
         namespace:
           create: true
         sync:
-          autoSync: true
+          autoSync: false
 
   monitoring:
     applications:

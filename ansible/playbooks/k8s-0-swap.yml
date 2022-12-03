@@ -1,9 +1,12 @@
 ---
 - hosts: all
   become: true
-  max_fail_percentage: 0
 
   tasks:
+    ##########
+    ## Swap ##
+    ##########
+
     # Kubernetes requires swap to be disabled
     # removing swap also speeds up reboots on rpi
     - name: swap - remove swapfile from /etc/fstab if it exist
