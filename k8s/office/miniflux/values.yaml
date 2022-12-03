@@ -29,35 +29,26 @@ app:
       protocol: TCP
 
   additionalContainers:
-    - name: postgres
-      environmentVariables:
-        - name: POSTGRES_DB
-          valueFrom:
-            secretKeyRef:
-              name: miniflux-db-creds
-              key: database
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: miniflux-db-creds
-              key: username
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: miniflux-db-creds
-              key: password
+    - name: prometheus-exporter
       image:
-        repository: postgres
+        repository: chhaley/omada_exporter
         pullPolicy: IfNotPresent
-        tag: 14-alpine
-      persistentVolumes:
-        pvc:
-          - name: postgres
-            size: 10Gi
-            mounts:
-              - path: /var/lib/postgresql/data
-                subPath: postgres
-      securityContext: {}
+        tag: latest
+      environmentVariables:
+        - name: OMADA_HOST
+          value: "https://127.0.0.1"
+        - name: OMADA_SITE
+          value: "KG28"
+        - name: OMADA_USER
+          valueFrom:
+            secretKeyRef:
+              name: omada-credentials-viewer
+              key: username
+        - name: OMADA_PASS
+          valueFrom:
+            secretKeyRef:
+              name: omada-credentials-viewer
+              key: password
       liveness:
         enabled: false
       readiness:

@@ -1,0 +1,75 @@
+app:
+  image:
+    repository: weejewel/wg-easy
+    tag: 7
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8s-worker-1
+
+  persistentVolumes:
+    static:
+      - name: config
+        mountPath: /etc/wireguard
+
+  environmentVariables:
+    WG_HOST: "vpn.fmlab.no"
+    PASSWORD: "yolo"
+
+  securityContext:
+    capabilities:
+      add:
+        - "NET_ADMIN"
+        - "SYS_MODULE"
+    sysctls:
+      - name: net.ipv4.conf.all.src_valid_mark
+        value: "1"
+      - name: net.ipv4.ip_forward
+        value: "1"
+
+  containerPorts:
+    - name: http
+      containerPort: 51821
+      protocol: TCP
+    - name: wg
+      containerPort: 51820
+      protocol: UDP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 51821
+          targetPort: 51821
+    - name: wireguard
+      type: NodePort
+      ports:
+        - name: wg
+          port: 51820
+          targetPort: 51820
+          nodePort: 51820
+          protocol: UDP
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 51821
+        hosts:
+          - host: wireguard.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        tls:
+          - secretName: wireguard
+            hosts:
+              - wireguard.fmlab.no

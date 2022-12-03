@@ -72,6 +72,11 @@ appProject:
           create: true
         sync:
           autoSync: true
+      wireguard:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
 
   monitoring:
     applications:
