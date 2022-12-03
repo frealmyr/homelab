@@ -3,15 +3,8 @@ app:
     repository: adguard/adguardhome
     tag: latest
 
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: kubernetes.io/hostname
-            operator: In
-            values:
-            - k8s-worker-1
+  nodeSelector:
+    kubernetes.io/hostname: k8s-worker-0
 
   persistentVolumes:
     static:
