@@ -20,7 +20,8 @@ app:
 
   environmentVariables:
     WG_HOST: "vpn.fmlab.no"
-    PASSWORD: "yolo"
+    WG_DEFAULT_ADDRESS: "10.100.0.x"
+    WG_DEFAULT_DNS: "1.1.1.1, 1.0.0.1"
 
   securityContext:
     capabilities:

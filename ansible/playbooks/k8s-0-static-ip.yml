@@ -13,6 +13,6 @@
         path: /etc/dhcpcd.conf
         block: |
           interface eth0
-          static_routers=10.8.0.1
-          static domain_name_servers=10.8.0.1
           static ip_address={{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}/24
+          static routers=10.8.0.1
+          static domain_name_servers=1.1.1.1 1.0.0.1
