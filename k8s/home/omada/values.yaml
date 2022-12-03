@@ -73,35 +73,33 @@ app:
     - name: https
       containerPort: 443
       protocol: TCP
-    - name: prometheus
-      containerPort: 9202
     - name: ctrl-1-tcp
       containerPort: 29810
-      protocol: TCP
-    - name: ctrl-2-tcp
-      containerPort: 29811
-      protocol: TCP
-    - name: ctrl-3-tcp
-      containerPort: 29812
-      protocol: TCP
-    - name: ctrl-4-tcp
-      containerPort: 29813
-      protocol: TCP
-    - name: ctrl-5-tcp
-      containerPort: 29814
       protocol: TCP
     - name: ctrl-1-udp
       containerPort: 29810
       protocol: UDP
+    - name: ctrl-2-tcp
+      containerPort: 29811
+      protocol: TCP
     - name: ctrl-2-udp
       containerPort: 29811
       protocol: UDP
+    - name: ctrl-3-tcp
+      containerPort: 29812
+      protocol: TCP
     - name: ctrl-3-udp
       containerPort: 29812
       protocol: UDP
+    - name: ctrl-4-tcp
+      containerPort: 29813
+      protocol: TCP
     - name: ctrl-4-udp
       containerPort: 29813
       protocol: UDP
+    - name: ctrl-5-tcp
+      containerPort: 29814
+      protocol: TCP
     - name: ctrl-5-udp
       containerPort: 29814
       protocol: UDP
