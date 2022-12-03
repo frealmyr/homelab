@@ -27,6 +27,8 @@ app:
       add:
         - "NET_ADMIN"
         - "SYS_MODULE"
+
+  podSecurityContext:
     sysctls:
       - name: net.ipv4.conf.all.src_valid_mark
         value: "1"

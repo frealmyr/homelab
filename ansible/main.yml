@@ -20,8 +20,8 @@
 - name: k8s - configure host for kubeadm
   import_playbook: playbooks/k8s-4-config.yml
 
-- name: k8s - create kubeadm cluster
-  import_playbook: playbooks/k8s-5-create-cluster.yml
+# - name: k8s - create kubeadm cluster
+#   import_playbook: playbooks/k8s-5-create-cluster.yml
 
 - name: k8s - enroll worker nodes to cluster
   import_playbook: playbooks/k8s-6-workers.yml

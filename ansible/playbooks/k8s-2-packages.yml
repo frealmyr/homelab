@@ -8,9 +8,11 @@
         upgrade: full
         update_cache: yes
         cache_valid_time: 3600
+      register: package_upgrade
 
     - name: system - reboot (kernel update)
       reboot:
+      when: package_upgrade.changed
 
     - name: apt - download gpg key
       get_url:
