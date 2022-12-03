@@ -1,9 +1,5 @@
 prometheus:
   server:
-    tolerations:
-      - key: node-role.kubernetes.io/control-plane
-        operator: Exists
-        effect: NoSchedule
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -12,7 +8,7 @@ prometheus:
             - key: kubernetes.io/hostname
               operator: In
               values:
-              - k8s-controller-0
+              - k8s-worker-0
     ingress:
       enabled: true
       annotations:

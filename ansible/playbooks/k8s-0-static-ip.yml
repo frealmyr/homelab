@@ -1,0 +1,18 @@
+---
+- hosts: all
+  become: true
+  max_fail_percentage: 0
+
+  tasks:
+    ###############
+    ## Static IP ##
+    ###############
+
+    - name: network - configure static ip
+      blockinfile:
+        path: /etc/dhcpcd.conf
+        block: |
+          interface eth0
+          static_routers=10.8.0.1
+          static domain_name_servers=10.8.0.1
+          static ip_address={{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}/24

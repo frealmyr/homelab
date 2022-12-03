@@ -37,6 +37,7 @@
         - br_netfilter
         - overlay
 
+    # allowedUnsafeSysctls is used for wg-easy
     - name: kubectl - copy KubeletConfiguration.yaml
       copy:
         dest: /etc/kubernetes/kube-init-config.yaml
@@ -62,6 +63,7 @@
           kubeReserved:
             cpu: '0.25'
             memory: '500Mi'
+          allowedUnsafeSysctls: 'net.ipv4.conf.all.src_valid_mark'
           ---
           apiVersion: kubeadm.k8s.io/v1beta3
           kind: ClusterConfiguration
