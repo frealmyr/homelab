@@ -1,6 +1,6 @@
 app:
   image:
-    repository: ghcr.io/actualbudget/actual-server
+    repository: jlongster/actual-server
     tag: 22.10-alpine
 
   nodeSelector:
