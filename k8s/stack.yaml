@@ -35,16 +35,6 @@ appProject:
           create: true
         sync:
           autoSync: true
-      firefly:
-        namespace:
-          create: true
-        sync:
-          autoSync: true
-      firefly-importer:
-        namespace:
-          name: firefly
-        sync:
-          autoSync: true
       homeassistant:
         namespace:
           create: true
@@ -88,6 +78,11 @@ appProject:
   office:
     applications:
       miniflux:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+      actualbudget:
         namespace:
           create: true
         sync:

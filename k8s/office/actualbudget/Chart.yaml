@@ -1,6 +1,6 @@
 apiVersion: v2
-name: firefly
-description: Personal finance manager
+name: actualbudget
+description: Money, budget and all that boring stuff
 
 type: application
 
