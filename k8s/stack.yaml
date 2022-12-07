@@ -82,11 +82,6 @@ appProject:
           create: true
         sync:
           autoSync: true
-      actualbudget:
-        namespace:
-          create: true
-        sync:
-          autoSync: true
 
   public:
     applications:

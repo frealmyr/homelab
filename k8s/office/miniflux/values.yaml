@@ -4,17 +4,17 @@ app:
     tag: latest
 
   secretEnvironmentVariables:
-    - name: CREATE_ADMIN
+    - name: ADMIN_USERNAME
       secret:
-        name: credentials-db-firefly
+        name: credentials-app-miniflux
         key: username
     - name: ADMIN_PASSWORD
       secret:
-        name: credentials-db-firefly
+        name: credentials-app-miniflux
         key: password
     - name: DATABASE_URL
       secret:
-        name: credentials-db-firefly
+        name: credentials-db-miniflux
         key: endpoint
 
   environmentVariables:
@@ -27,32 +27,6 @@ app:
     - name: http
       containerPort: 8080
       protocol: TCP
-
-  additionalContainers:
-    - name: prometheus-exporter
-      image:
-        repository: chhaley/omada_exporter
-        pullPolicy: IfNotPresent
-        tag: latest
-      environmentVariables:
-        - name: OMADA_HOST
-          value: "https://127.0.0.1"
-        - name: OMADA_SITE
-          value: "KG28"
-        - name: OMADA_USER
-          valueFrom:
-            secretKeyRef:
-              name: omada-credentials-viewer
-              key: username
-        - name: OMADA_PASS
-          valueFrom:
-            secretKeyRef:
-              name: omada-credentials-viewer
-              key: password
-      liveness:
-        enabled: false
-      readiness:
-        enabled: false
 
   services:
     - name: http
@@ -73,19 +47,6 @@ app:
           - host: news.fmlab.no
             paths:
               - path: /
-                pathType: ImplementationSpecific
-        tls:
-          - secretName: miniflux
-            hosts:
-              - news.fmlab.no
-      - name: api
-        service:
-          name: http
-          port: 8080
-        hosts:
-          - host: news.fmlab.no
-            paths:
-              - path: /fever
                 pathType: ImplementationSpecific
         tls:
           - secretName: miniflux
