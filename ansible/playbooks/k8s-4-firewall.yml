@@ -57,6 +57,18 @@
         - "{{ subnet_svc }}"
         - 10.8.0.0/24 # K8s VLAN
 
+    ###############
+    ## Wireguard ##
+    ###############
+
+    - name: firewall - allow wireguard ingress to worker-0
+      community.general.ufw:
+        rule: allow
+        direction: in
+        port: 51820
+        proto: udp
+      when: "'k8s-worker-0' in inventory_hostname"
+
     ############
     ## Global ##
     ############
