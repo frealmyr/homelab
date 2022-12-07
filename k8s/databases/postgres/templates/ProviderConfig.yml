@@ -9,3 +9,4 @@ spec:
     connectionSecretRef:
       name: credentials-postgres
       namespace: databases
+  sslMode: disable
