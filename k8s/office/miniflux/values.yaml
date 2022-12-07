@@ -18,10 +18,8 @@ app:
         key: endpoint
 
   environmentVariables:
-    - name: RUN_MIGRATIONS
-      value: "1"
-    - name: CREATE_ADMIN
-      value: "1"
+    RUN_MIGRATIONS: "1"
+    CREATE_ADMIN: "1"
 
   containerPorts:
     - name: http
