@@ -8,6 +8,7 @@ metadata:
 spec:
   providerConfigRef:
     name: postgres
+  forProvider: {}
 ---
 apiVersion: postgresql.sql.crossplane.io/v1alpha1
 kind: Role
