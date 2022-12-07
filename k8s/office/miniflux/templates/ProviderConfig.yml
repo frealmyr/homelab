@@ -4,13 +4,13 @@ kind: Database
 metadata:
   name: miniflux
   annotations:
-    argocd.argoproj.io/sync-wave: "-2"
+    argocd.argoproj.io/sync-wave: "-3"
 spec:
   providerConfigRef:
     name: postgres
 ---
 apiVersion: postgresql.sql.crossplane.io/v1alpha1
-kind: User
+kind: Role
 metadata:
   name: miniflux
   annotations:
@@ -18,7 +18,9 @@ metadata:
 spec:
   providerConfigRef:
     name: postgres
-  forProvider: {}
+  forProvider:
+    privileges:
+      login: true
   writeConnectionSecretToRef:
     name: credentials-db-miniflux
     namespace: miniflux
@@ -35,7 +37,8 @@ spec:
   forProvider:
     privileges:
       - ALL
-    userRef:
+    withOption: GRANT
+    roleRef:
       name: miniflux
     databaseRef:
       name: miniflux
