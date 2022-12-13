@@ -12,10 +12,22 @@ app:
       secret:
         name: credentials-app-miniflux
         key: password
-    - name: DATABASE_URL
+    - name: DB_USERNAME
+      secret:
+        name: credentials-db-miniflux
+        key: username
+    - name: DB_PASSWORD
+      secret:
+        name: credentials-db-miniflux
+        key: password
+    - name: DB_HOST
       secret:
         name: credentials-db-miniflux
         key: endpoint
+    - name: DB_PORT
+      secret:
+        name: credentials-db-miniflux
+        key: port
 
   environmentVariables:
     RUN_MIGRATIONS: "1"
