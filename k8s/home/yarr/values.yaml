@@ -2,16 +2,16 @@ external-services:
   services:
     - name: jellyfin
       port: 8096
-      ipAddress: 10.10.0.10
+      ipAddress: 10.7.0.11
     - name: transmission
       port: 9091
-      ipAddress: 10.10.0.10
+      ipAddress: 10.7.0.11
     - name: sonarr
       port: 8989
-      ipAddress: 10.10.0.10
+      ipAddress: 10.7.0.11
     - name: radarr
       port: 7878
-      ipAddress: 10.10.0.10
+      ipAddress: 10.7.0.11
     - name: prowlarr
       port: 9696
-      ipAddress: 10.10.0.10
+      ipAddress: 10.7.0.11
