@@ -42,7 +42,7 @@ spec:
           {{- if .Values.environmentVariables }}
           {{- range $key, $value := .Values.environmentVariables }}
             - name: {{ $key }}
-              value: '{{ $value }}'
+              value: {{ $value }}
           {{- end }}
           {{- end }}
           {{- if .Values.secretEnvironmentVariables }}
