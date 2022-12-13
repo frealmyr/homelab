@@ -3,6 +3,11 @@ app:
     repository: miniflux/miniflux
     tag: latest
 
+  environmentVariables:
+    RUN_MIGRATIONS: "1"
+    CREATE_ADMIN: "1"
+    DATABASE_URL: "postgres://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/miniflux?sslmode=disable"
+
   secretEnvironmentVariables:
     - name: ADMIN_USERNAME
       secret:
@@ -28,11 +33,6 @@ app:
       secret:
         name: credentials-db-miniflux
         key: port
-
-  environmentVariables:
-    RUN_MIGRATIONS: "1"
-    CREATE_ADMIN: "1"
-    DATABASE_URL: "postgres://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_DATABASE):$(DB_PORT)/miniflux?sslmode=disable"
 
   containerPorts:
     - name: http
