@@ -77,7 +77,7 @@ appProject:
 
   office:
     applications:
-      miniflux:
+      freshrss:
         namespace:
           create: true
         sync:

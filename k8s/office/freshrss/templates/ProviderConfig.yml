@@ -2,7 +2,7 @@
 apiVersion: postgresql.sql.crossplane.io/v1alpha1
 kind: Database
 metadata:
-  name: miniflux
+  name: freshrss
   annotations:
     argocd.argoproj.io/sync-wave: "-3"
 spec:
@@ -13,7 +13,7 @@ spec:
 apiVersion: postgresql.sql.crossplane.io/v1alpha1
 kind: Role
 metadata:
-  name: miniflux
+  name: freshrss
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
 spec:
@@ -23,13 +23,13 @@ spec:
     privileges:
       login: true
   writeConnectionSecretToRef:
-    name: credentials-db-miniflux
-    namespace: miniflux
+    name: credentials-db-freshrss
+    namespace: freshrss
 ---
 apiVersion: postgresql.sql.crossplane.io/v1alpha1
 kind: Grant
 metadata:
-  name: miniflux
+  name: freshrss
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 spec:
@@ -40,6 +40,6 @@ spec:
       - ALL
     withOption: GRANT
     roleRef:
-      name: miniflux
+      name: freshrss
     databaseRef:
-      name: miniflux
+      name: freshrss

@@ -1,37 +1,29 @@
 app:
   image:
-    repository: miniflux/miniflux
+    repository: lscr.io/linuxserver/freshrss
     tag: latest
 
   environmentVariables:
-    RUN_MIGRATIONS: "1"
-    CREATE_ADMIN: "1"
-    DATABASE_URL: postgres://$$(DB_USERNAME):$$(DB_PASSWORD)@$$(DB_HOST):$$(DB_PORT)/miniflux?sslmode=disable
+    PUID: "1000"
+    PGID: "1000"
+    TZ: "Europe/Oslo"
 
   secretEnvironmentVariables:
-    - name: ADMIN_USERNAME
-      secret:
-        name: credentials-app-miniflux
-        key: username
-    - name: ADMIN_PASSWORD
-      secret:
-        name: credentials-app-miniflux
-        key: password
     - name: DB_USERNAME
       secret:
-        name: credentials-db-miniflux
+        name: credentials-db-freshrss
         key: username
     - name: DB_PASSWORD
       secret:
-        name: credentials-db-miniflux
+        name: credentials-db-freshrss
         key: password
     - name: DB_HOST
       secret:
-        name: credentials-db-miniflux
+        name: credentials-db-freshrss
         key: endpoint
     - name: DB_PORT
       secret:
-        name: credentials-db-miniflux
+        name: credentials-db-freshrss
         key: port
 
   containerPorts:
@@ -60,6 +52,6 @@ app:
               - path: /
                 pathType: ImplementationSpecific
         tls:
-          - secretName: miniflux
+          - secretName: freshrss
             hosts:
               - news.fmlab.no
