@@ -32,6 +32,7 @@ app:
   environmentVariables:
     RUN_MIGRATIONS: "1"
     CREATE_ADMIN: "1"
+    DATABASE_URL: "postgres://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_DATABASE):$(DB_PORT)/miniflux?sslmode=disable"
 
   containerPorts:
     - name: http
