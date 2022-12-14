@@ -85,7 +85,7 @@ appProject:
 
   public:
     applications:
-      lychee:
+      photoprism:
         namespace:
           create: true
         sync:

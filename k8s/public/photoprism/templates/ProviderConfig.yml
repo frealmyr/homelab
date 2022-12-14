@@ -2,7 +2,7 @@
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: Database
 metadata:
-  name: lychee
+  name: photoprism
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
 spec:
@@ -12,7 +12,7 @@ spec:
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: User
 metadata:
-  name: lychee
+  name: photoprism
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
 spec:
@@ -25,13 +25,13 @@ spec:
       maxConnectionsPerHour: 100
       maxUserConnections: 10
   writeConnectionSecretToRef:
-    name: credentials-db-lychee
-    namespace: lychee
+    name: credentials-db-photoprism
+    namespace: photoprism
 ---
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: Grant
 metadata:
-  name: lychee
+  name: photoprism
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 spec:
@@ -41,6 +41,6 @@ spec:
     privileges:
       - ALL
     userRef:
-      name: lychee
+      name: photoprism
     databaseRef:
-      name: lychee
+      name: photoprism
