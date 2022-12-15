@@ -85,7 +85,7 @@ appProject:
 
   public:
     applications:
-      photoprism:
+      photoview:
         namespace:
           create: true
         sync:
