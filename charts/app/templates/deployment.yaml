@@ -42,7 +42,7 @@ spec:
           {{- if .Values.environmentVariables }}
           {{- range $key, $value := .Values.environmentVariables }}
             - name: {{ $key }}
-              value: {{ $value }}
+              value: {{ $value | quote }}
           {{- end }}
           {{- end }}
           {{- if .Values.secretEnvironmentVariables }}
@@ -51,7 +51,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .secret.name }}
-                  key: {{ .secret.key }}
+                  key: {{ .secret.key | quote }}
           {{- end }}
           {{- end }}
           {{- end }}
@@ -235,8 +235,8 @@ spec:
       {{- range .Values.persistentVolumes.nfs }}
         - name: {{ .name }}
           nfs:
-            server: {{ quote .server }}
-            path: {{ .remotePath }}
+            server: {{ .server | quote }}
+            path: {{ .remotePath | quote }}
       {{- end }}
       {{- range .Values.mountSecrets }}
         - name: {{ .name }}

@@ -21,16 +21,16 @@ app:
         mountPath: /app/database
     nfs:
       - name: gallery
-        server: "'10.7.0.11'"
+        server: 10.7.0.11
         remotePath: /gallery
         mountPath: /app/gallery
 
   environmentVariables:
-    PHOTOVIEW_LISTEN_IP: "'0.0.0.0'"
-    PHOTOVIEW_LISTEN_PORT: "80"
-    PHOTOVIEW_DATABASE_DRIVER: "sqlite"
-    PHOTOVIEW_MEDIA_CACHE: "/app/cache"
-    PHOTOVIEW_SQLITE_PATH: "/app/database/photoview.db"
+    PHOTOVIEW_LISTEN_IP: 0.0.0.0
+    PHOTOVIEW_LISTEN_PORT: 80
+    PHOTOVIEW_DATABASE_DRIVER: sqlite
+    PHOTOVIEW_MEDIA_CACHE: /app/cache
+    PHOTOVIEW_SQLITE_PATH: /app/database/photoview.db
 
   secretEnvironmentVariables:
     - name: MAPBOX_TOKEN
