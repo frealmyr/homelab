@@ -21,7 +21,7 @@ app:
         mountPath: /app/database
     nfs:
       - name: gallery
-        server: 10.7.0.11
+        server: "10.7.0.11"
         remotePath: /gallery
         mountPath: /app/gallery
 
