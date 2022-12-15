@@ -40,7 +40,7 @@ secretEnvironmentVariables: {}
   #     name: credentials-db
   #     key: password
 
-persistentVolumes:
+persistentVolumes: {}
   # static:
   #   - name: config
   #     mountPath: /config
