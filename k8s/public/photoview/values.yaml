@@ -21,7 +21,7 @@ app:
         mountPath: /app/database
 
   environmentVariables:
-    PHOTOVIEW_LISTEN_IP: "https://photos.fmlab.no"
+    PHOTOVIEW_LISTEN_IP: "localhost"
     PHOTOVIEW_LISTEN_PORT: "8080"
     PHOTOVIEW_DATABASE_DRIVER: "sqlite"
     PHOTOVIEW_MEDIA_CACHE: "/app/cache"
