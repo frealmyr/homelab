@@ -1,0 +1,50 @@
+app:
+  image:
+    repository: viktorstrate/photoview
+    tag: 2.3.13
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8s-worker-0
+
+  persistentVolumes:
+    static:
+      - name: cache
+        mountPath: /app/cache
+      - name: sqlite
+        mountPath: /app/database
+
+  environmentVariables:
+    PHOTOVIEW_LISTEN_IP: "https://photos.fmlab.no"
+    PHOTOVIEW_LISTEN_PORT: "8080"
+    PHOTOVIEW_DATABASE_DRIVER: "sqlite"
+    PHOTOVIEW_MEDIA_CACHE: "/app/cache"
+    PHOTOVIEW_SQLITE_PATH: "/app/database/photoview.db"
+
+  secretEnvironmentVariables:
+    - name: MAPBOX_TOKEN
+      secret:
+        name: credentials-app
+        key: mapbox-token
+
+  additionalContainers:
+    - name: cloudflare-tunnel
+      image:
+        repository: milgradesec/cloudflared
+        tag: latest
+      command:
+        - /usr/local/bin/cloudflared
+        - '--no-autoupdate'
+        - tunnel
+        - run
+      secretEnvironmentVariables:
+        - name: TUNNEL_TOKEN
+          secret:
+            name: credentials-cloudflare-tunnel
+            key: token
