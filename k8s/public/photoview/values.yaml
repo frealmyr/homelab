@@ -28,8 +28,11 @@ app:
   environmentVariables:
     PHOTOVIEW_LISTEN_IP: 0.0.0.0
     PHOTOVIEW_LISTEN_PORT: 8080
+    PHOTOVIEW_SERVE_UI: true
     PHOTOVIEW_DEVELOPMENT_MODE: false
     PHOTOVIEW_DISABLE_FACE_RECOGNITION: true
+    PHOTOVIEW_UI_ENDPOINT: https://photos.fmlab.no/
+    PHOTOVIEW_API_ENDPOINT: https://photos.fmlab.no/api
     PHOTOVIEW_DATABASE_DRIVER: sqlite
     PHOTOVIEW_MEDIA_CACHE: /app/cache
     PHOTOVIEW_SQLITE_PATH: /app/database/photoview.db
@@ -56,7 +59,7 @@ app:
   ingresses:
     enabled: true
     ingress:
-      - name: frontend
+      - name: public
         service:
           name: http
           port: 8080
@@ -69,3 +72,16 @@ app:
           - secretName: photoview
             hosts:
               - photos.fmlab.no
+      - name: admin
+        service:
+          name: http
+          port: 8080
+        hosts:
+          - host: photosadm.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        tls:
+          - secretName: photoview-admin
+            hosts:
+              - photosadm.fmlab.no
