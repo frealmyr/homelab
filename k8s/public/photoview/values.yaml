@@ -19,12 +19,15 @@ app:
         mountPath: /app/cache
       - name: sqlite
         mountPath: /app/database
+    nfs:
+      - name: gallery
+        server: 10.7.0.11
+        remotePath: /gallery
+        mountPath: /app/gallery
 
   environmentVariables:
     PHOTOVIEW_LISTEN_IP: "127.0.0.1"
     PHOTOVIEW_LISTEN_PORT: "8080"
-    PHOTOVIEW_UI_ENDPOINT: "https://photos.fmlab.no"
-    PHOTOVIEW_API_ENDPOINT: "https://photos.fmlab.no/api"
     PHOTOVIEW_DATABASE_DRIVER: "sqlite"
     PHOTOVIEW_MEDIA_CACHE: "/app/cache"
     PHOTOVIEW_SQLITE_PATH: "/app/database/photoview.db"

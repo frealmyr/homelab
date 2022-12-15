@@ -72,6 +72,11 @@ persistentVolumes: {}
 #    - name: downloads
 #      mountPath: /mnt/downloads
 #      hostPath: /media/SSD2/Downloads
+# nfs:
+#   - name: gallery
+#     remotePath: /gallery
+#     server: 10.7.0.11
+#     mountPath: /app/gallery
 
 mountSecrets: {}
 #  - name: cert-app

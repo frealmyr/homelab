@@ -73,7 +73,7 @@ spec:
               protocol: {{ .protocol }}
           {{- end }}
           {{- end }}
-          {{- if or .Values.persistentVolumes.static .Values.persistentVolumes.dynamic .Values.persistentVolumes.hostPath .Values.mountSecrets .Values.mountConfigmaps }}
+          {{- if or .Values.persistentVolumes.static .Values.persistentVolumes.dynamic .Values.persistentVolumes.hostPath .Values.persistentVolumes.nfs .Values.mountSecrets .Values.mountConfigmaps }}
           volumeMounts:
           {{- if .Values.persistentVolumes }}
           {{- range .Values.persistentVolumes.dynamic }}
@@ -95,6 +95,10 @@ spec:
               mountPath: {{ .mountPath }}
           {{- end }}
           {{- range .Values.persistentVolumes.hostPath }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          {{- range .Values.persistentVolumes.nfs }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
           {{- end }}
@@ -199,7 +203,7 @@ spec:
             {{- toYaml .resources | nindent 12 }}
         {{- end }}
 
-      {{- if or .Values.persistentVolumes.dynamic .Values.persistentVolumes.static .Values.persistentVolumes.hostPath .Values.mountSecrets .Values.mountConfigmaps }}
+      {{- if or .Values.persistentVolumes.dynamic .Values.persistentVolumes.static .Values.persistentVolumes.hostPath .Values.persistentVolumes.nfs .Values.mountSecrets .Values.mountConfigmaps }}
       volumes:
       {{- if .Values.persistentVolumes }}
       {{- range .Values.persistentVolumes.dynamic }}
@@ -227,6 +231,12 @@ spec:
             {{- if .type }}
             type: {{ .type }}
             {{- end }}
+      {{- end }}
+      {{- range .Values.persistentVolumes.nfs }}
+        - name: {{ .name }}
+          nfs:
+            server: {{ .server }}
+            path: {{ .remotePath }}
       {{- end }}
       {{- range .Values.mountSecrets }}
         - name: {{ .name }}
