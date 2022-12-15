@@ -29,7 +29,7 @@ app:
     PHOTOPRISM_ADMIN_USER: "admin"                 # superadmin username
     PHOTOPRISM_ADMIN_PASSWORD: "insecure"          # initial superadmin password (minimum 8 characters)
     PHOTOPRISM_AUTH_MODE: "public"               # authentication mode (public, password)
-    PHOTOPRISM_SITE_URL: "https://photos.fmlab.no/"  # server URL in the format "http(s)://domain.name(:port)/(path)"
+    PHOTOPRISM_SITE_URL: "https://photos.fmlab.no:443/"  # server URL in the format "http(s)://domain.name(:port)/(path)"
     PHOTOPRISM_ORIGINALS_LIMIT: 5000               # file size limit for originals in MB (increase for high-res video)
     PHOTOPRISM_HTTP_COMPRESSION: "none"            # improves transfer speed and bandwidth utilization (none or gzip)
     PHOTOPRISM_WORKERS: 2                          # limits the number of indexing workers to reduce system load
