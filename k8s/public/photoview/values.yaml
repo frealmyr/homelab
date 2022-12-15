@@ -40,22 +40,6 @@ app:
         name: credentials-app
         key: mapbox-token
 
-  additionalContainers:
-    - name: cloudflare-tunnel
-      image:
-        repository: milgradesec/cloudflared
-        tag: latest
-      command:
-        - /usr/local/bin/cloudflared
-        - '--no-autoupdate'
-        - tunnel
-        - run
-      secretEnvironmentVariables:
-        - name: TUNNEL_TOKEN
-          secret:
-            name: credentials-cloudflare-tunnel
-            key: token
-
   containerPorts:
     - name: http
       containerPort: 8080
@@ -77,11 +61,11 @@ app:
           name: http
           port: 8080
         hosts:
-          - host: photos2.fmlab.no
+          - host: photos.fmlab.no
             paths:
               - path: /
                 pathType: ImplementationSpecific
         tls:
           - secretName: photoview
             hosts:
-              - photos2.fmlab.no
+              - photos.fmlab.no
