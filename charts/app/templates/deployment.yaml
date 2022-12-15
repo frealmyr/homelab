@@ -236,7 +236,7 @@ spec:
         - name: {{ .name }}
           nfs:
             server: {{ .server }}
-            path: {{ .remotePath }}
+            path: {{ quote .remotePath }}
       {{- end }}
       {{- range .Values.mountSecrets }}
         - name: {{ .name }}
