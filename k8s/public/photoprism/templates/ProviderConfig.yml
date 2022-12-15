@@ -18,12 +18,7 @@ metadata:
 spec:
   providerConfigRef:
     name: mariadb
-  forProvider:
-    resourceOptions:
-      maxQueriesPerHour: 1000
-      maxUpdatesPerHour: 1000
-      maxConnectionsPerHour: 100
-      maxUserConnections: 10
+  forProvider: {}
   writeConnectionSecretToRef:
     name: credentials-db-photoprism
     namespace: photoprism
