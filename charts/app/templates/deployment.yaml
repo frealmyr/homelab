@@ -235,8 +235,8 @@ spec:
       {{- range .Values.persistentVolumes.nfs }}
         - name: {{ .name }}
           nfs:
-            server: {{ .server }}
-            path: {{ quote .remotePath }}
+            server: {{ quote .server }}
+            path: {{ .remotePath }}
       {{- end }}
       {{- range .Values.mountSecrets }}
         - name: {{ .name }}
