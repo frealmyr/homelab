@@ -27,7 +27,7 @@ app:
 
   environmentVariables:
     PHOTOVIEW_LISTEN_IP: 0.0.0.0
-    PHOTOVIEW_LISTEN_PORT: 80
+    PHOTOVIEW_LISTEN_PORT: 8080
     PHOTOVIEW_DATABASE_DRIVER: sqlite
     PHOTOVIEW_MEDIA_CACHE: /app/cache
     PHOTOVIEW_SQLITE_PATH: /app/database/photoview.db
