@@ -218,7 +218,7 @@ readiness: {}
 
 ingresses:
   enabled: false
-  className: "traefik"
+  className: "traefik-internal"
   annotations:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"

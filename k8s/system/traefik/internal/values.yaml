@@ -1,0 +1,47 @@
+traefik:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - k8s-controller-0
+  ingressRoute:
+    dashboard:
+      enabled: false
+  namespaceOverride: traefik-internal
+  podSecurityPolicy:
+    enabled: false
+  providers:
+    kubernetesCRD:
+      allowCrossNamespace: true
+      allowExternalNameServices: true
+      ingressClass: traefik-internal
+    kubernetesIngress:
+      allowExternalNameServices: true
+      ingressClass: traefik-internal
+      publishedService:
+        enabled: true
+  service:
+    annotations:
+      metallb.universe.tf/allow-shared-ip: sharing-is-caring
+    spec:
+      loadBalancerIP: 10.8.0.10
+  tlsOptions:
+    default:
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+        - TLS_AES_256_GCM_SHA384
+        - TLS_CHACHA20_POLY1305_SHA256
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+      minVersion: VersionTLS12
+      sniStrict: true
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Exists

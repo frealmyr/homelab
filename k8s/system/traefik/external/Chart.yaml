@@ -1,0 +1,13 @@
+apiVersion: v2
+name: traefik-internal
+description: Traefik with authproxy and middlewares
+
+type: application
+
+version: 1.0.0
+appVersion: 2.7.1
+
+dependencies:
+  - name: traefik
+    version: 19.0.3
+    repository: https://helm.traefik.io/traefik
