@@ -1,5 +1,5 @@
 ---
-- hosts: k8s_master, k8s_workers
+- hosts: k8s_controller, k8s_workers
   become: true
 
   vars:
@@ -292,11 +292,11 @@
           networking:
             podSubnet: "{{ net_subnet }}"
           controlPlaneEndpoint: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}:6443"
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     - name: kubeadm - initialize the Kubernetes cluster
       command: kubeadm init --config /etc/kubernetes/kube-init-config.yaml
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     - name: ansible - sleep for 45 seconds (wait for cluster startup)
       wait_for:
@@ -312,17 +312,17 @@
         - mkdir -p /home/fredrick/.kube
         - cp /etc/kubernetes/admin.conf /home/fredrick/.kube/config
         - chown fredrick:fredrick /home/fredrick/.kube/config
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     - name: kubeadm - create kubeconfig for terraform
       command: kubeadm kubeconfig user --config /etc/kubernetes/ClusterConfiguration.yaml --client-name terraform --validity-period 8760h
       register: kubeconfig_terraform
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     - name: kubectl - grant terraform user cluster-admin role
       command: kubectl create clusterrolebinding terraform --clusterrole=cluster-admin --user=terraform
       become_user: fredrick
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     - name: kubeconfig - create Terraform directory if it does not exist
       file:
@@ -330,13 +330,13 @@
         state: directory
       delegate_to: localhost
       become_user: fredrick
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     - name: kubeconfig - copy kubeconfig to Terraform directory
       copy: content={{ kubeconfig_terraform.stdout }} dest=../../terraform/.terraform/kubeconfig
       delegate_to: localhost
       become_user: fredrick
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     ###########
     ## Nodes ##
@@ -345,7 +345,7 @@
     # - name: kubectl - remove taints from master node
     #   command: "kubectl taint nodes {{ ansible_hostname }} {{ item }}"
     #   become_user: fredrick
-    #   when: "'k8s_master' in group_names"
+    #   when: "'k8s_controller' in group_names"
     #   with_items:
     #     - node-role.kubernetes.io/control-plane:NoSchedule-
     #     #- node-role.kubernetes.io/master:NoSchedule-
@@ -359,12 +359,12 @@
 
     - name: kubeadmin - create kubeadm join token
       command: kubeadm token create --print-join-command
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
       register: k8s_join_token
 
     - set_fact:
         k8s_join_command: "{{ k8s_join_token.stdout }}"
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     - name: kubedm - enroll worker nodes to master
       command: "{{ hostvars['node-x300']['k8s_join_command'] }}"
