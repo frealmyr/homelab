@@ -11,7 +11,7 @@ app:
           - key: kubernetes.io/hostname
             operator: In
             values:
-            - k8s-worker-0
+            - k8s-worker-1
 
   persistentVolumes:
     static:

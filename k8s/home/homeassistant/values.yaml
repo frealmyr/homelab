@@ -23,8 +23,6 @@ app:
       - name: config
         mountPath: /config
 
-  podHostNetwork: true
-
   containerPorts:
     - name: http
       containerPort: 8123

@@ -4,7 +4,7 @@ app:
     tag: 7
 
   nodeSelector:
-    kubernetes.io/hostname: k8s-worker-0
+    kubernetes.io/hostname: k8s-worker-1
 
   persistentVolumes:
     static:
