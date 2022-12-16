@@ -7,7 +7,7 @@ traefik:
               - key: kubernetes.io/hostname
                 operator: In
                 values:
-                  - k8s-controller-0
+                  - k8s-worker-1
   ingressRoute:
     dashboard:
       enabled: false
@@ -28,7 +28,7 @@ traefik:
     annotations:
       metallb.universe.tf/allow-shared-ip: sharing-is-caring
     spec:
-      loadBalancerIP: 10.8.0.10
+      loadBalancerIP: 10.8.0.12
   tlsOptions:
     default:
       cipherSuites:
@@ -41,7 +41,3 @@ traefik:
         - CurveP384
       minVersion: VersionTLS12
       sniStrict: true
-  tolerations:
-    - effect: NoSchedule
-      key: node-role.kubernetes.io/control-plane
-      operator: Exists

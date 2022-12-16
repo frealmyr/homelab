@@ -1,5 +1,5 @@
 apiVersion: v2
-name: traefik
+name: traefik-external
 description: Traefik with authproxy and middlewares
 
 type: application

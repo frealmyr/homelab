@@ -125,8 +125,26 @@ appProject:
         sync:
           autoSync: true
           wave: "-2"
-      traefik:
-        type: manifest
+      traefik-internal:
+        namespace:
+          name: traefik-internal
+          create: true
+        sync:
+          autoSync: true
+          wave: "-1"
+        ignoreDifferences:
+          - group: ""
+            kind: ConfigMap
+            name: traefik-whitelist
+            jsonPointers:
+              - /data/whitelist
+      traefik-external:
+        namespace:
+          name: traefik-external
+          create: true
+        sync:
+          autoSync: true
+          wave: "-1"
         ignoreDifferences:
           - group: ""
             kind: ConfigMap
