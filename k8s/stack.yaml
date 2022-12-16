@@ -126,12 +126,7 @@ appProject:
           autoSync: true
           wave: "-2"
       traefik:
-        namespace:
-          name: traefik-system
-          create: true
-        sync:
-          autoSync: true
-          wave: "-1"
+        type: manifest
         ignoreDifferences:
           - group: ""
             kind: ConfigMap
