@@ -1,5 +1,5 @@
 ---
-- hosts: k8s_master, k8s_workers
+- hosts: k8s_controller, k8s_workers
   become: true
   vars:
     subnet_pod: 10.244.0.0/16
@@ -18,7 +18,7 @@
       community.general.ufw:
         rule: limit
         src: 10.0.0.0/24
-        port: 22
+        port: '22'
         proto: tcp
 
     - name: firewall - allow ingress ports from LAN
@@ -28,18 +28,18 @@
         port: "{{ item }}"
         proto: tcp
       loop:
-        - 80
-        - 443
-        - 8080
-        - 8443
+        - '80'
+        - '443'
+        - '8080'
+        - '8443'
 
     - name: firewall - allow kubectl access to controller from LAN
       community.general.ufw:
         rule: allow
         src: 10.0.0.0/24
-        port: 6443
+        port: '6443'
         proto: tcp
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     ################
     ## Kubernetes ##
@@ -57,17 +57,27 @@
         - "{{ subnet_svc }}"
         - 10.8.0.0/24 # K8s VLAN
 
-    ###############
-    ## Wireguard ##
-    ###############
+    ############
+    ## Public ##
+    ############
 
-    - name: firewall - allow wireguard ingress to worker-0
+    # - name: firewall - allow ingress ports to worker-1
+    #   community.general.ufw:
+    #     rule: allow
+    #     port: "{{ item }}"
+    #     proto: tcp
+    #   when: "'k8s-worker-1' in inventory_hostname"
+    #   loop:
+    #     - '80'
+    #     - '443'
+
+    - name: firewall - allow wireguard ingress to worker-1
       community.general.ufw:
         rule: allow
         direction: in
-        port: 51820
+        port: '51820'
         proto: udp
-      when: "'k8s-worker-0' in inventory_hostname"
+      when: "'k8s-worker-1' in inventory_hostname"
 
     ############
     ## Global ##

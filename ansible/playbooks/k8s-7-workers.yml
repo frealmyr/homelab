@@ -1,11 +1,18 @@
 ---
-- hosts: k8s_master, k8s_workers
+- hosts: k8s_controller, k8s_workers
   become: true
 
   tasks:
     - name: kublet - restart service
       service:
         name: kubelet
+        daemon_reload: yes
+        state: restarted
+      when: "'k8s_workers' in group_names"
+
+    - name: containerd - restart service
+      service:
+        name: containerd
         daemon_reload: yes
         state: restarted
       when: "'k8s_workers' in group_names"
@@ -22,12 +29,12 @@
 
     - name: kubeadm - create kubeadm join token
       command: kubeadm token create --print-join-command
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
       register: k8s_join_token
 
     - set_fact:
         k8s_join_command: "{{ k8s_join_token.stdout }}"
-      when: "'k8s_master' in group_names"
+      when: "'k8s_controller' in group_names"
 
     - name: kubedm - enroll worker nodes to master
       command: "{{ hostvars['k8s-controller-0']['k8s_join_command'] }}"

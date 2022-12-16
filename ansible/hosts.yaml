@@ -10,7 +10,7 @@ all:
       ansible_host: 10.8.0.12
       ansible_user: fredrick
 
-k8s_master:
+k8s_controller:
   hosts:
     k8s-controller-0:
       ansible_host: 10.8.0.10

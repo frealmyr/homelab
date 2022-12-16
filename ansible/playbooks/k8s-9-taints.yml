@@ -1,11 +1,11 @@
 ---
-- hosts: k8s_master, k8s_workers
+- hosts: k8s_controller, k8s_workers
   become: true
 
   tasks:
     # - name: kubectl - remove taints from control plane node
     #   shell: "KUBECONFIG=/etc/kubernetes/admin.conf kubectl taint nodes {{ ansible_hostname }} {{ item }}"
-    #   when: "'k8s_master' in group_names"
+    #   when: "'k8s_controller' in group_names"
     #   with_items:
     #     - node-role.kubernetes.io/control-plane:NoSchedule-
     #     #- node-role.kubernetes.io/master:NoSchedule-

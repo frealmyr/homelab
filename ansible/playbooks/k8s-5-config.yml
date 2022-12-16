@@ -3,7 +3,7 @@
   become: true
 
   vars:
-    synology_ip: 10.10.0.11
+    synology_ip: 10.7.0.11
     sysctl_config:
       net.ipv4.ip_forward: 1
       net.ipv4.conf.all.forwarding: 1
@@ -67,7 +67,9 @@
         line: "tmpfs /var/log tmpfs defaults,noatime,mode=0755 0 0"
         state: present
 
-    - name: rpi - overclock to 1.7GHz
+    # UNI-T voltmeter shows 1.15A max with USB SSD connected. So around 1A lower than the 2.4A max the PSU provides.
+    # The 120mm desktop FAN which is connected to the same power supply should cool this effectivly
+    - name: rpi - overclock to 2.0GHz
       lineinfile:
         path: /boot/config.txt
         regexp: "{{ item.find }}"
@@ -75,9 +77,9 @@
         state: present
       with_items:
         - find: .*over_voltage=.*
-          value: over_voltage=2
+          value: over_voltage=6
         - find: .*arm_freq=.*
-          value: arm_freq=1700
+          value: arm_freq=2000
 
     #########
     ## UPS ##

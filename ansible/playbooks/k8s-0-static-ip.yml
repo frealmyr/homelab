@@ -4,11 +4,27 @@
   max_fail_percentage: 0
 
   tasks:
+
+    - name: network - create interface file if it does not exist
+      file:
+        path: /etc/network/interfaces.d/eth0
+        state: touch
+
     - name: network - configure static ip
       blockinfile:
-        path: /etc/dhcpcd.conf
+        path: /etc/network/interfaces.d/eth0
         block: |
-          interface eth0
-          static ip_address={{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}/24
-          static routers=10.8.0.1
-          static domain_name_servers=1.1.1.1 1.0.0.1
+          auto eth0
+          iface eth0 inet static
+              address {{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}
+              netmask 255.255.255.0
+              network 10.8.0.0
+              broadcast 10.8.0.255
+              gateway 10.8.0.1
+
+    - name: network - disable dhcpcd service
+      systemd:
+        name: "dhcpcd.service"
+        enabled: no
+        masked: yes
+        state: stopped
