@@ -8,8 +8,6 @@ traefik:
                 operator: In
                 values:
                   - k8s-controller-0
-  ingressClass:
-    enabled: false
   ingressRoute:
     dashboard:
       enabled: false
