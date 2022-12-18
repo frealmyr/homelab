@@ -374,6 +374,16 @@ entries:
     version: 1.0.0
   external-services:
   - apiVersion: v2
+    created: "2022-12-18T14:54:18.248673407Z"
+    description: For hooking up external services from other devices on the network
+      to Traefik
+    digest: c68e50a83bd15e7151b20a547e6e867386fedaded8aa10b3ede7d154487efcea
+    name: external-services
+    type: application
+    urls:
+    - https://github.com/frealmyr/homelab/releases/download/external-services-1.0.1/external-services-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
     created: "2022-10-15T17:27:26.428414234Z"
     description: For hooking up external services from other devices on the network
       to Traefik
@@ -414,4 +424,4 @@ entries:
     urls:
     - https://github.com/frealmyr/homelab/releases/download/raw-v0.2.5/raw-v0.2.5.tgz
     version: v0.2.5
-generated: "2022-12-18T13:58:40.86352811Z"
+generated: "2022-12-18T14:54:18.24904002Z"
