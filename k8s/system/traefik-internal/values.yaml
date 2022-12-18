@@ -21,6 +21,7 @@ traefik:
     kubernetesCRD:
       allowCrossNamespace: true
       allowExternalNameServices: true
+      ingressClass: traefik-internal
     kubernetesIngress:
       allowExternalNameServices: true
       ingressClass: traefik-internal

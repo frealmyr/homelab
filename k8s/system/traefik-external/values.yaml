@@ -14,9 +14,14 @@ traefik:
   namespaceOverride: traefik-external
   podSecurityPolicy:
     enabled: false
+  ports:
+    web:
+      redirectTo: websecure
   providers:
     kubernetesCRD:
-      enabled: false
+      allowCrossNamespace: true
+      allowExternalNameServices: true
+      ingressClass: traefik-external
     kubernetesIngress:
       allowExternalNameServices: true
       ingressClass: traefik-external
@@ -39,6 +44,3 @@ traefik:
         - CurveP384
       minVersion: VersionTLS12
       sniStrict: true
-  ports:
-    web:
-      redirectTo: websecure
