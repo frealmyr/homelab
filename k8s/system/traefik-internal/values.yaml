@@ -14,11 +14,13 @@ traefik:
   namespaceOverride: traefik-internal
   podSecurityPolicy:
     enabled: false
+  ports:
+    web:
+      redirectTo: websecure
   providers:
     kubernetesCRD:
       allowCrossNamespace: true
       allowExternalNameServices: true
-      ingressClass: traefik-internal
     kubernetesIngress:
       allowExternalNameServices: true
       ingressClass: traefik-internal

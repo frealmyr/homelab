@@ -16,9 +16,7 @@ traefik:
     enabled: false
   providers:
     kubernetesCRD:
-      allowCrossNamespace: true
-      allowExternalNameServices: true
-      ingressClass: traefik-external
+      enabled: false
     kubernetesIngress:
       allowExternalNameServices: true
       ingressClass: traefik-external
@@ -41,3 +39,6 @@ traefik:
         - CurveP384
       minVersion: VersionTLS12
       sniStrict: true
+  ports:
+    web:
+      redirectTo: websecure
