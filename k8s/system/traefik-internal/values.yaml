@@ -33,7 +33,7 @@ traefik:
     spec:
       loadBalancerIP: 10.8.0.10
   tlsOptions:
-    default:
+    strict:
       cipherSuites:
         - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
         - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305

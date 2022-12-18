@@ -6,6 +6,7 @@ metadata:
   namespace: traefik-internal
   annotations:
     kubernetes.io/ingress.class: traefik-internal
+    traefik.ingress.kubernetes.io/router.tls.options: traefik-internal-strict@kubernetescrd
 spec:
   entryPoints:
     - websecure
