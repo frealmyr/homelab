@@ -3,7 +3,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: traefik-dashboard
-  namespace: traefik-system
+  namespace: traefik-internal
 spec:
   entryPoints:
     - websecure
