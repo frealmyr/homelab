@@ -14,7 +14,7 @@ spec:
         - name: {{ .name }}
           port: {{ .port }}
       middlewares:
-        - name: traefik-system-security@kubernetescrd
+        - name: traefik-internal-security@kubernetescrd
   tls:
     secretName: {{ .name }}
 {{- end }}
