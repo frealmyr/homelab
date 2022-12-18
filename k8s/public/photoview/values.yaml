@@ -55,9 +55,9 @@ app:
 
   ingresses:
     enabled: true
+    className: traefik-external
     ingress:
       - name: frontend
-        className: traefik-external
         service:
           name: http
           port: 8080
