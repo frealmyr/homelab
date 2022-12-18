@@ -4,6 +4,8 @@ kind: Middleware
 metadata:
   name: security
   namespace: traefik-internal
+  annotations:
+    kubernetes.io/ingress.class: traefik-internal
 spec:
   headers:
     frameDeny: true
