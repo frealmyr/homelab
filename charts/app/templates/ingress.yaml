@@ -13,7 +13,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: 'websecure'
     traefik.ingress.kubernetes.io/router.tls: 'true'
     {{- end }}
-    traefik.ingress.kubernetes.io/router.middlewares: 'traefik-system-security@kubernetescrd'
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ .Values.ingresses.className }}-security@kubernetescrd"
     {{- with .Values.ingresses.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
