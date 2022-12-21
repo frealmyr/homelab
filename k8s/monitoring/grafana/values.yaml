@@ -10,11 +10,11 @@ grafana:
   ingress:
     enabled: true
     annotations:
-      kubernetes.io/ingress.class: traefik
+      kubernetes.io/ingress.class: traefik-internal
       cert-manager.io/cluster-issuer: letsencrypt-prod
       traefik.ingress.kubernetes.io/router.tls: "true"
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.middlewares: traefik-system-security@kubernetescrd
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-internal-security@kubernetescrd
     hosts:
       - grafana.fmlab.no
     tls:
