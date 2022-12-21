@@ -2,7 +2,9 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRouteTCP
 metadata:
-  name: ingressroute-tcp
+  name: omada-frontend
+  annotations:
+    kubernetes.io/ingress.class: traefik-internal
 spec:
   entryPoints:
     - websecure
