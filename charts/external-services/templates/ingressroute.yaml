@@ -5,7 +5,7 @@ kind: IngressRoute
 metadata:
   name: {{ .name }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.ingressClass }}
+    kubernetes.io/ingress.class: {{ $.Values.ingressClass }}
 spec:
   entryPoints:
     - websecure
@@ -16,7 +16,7 @@ spec:
         - name: {{ .name }}
           port: {{ .port }}
       middlewares:
-        - name: {{ .Values.ingressClass }}-security@kubernetescrd
+        - name: {{ $.Values.ingressClass }}-security@kubernetescrd
   tls:
     secretName: {{ .name }}
 {{- end }}
