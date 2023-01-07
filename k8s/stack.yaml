@@ -154,7 +154,7 @@ appProject:
 
   tools:
     applications:
-      openspeedtest:
+      librespeed:
         namespace:
           create: true
         sync:
