@@ -1,14 +1,19 @@
 app:
   image:
-    repository: openspeedtest/latest
+    repository: lscr.io/linuxserver/librespeed
     tag: latest
 
   nodeSelector:
     kubernetes.io/hostname: k8s-worker-1
 
+  environmentVariables:
+    PUID: "1000"
+    GUID: "1000"
+    TZ: "Europe/London"
+
   containerPorts:
     - name: http
-      containerPort: 3000
+      containerPort: 80
       protocol: TCP
 
   services:
@@ -16,8 +21,8 @@ app:
       type: ClusterIP
       ports:
         - name: http
-          port: 3000
-          targetPort: 3000
+          port: 8080
+          targetPort: 80
 
   ingresses:
     enabled: true
@@ -25,7 +30,7 @@ app:
       - name: frontend
         service:
           name: http
-          port: 3000
+          port: 8080
         hosts:
           - host: speedtest.fmlab.no
             paths:
