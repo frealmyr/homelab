@@ -151,3 +151,11 @@ appProject:
             name: traefik-whitelist
             jsonPointers:
               - /data/whitelist
+
+  tools:
+    applications:
+      openspeedtest:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
