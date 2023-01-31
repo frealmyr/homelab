@@ -40,6 +40,11 @@ appProject:
           create: true
         sync:
           autoSync: true
+      homebox:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
       homer:
         namespace:
           create: true
