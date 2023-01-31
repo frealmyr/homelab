@@ -1,6 +1,6 @@
 app:
   image:
-    repository: hcr.io/hay-kot/homebox
+    repository: ghcr.io/hay-kot/homebox
     tag: v0.7.0
 
   affinity:
