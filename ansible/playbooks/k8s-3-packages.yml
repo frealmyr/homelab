@@ -70,7 +70,7 @@
 
     - name: apt - install amd rocm kernel module
       apt:
-        name: rocm-hip-sdk
+        name: rocm-dkms
         state: present
 
     - name: apt - install misc packages
