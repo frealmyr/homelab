@@ -3,16 +3,6 @@ app:
     repository: lscr.io/linuxserver/homeassistant
     tag: latest
 
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: kubernetes.io/hostname
-            operator: In
-            values:
-            - k8s-worker-0
-
   environmentVariables:
     PID: "1000"
     PGID: "1000"
