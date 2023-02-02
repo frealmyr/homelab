@@ -94,7 +94,7 @@ appProject:
         namespace:
           create: true
         sync:
-          autoSync: false
+          autoSync: true
 
   system:
     applications:

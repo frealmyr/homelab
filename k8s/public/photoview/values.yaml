@@ -9,11 +9,11 @@ app:
         mountPath: /app/cache
       - name: sqlite
         mountPath: /app/database
-    nfs:
-      - name: gallery
-        server: 10.7.0.11
-        remotePath: /volume2/gallery
-        mountPath: /app/gallery
+    # nfs:
+    #   - name: gallery
+    #     server: 10.7.0.11
+    #     remotePath: /volume2/gallery
+    #     mountPath: /app/gallery
 
   environmentVariables:
     PHOTOVIEW_LISTEN_IP: 0.0.0.0
