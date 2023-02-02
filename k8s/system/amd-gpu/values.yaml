@@ -1,5 +1,4 @@
 amd-gpu:
-  nfd:
-    enabled: true
-  labeller:
-    enabled: false
+  dp:
+    image:
+      tag: "1.18.0"
