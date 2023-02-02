@@ -3,16 +3,6 @@ app:
     repository: ghcr.io/hay-kot/homebox
     tag: v0.7.0@sha256:944fa42979568e33b64d13ff09fdc97915853c999c8635ee89bfe37b5c6c602e
 
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: kubernetes.io/hostname
-            operator: In
-            values:
-            - k8s-worker-0
-
   persistentVolumes:
     static:
       - name: data

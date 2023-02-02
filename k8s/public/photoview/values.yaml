@@ -3,16 +3,6 @@ app:
     repository: viktorstrate/photoview
     tag: 2.3.13
 
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: kubernetes.io/hostname
-            operator: In
-            values:
-            - k8s-worker-1
-
   persistentVolumes:
     static:
       - name: cache

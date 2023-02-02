@@ -1,17 +1,7 @@
 app:
   image:
-    repository: arm64v8/redis
+    repository: redis
     tag: 7-alpine
-
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: kubernetes.io/hostname
-            operator: In
-            values:
-            - k8s-worker-0
 
   persistentVolumes:
     static:
