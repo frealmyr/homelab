@@ -3,9 +3,6 @@ app:
     repository: lscr.io/linuxserver/librespeed
     tag: latest
 
-  nodeSelector:
-    kubernetes.io/hostname: k8s-worker-1
-
   environmentVariables:
     PUID: "1000"
     GUID: "1000"

@@ -1,6 +1,4 @@
 grafana:
-  nodeSelector:
-    kubernetes.io/hostname: k8s-worker-0
   admin:
     existingSecret: grafana-admin-credentials
     userKey: username

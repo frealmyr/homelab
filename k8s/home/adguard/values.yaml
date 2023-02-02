@@ -3,9 +3,6 @@ app:
     repository: adguard/adguardhome
     tag: latest
 
-  nodeSelector:
-    kubernetes.io/hostname: k8s-worker-0
-
   persistentVolumes:
     static:
       - name: work

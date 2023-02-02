@@ -3,14 +3,6 @@ app:
     repository: mbentley/omada-controller
     tag: 5.7
 
-  tolerations:
-    - key: node-role.kubernetes.io/control-plane
-      operator: Exists
-      effect: NoSchedule
-
-  nodeSelector:
-    kubernetes.io/hostname: k8s-controller-0
-
   persistentVolumes:
     static:
       - name: data
