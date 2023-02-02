@@ -18,8 +18,8 @@ app:
     JELLYFIN_PublishedServerUrl: https://jellyfin.fmlab.no
 
   podSecurityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
+    # runAsUser: 1000
+    # runAsGroup: 1000
     SupplementalGroups:
       - 44 # Video
       - 109 # Render
