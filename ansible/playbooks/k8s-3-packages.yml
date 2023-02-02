@@ -14,7 +14,7 @@
       reboot:
       when: package_upgrade.changed
 
-    - name: apt - download gpg key
+    - name: apt - download gpg keys
       get_url:
         url: "{{ item.url }}"
         dest: "{{ item.dest }}"
@@ -23,6 +23,8 @@
           dest: /etc/apt/trusted.gpg.d/docker.asc
         - url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
           dest: /usr/share/keyrings/apt-key.gpg
+        - url: https://repo.radeon.com/rocm/rocm.gpg.key
+          dest: /etc/apt/trusted.gpg.d/rocm.asc
 
     - name: apt - add repository
       apt_repository:
@@ -34,6 +36,42 @@
           filename: docker.list
         - repo: deb [arch=amd64 signed-by=/usr/share/keyrings/apt-key.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
           filename: kubernetes.list
+        - repo: deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/rocm.asc] https://repo.radeon.com/amdgpu/latest/ubuntu {{ ansible_distribution_release }} main
+          filename: amdgpu.list
+        - repo: deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/rocm.asc] https://repo.radeon.com/rocm/apt/latest {{ ansible_distribution_release }} main
+          filename: rocm.list
+
+    # Fixes dependency hell that amd have yet to fix
+    # https://github.com/RadeonOpenCompute/ROCm/issues/1713#issuecomment-1292766819
+    - name: apt - raise priority for repo.radeon repositories
+      copy:
+        dest: /etc/apt/preferences.d/rocm-pin-600
+        content: |
+          Package: *
+          Pin: release o=repo.radeon.com
+          Pin-Priority: 600
+
+    - name: apt - update package cache
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 0
+
+    - name: apt - install amd rocm dependecies
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - amdgpu-dkms
+          - gnupg2
+          - libnuma-dev
+          - wget
+
+    - name: apt - install amd rocm kernel module
+      apt:
+        name: rocm-hip-sdk
+        state: present
 
     - name: apt - install misc packages
       apt:

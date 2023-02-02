@@ -98,6 +98,12 @@ appProject:
 
   system:
     applications:
+      amd-gpu:
+        namespace:
+          name: kube-system
+        sync:
+          autoSync: true
+          wave: "-1"
       external-secrets:
         namespace:
           name: external-secrets
