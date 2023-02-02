@@ -2,4 +2,4 @@ amd-gpu:
   nfd:
     enabled: true
   labeller:
-    enabled: true
+    enabled: false
