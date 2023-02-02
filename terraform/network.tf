@@ -61,37 +61,6 @@ resource "helm_release" "metallb" {
 
   namespace        = kubernetes_namespace.metallb.metadata[0].name
 
-  values = [<<EOF
-    controller:
-      tolerations:
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - k8s-controller-0
-    speaker:
-      tolerations:
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - k8s-controller-0
-  EOF
-  ]
   depends_on = [helm_release.tigera_operator]
 }
 
@@ -110,9 +79,8 @@ resource "helm_release" "metallb_address_pool" {
           namespace: metallb-system
         spec:
           addresses:
-            - 10.8.0.10/32
-            - 10.8.0.11/32
-            - 10.8.0.12/32
+            - 10.8.0.10/32 # private
+            - 10.8.0.11/32 # public
       - apiVersion: metallb.io/v1beta1
         kind: L2Advertisement
         metadata:

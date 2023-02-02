@@ -15,71 +15,27 @@
 
   tasks:
     ##################
-    ## Raspberry Pi ##
+    ## Disks / Swap ##
     ##################
 
-    - name: rpi - enable container related cgroups
-      replace:
-        path: /boot/cmdline.txt
-        regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
-        replace: '\1 {{ item }}'
-      with_items:
-        - "cgroup_enable=cpuset"
-        - "cgroup_enable=memory"
-        - "cgroup_memory=1"
-        - "swapaccount=1"
-
-    - name: rpi - set config parameters
-      lineinfile:
-        path: /boot/config.txt
-        regexp: "{{ item.find }}"
-        line: "{{ item.value }}"
-        state: present
-      with_items:
-        - find: ^gpu_mem=.*
-          value: gpu_mem=16
-        - find: ^dtparam=audio=on
-          value: "#dtparam=audio=on"
-        - find: ^dtoverlay=disable-bt
-          value: dtoverlay=disable-bt
-        - find: ^dtoverlay=disable-wifi
-          value: dtoverlay=disable-wifi
-
-    - name: rpi - disable services
-      systemd:
+    - name: fstab - remove swapfile from /etc/fstab if it exist
+      mount:
         name: "{{ item }}"
-        enabled: no
-        masked: yes
-        state: stopped
+        fstype: swap
+        state: absent
       with_items:
-        - apt-daily-upgrade.timer
-        - apt-daily.timer
-        - hciuart.service
-        - man-db.timer
-        - raspi-config.service
-        - rpi-eeprom-update.service
-        - wpa_supplicant.service
+        - none
+        - swap
 
-    - name: rpi - fstab move logs to RAM
-      lineinfile:
+    - name: fstab - add sdd mount options
+      replace:
+        backup: yes
         path: /etc/fstab
-        regexp: "^tmpfs \/var\/log.*"
-        line: "tmpfs /var/log tmpfs defaults,noatime,mode=0755 0 0"
-        state: present
-
-    # UNI-T voltmeter shows 1.15A max with USB SSD connected. So around 1A lower than the 2.4A max the PSU provides.
-    # The 120mm desktop FAN which is connected to the same power supply should cool this effectivly
-    - name: rpi - overclock to 2.0GHz
-      lineinfile:
-        path: /boot/config.txt
-        regexp: "{{ item.find }}"
-        line: "{{ item.value }}"
-        state: present
+        regexp: '^(\S+)(\s+)(\S+)(\s+)(ext4|xfs|btrfs)(\s+)(((?!{{item}})\S)*)(\s+)(\d)(\s+)(\d)$'
+        replace: '\1\2\3\4\5\6\7,{{item}}\9\10\11\12'
       with_items:
-        - find: .*over_voltage=.*
-          value: over_voltage=6
-        - find: .*arm_freq=.*
-          value: arm_freq=2000
+        - discard
+        - noatime
 
     #########
     ## UPS ##
@@ -120,7 +76,7 @@
     - name: modprobe - load modules on boot
       lineinfile:
         path: /etc/modules
-        line: "{{item}}"
+        line: "{{ item }}"
         state: present
       with_items:
         - br_netfilter

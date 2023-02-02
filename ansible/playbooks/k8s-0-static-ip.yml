@@ -4,27 +4,43 @@
   max_fail_percentage: 0
 
   tasks:
+    - name: netplan - remove default configuration
+      ansible.builtin.file:
+        path: /etc/netplan/00-installer-config.yaml
+        state: absent
 
-    - name: network - create interface file if it does not exist
-      file:
-        path: /etc/network/interfaces.d/eth0
-        state: touch
-
-    - name: network - configure static ip
+    - name: netplan - configure static ip
       blockinfile:
-        path: /etc/network/interfaces.d/eth0
+        path: /etc/netplan/00-server.yaml
+        create: yes
         block: |
-          auto eth0
-          iface eth0 inet static
-              address {{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}
-              netmask 255.255.255.0
-              network 10.8.0.0
-              broadcast 10.8.0.255
-              gateway 10.8.0.1
-
-    - name: network - disable dhcpcd service
-      systemd:
-        name: "dhcpcd.service"
-        enabled: no
-        masked: yes
-        state: stopped
+          network:
+            version: 2
+            renderer: networkd
+            ethernets:
+              enp3s0:
+                dhcp4: false
+                dhcp6: false
+                addresses:
+                    - 10.8.0.10/24:
+                        label: enp3s0:private
+                    - 10.8.0.11/24:
+                        label: enp3s0:public
+                nameservers:
+                  addresses: [1.1.1.1,1.0.0.1]
+                routes:
+                    - to: default
+                      via: 10.8.0.1
+                      metric: 50
+              enp4s0:
+                dhcp4: false
+                dhcp6: false
+                addresses:
+                    - 10.8.0.12/24
+                nameservers:
+                  addresses: [1.1.1.1,1.0.0.1]
+                routes:
+                    - to: default
+                      via: 10.8.0.1
+                      metric: 200
+                      on-link: yes

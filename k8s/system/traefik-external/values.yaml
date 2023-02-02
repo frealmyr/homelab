@@ -1,13 +1,4 @@
 traefik:
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                  - k8s-worker-1
   ingressRoute:
     dashboard:
       enabled: false
@@ -31,4 +22,16 @@ traefik:
     annotations:
       metallb.universe.tf/allow-shared-ip: sharing-is-caring
     spec:
-      loadBalancerIP: 10.8.0.12
+      loadBalancerIP: 10.8.0.11
+  tlsOptions:
+    default:
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+        - TLS_AES_256_GCM_SHA384
+        - TLS_CHACHA20_POLY1305_SHA256
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+      minVersion: VersionTLS12
+      sniStrict: true

@@ -19,7 +19,7 @@
         url: "{{ item.url }}"
         dest: "{{ item.dest }}"
       with_items:
-        - url: https://download.docker.com/linux/debian/gpg
+        - url: https://download.docker.com/linux/ubuntu/gpg
           dest: /etc/apt/trusted.gpg.d/docker.asc
         - url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
           dest: /usr/share/keyrings/apt-key.gpg
@@ -30,9 +30,9 @@
         state: present
         filename: "{{ item.filename }}"
       with_items:
-        - repo: deb [arch=arm64 signed-by=/etc/apt/trusted.gpg.d/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+        - repo: deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
           filename: docker.list
-        - repo: deb [arch=arm64 signed-by=/usr/share/keyrings/apt-key.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
+        - repo: deb [arch=amd64 signed-by=/usr/share/keyrings/apt-key.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
           filename: kubernetes.list
 
     - name: apt - install misc packages

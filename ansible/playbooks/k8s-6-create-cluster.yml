@@ -45,11 +45,13 @@
       vars:
         content: |
           ---
-          apiVersion: kubeadm.k8s.io/v1beta2
+          apiVersion: kubeadm.k8s.io/v1beta3
           kind: InitConfiguration
           nodeRegistration:
             name: "{{ ansible_hostname }}"
-            criSocket: "/run/containerd/containerd.sock"
+            criSocket: "unix:///run/containerd/containerd.sock"
+            imagePullPolicy: IfNotPresent
+            taints: []
           localAPIEndpoint:
             advertiseAddress: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}"
             bindPort: 6443
@@ -58,12 +60,17 @@
           kind: KubeletConfiguration
           cgroupDriver: systemd
           systemReserved:
-            cpu: '0.25'
-            memory: '500Mi'
+            cpu: '500m'
+            memory: '1Gi'
+            ephemeral-storage: '1Gi'
           kubeReserved:
-            cpu: '0.25'
-            memory: '500Mi'
-          allowedUnsafeSysctls: 
+            cpu: '1'
+            memory: '2Gi'
+            ephemeral-storage: '1Gi'
+          evictionHard:
+            memory.available: '500Mi'
+            nodefs.available: '10%'
+          allowedUnsafeSysctls:
             - 'net.ipv4.ip_forward'
             - 'net.ipv4.conf.all.src_valid_mark'
           ---
@@ -78,6 +85,7 @@
           apiServer:
             extraArgs:
               service-node-port-range: 1-65535
+            timeoutForControlPlane: 5m0s
           ---
           apiVersion: kubeproxy.config.k8s.io/v1alpha1
           kind: KubeProxyConfiguration

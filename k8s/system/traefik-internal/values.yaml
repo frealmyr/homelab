@@ -1,13 +1,4 @@
 traefik:
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                  - k8s-controller-0
   ingressRoute:
     dashboard:
       enabled: false
@@ -44,7 +35,3 @@ traefik:
         - CurveP384
       minVersion: VersionTLS12
       sniStrict: true
-  tolerations:
-    - effect: NoSchedule
-      key: node-role.kubernetes.io/control-plane
-      operator: Exists

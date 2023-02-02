@@ -4,6 +4,7 @@
   vars:
     subnet_pod: 10.244.0.0/16
     subnet_svc: 10.122.0.0/16
+    mgmt_ip: 10.8.0.12
 
   tasks:
     - name: firewall - reset firewall to installation defaults
@@ -42,6 +43,7 @@
         src: "{{ item }}"
         port: '6443'
         proto: tcp
+        dest: "{{ mgmt_ip }}"
       loop:
         - '10.0.0.0/24'
         - '10.100.0.0/24'
