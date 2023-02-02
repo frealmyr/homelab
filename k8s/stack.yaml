@@ -28,6 +28,14 @@ appProject:
           autoSync: true
           wave: "-1"
 
+  entertainment:
+    applications:
+      jellyfin:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+
   home:
     applications:
       adguard:
