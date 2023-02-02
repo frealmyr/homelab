@@ -2,3 +2,5 @@ amd-gpu:
   dp:
     image:
       tag: "1.18.0"
+  nfd:
+    enabled: true
