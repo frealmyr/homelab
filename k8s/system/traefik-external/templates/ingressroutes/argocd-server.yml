@@ -17,6 +17,6 @@ spec:
         - name: argocd-server
           port: 80
       middlewares:
-        - name: traefik-external-security@kubernetescrd
+        - name: traefik-internal-security@kubernetescrd
   tls:
     secretName: argocd-server
