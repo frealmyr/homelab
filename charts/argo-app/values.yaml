@@ -1,0 +1,7 @@
+repoURL: https://github.com/frealmyr/homelab
+targetRevision: k8s/restruct
+basePath: k8s
+
+namespaces: {}
+
+appProject: {}
