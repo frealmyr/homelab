@@ -19,4 +19,4 @@ spec:
       middlewares:
         - name: traefik-external-security@kubernetescrd
   tls:
-    secretName: argocd-server
+    secretName: tls-argocd-webhook
