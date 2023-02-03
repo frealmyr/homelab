@@ -20,7 +20,7 @@ spec:
     {{- end }}
   project: {{ $project_key }}
   source:
-    targetRevision: main
+    targetRevision: {{ $.Values.targetRevision }}
     path: {{ $.Values.basePath }}/{{ $project_key }}/{{ $app_key }}
     repoURL: {{ $.Values.repoURL }}
     {{- if and (ne $app_value.type "kustomization") (ne $app_value.type "manifest") }}

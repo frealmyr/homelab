@@ -11,7 +11,7 @@ spec:
     namespace: argocd
   project: default
   source:
-    targetRevision: k8s/restruct
+    targetRevision: {{ $.Values.targetRevision }}
     path: charts/argo-app
     repoURL: {{ $.Values.repoURL }}
     helm:

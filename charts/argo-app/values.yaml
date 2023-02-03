@@ -1,5 +1,5 @@
 repoURL: https://github.com/frealmyr/homelab
-targetRevision: k8s/restruct
+targetRevision: main
 basePath: k8s
 
 namespaces: {}
