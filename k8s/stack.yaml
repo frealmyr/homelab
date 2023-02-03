@@ -35,6 +35,16 @@ appProject:
           create: true
         sync:
           autoSync: true
+      sonarr:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
+      transmission:
+        namespace:
+          create: true
+        sync:
+          autoSync: true
 
   home:
     applications:

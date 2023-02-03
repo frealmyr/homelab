@@ -1,0 +1,68 @@
+app:
+  image:
+    repository: lscr.io/linuxserver/transmission
+    tag: latest
+
+  persistentVolumes:
+    static:
+      - name: config
+        mountPath: /config
+    hostPath:
+      - name: downloads
+        mountPath: /media
+        hostPath: /home/fredrick/media # TODO public user
+
+  environmentVariables:
+    PUID: 1000
+    PGID: 1000
+    TZ: Europe/Oslo
+    TRANSMISSION_WEB_HOME: /flood-for-transmission/
+    PEERPORT: 54213
+
+  containerPorts:
+    - name: http
+      containerPort: 9091
+      protocol: TCP
+    - name: peer-tcp
+      containerPort: 54213
+      protocol: TCP
+    - name: peer-udp
+      containerPort: 54213
+      protocol: UDP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 9091
+          targetPort: 9091
+    - name: peer
+      type: NodePort
+      ports:
+        - name: peer-tcp
+          port: 54213
+          targetPort: 54213
+          nodePort: 54213
+        - name: peer-udp
+          port: 54213
+          targetPort: 54213
+          nodePort: 54213
+          protocol: UDP
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 9091
+        hosts:
+          - host: transmission.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        tls:
+          - secretName: transmission
+            hosts:
+              - transmission.fmlab.no
