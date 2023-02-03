@@ -372,6 +372,17 @@ entries:
     urls:
     - https://github.com/frealmyr/homelab/releases/download/argo-1.0.0/argo-1.0.0.tgz
     version: 1.0.0
+  argo-app:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2023-02-03T14:36:13.040459734Z"
+    description: Create apps-of-apps under the appProject apps-of-app
+    digest: c36a71907e642df95f748ddcd88228d5efd8e1b8e849ba8116c1fa73804cd0dc
+    name: argo-app
+    type: application
+    urls:
+    - https://github.com/frealmyr/homelab/releases/download/argo-app-1.0.0/argo-app-1.0.0.tgz
+    version: 1.0.0
   external-services:
   - apiVersion: v2
     created: "2022-12-21T11:49:14.505488428Z"
@@ -444,4 +455,4 @@ entries:
     urls:
     - https://github.com/frealmyr/homelab/releases/download/raw-v0.2.5/raw-v0.2.5.tgz
     version: v0.2.5
-generated: "2022-12-21T11:49:14.505946637Z"
+generated: "2023-02-03T14:36:13.040688834Z"
