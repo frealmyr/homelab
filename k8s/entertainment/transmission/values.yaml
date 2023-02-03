@@ -37,7 +37,7 @@ app:
         - name: http
           port: 9091
           targetPort: 9091
-    - name: controller
+    - name: peer
       type: NodePort
       ports:
         - name: peer-tcp
