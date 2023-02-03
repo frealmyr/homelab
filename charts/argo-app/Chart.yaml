@@ -1,6 +1,6 @@
 apiVersion: v2
-name: argo
-description: Create argo applications under projects
+name: argo-app
+description: Create apps-of-apps under the appProject apps-of-app
 
 # A chart can be either an 'application' or a 'library' chart.
 #
