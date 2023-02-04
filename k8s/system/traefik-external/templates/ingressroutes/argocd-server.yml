@@ -11,7 +11,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`argocd.fmlab.no`) && PathPrefix(`/api`)
+      match: Host(`argocd.fmlab.no`) && Path(`/api/webhook`)
       services:
         - name: argocd-server
           port: 80
