@@ -17,3 +17,5 @@ external-dns:
           key: email
   extraArgs:
     - --annotation-filter=kubernetes.io/ingress.class in (traefik-external)
+  sources:
+    - ingress
