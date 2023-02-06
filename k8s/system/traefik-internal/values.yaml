@@ -3,6 +3,7 @@ traefik:
     dashboard:
       enabled: false
   namespaceOverride: traefik-internal
+  
   podSecurityPolicy:
     enabled: false
   ports:

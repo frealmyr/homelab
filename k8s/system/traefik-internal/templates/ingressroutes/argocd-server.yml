@@ -29,26 +29,3 @@ spec:
           scheme: h2c
   tls:
     secretName: argocd-server
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: argocd-webhook
-  namespace: argocd
-  labels:
-    traefik-instance: public
-  annotations:
-    kubernetes.io/ingress.class: traefik-external
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`argocd.fmlab.no`) && PathPrefix(`/api/webhook`)
-      services:
-        - name: argocd-server
-          port: 80
-      middlewares:
-        - name: traefik-external-security@kubernetescrd
-  tls:
-    secretName: argocd-server

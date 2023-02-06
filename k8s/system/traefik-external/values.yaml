@@ -1,6 +1,4 @@
 traefik:
-  rbac:
-    enabled: false
   ingressRoute:
     dashboard:
       enabled: false

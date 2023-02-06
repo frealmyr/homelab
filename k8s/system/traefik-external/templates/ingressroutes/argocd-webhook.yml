@@ -2,8 +2,8 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: traefik-dashboard
-  namespace: traefik-external
+  name: argocd-webhook
+  namespace: argocd
   labels:
     traefik-instance: public
   annotations:
@@ -12,24 +12,25 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`traefik-external.fmlab.no`)
-      kind: Rule
+    - kind: Rule
+      match: Host(`argocd-webhook.fmlab.no`) && PathPrefix(`/api/webhook`)
+      services:
+        - name: argocd-server
+          port: 80
       middlewares:
         - name: traefik-external-security@kubernetescrd
-      services:
-        - name: api@internal
-          kind: TraefikService
   tls:
-    secretName: traefik-external-dashboard
+    secretName: argocd-webhook
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: traefik-external-dashboard
+  name: argocd-webhook
+  namespace: argocd
 spec:
-  secretName: traefik-external-dashboard
+  secretName: argocd-webhook
   dnsNames:
-    - traefik-external.fmlab.no
+    - argocd-webhook.fmlab.no
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
