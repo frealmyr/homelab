@@ -25,3 +25,4 @@ traefik:
       loadBalancerIP: 10.8.0.11
   additionalArguments:
     - "--api.insecure=true"
+    - "--api.dashboard=true"
