@@ -4,6 +4,8 @@ kind: IngressRoute
 metadata:
   name: argocd-webhook
   namespace: argocd
+  labels:
+    traefik-instance: public
   annotations:
     kubernetes.io/ingress.class: traefik-external
 spec:
@@ -11,7 +13,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`argocd.fmlab.no`) && Path(`/api/webhook`)
+      match: Host(`argocd.fmlab.no`) && PathPrefix(`/api/webhook`)
       services:
         - name: argocd-server
           port: 80
