@@ -10,3 +10,15 @@ spec:
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-external-dashboard
+spec:
+  secretName: traefik-external-dashboard
+  dnsNames:
+    - traefik-external.fmlab.no
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer

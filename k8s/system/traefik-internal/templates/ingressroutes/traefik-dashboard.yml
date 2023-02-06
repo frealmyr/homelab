@@ -19,3 +19,25 @@ spec:
           kind: TraefikService
   tls:
     secretName: traefik-dashboard
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard-external
+  namespace: traefik-internal
+  annotations:
+    kubernetes.io/ingress.class: traefik-internal
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`traefik-external.fmlab.no`)
+      kind: Rule
+      middlewares:
+        - name: traefik-internal-security@kubernetescrd
+      services:
+        - name: api@internal
+          kind: TraefikService
+          namespace: traefik-external
+  tls:
+    secretName: traefik-external-dashboard
