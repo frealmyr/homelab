@@ -124,7 +124,7 @@ appProject:
           wave: "-1"
       external-dns:
         namespace:
-          name: external-secrets
+          name: external-dns
         sync:
           autoSync: true
           wave: "-3"
