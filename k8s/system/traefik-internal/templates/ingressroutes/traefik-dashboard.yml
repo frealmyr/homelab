@@ -4,6 +4,8 @@ kind: IngressRoute
 metadata:
   name: traefik-dashboard
   namespace: traefik-internal
+  labels:
+    traefik-instance: private
   annotations:
     kubernetes.io/ingress.class: traefik-internal
 spec:
