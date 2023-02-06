@@ -1,0 +1,18 @@
+external-dns:
+  provider: cloudflare
+  domainFilters:
+    - fmlab.no
+  interval: 168h
+  triggerLoopOnEvent: true
+  env:
+    - name: CF_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare-credentials
+          key: api_token
+    - name: CF_API_EMAIL
+      valueFrom:
+        secretKeyRef:
+          name: cloudflare-credentials
+          key: email
+  sources: [] # Disable service/ingress in favor of CRDs
