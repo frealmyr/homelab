@@ -125,6 +125,7 @@ appProject:
       external-dns:
         namespace:
           name: external-dns
+          create: true
         sync:
           autoSync: true
           wave: "-3"
