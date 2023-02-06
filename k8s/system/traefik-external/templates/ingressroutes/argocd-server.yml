@@ -1,23 +1,30 @@
 ---
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: argocd-webhook
-  namespace: argocd
-  labels:
-    traefik-instance: public
-  annotations:
-    kubernetes.io/ingress.class: traefik-external
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`argocd.fmlab.no`) && PathPrefix(`/api/webhook`)
-      services:
-        - name: argocd-server
-          port: 80
-      middlewares:
-        - name: traefik-external-security@kubernetescrd
-  tls:
-    secretName: argocd-server
+apiVersion: v1
+items:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-external-security@kubernetescrd
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    name: argocd-webhook
+    namespace: argocd
+  spec:
+    ingressClassName: traefik-external
+    rules:
+    - host: argocd.fmlab.no
+      http:
+        paths:
+        - backend:
+            service:
+              name: argocd-server
+              port:
+                number: 80
+          path: /api/webhook
+          pathType: ImplementationSpecific
+    tls:
+    - hosts:
+      - argocd.fmlab.no
+      secretName: argocd-server

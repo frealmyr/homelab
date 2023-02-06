@@ -13,7 +13,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`argocd.fmlab.no`)
+      match: Host(`argocd.fmlab.no`) && !PathPrefix(`/api/webhook`)
       priority: 10
       services:
         - name: argocd-server
