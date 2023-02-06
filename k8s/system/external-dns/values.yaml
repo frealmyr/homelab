@@ -15,4 +15,5 @@ external-dns:
         secretKeyRef:
           name: cloudflare-credentials
           key: email
-  sources: [] # Disable service/ingress in favor of CRDs
+  args:
+    - --annotation-filter=kubernetes.io/ingress.class in (traefik-external)
