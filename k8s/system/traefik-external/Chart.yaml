@@ -9,5 +9,5 @@ appVersion: 2.9.6
 
 dependencies:
   - name: traefik
-    version: 20.80.0
+    version: 20.8.0
     repository: https://helm.traefik.io/traefik
