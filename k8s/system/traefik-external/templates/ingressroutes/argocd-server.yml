@@ -21,7 +21,7 @@ spec:
             port:
               number: 80
         path: /api/webhook
-        pathType: ImplementationSpecific
+        pathType: Prefix
   tls:
   - hosts:
     - argocd.fmlab.no
