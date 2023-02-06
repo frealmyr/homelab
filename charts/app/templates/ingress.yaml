@@ -14,6 +14,9 @@ metadata:
     traefik.ingress.kubernetes.io/router.tls: 'true'
     {{- end }}
     traefik.ingress.kubernetes.io/router.middlewares: "{{ .Values.ingresses.className }}-security@kubernetescrd"
+    {{- if eq .Values.ingresses.className "traefik-external" }}
+    external-dns.alpha.kubernetes.io/target: "vpn.fmlab.no" # Create CNAME instead of A record
+    {{- end }}
     {{- with .Values.ingresses.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
