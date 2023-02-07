@@ -38,9 +38,10 @@ grafana:
       auth_url: https://github.com/login/oauth/authorize
       token_url: https://github.com/login/oauth/access_token
       api_url: https://api.github.com/user
-      allowed_organizations: fm-homelab
       client_id: $__file{/etc/secrets/oauth_github/client_id} # https://github.com/helm/charts/issues/22473#issuecomment-662361020
       client_secret: $__file{/etc/secrets/oauth_github/client_secret}
+      allowed_organizations: fm-homelab
+      role_attribute_path: "contains(groups[*], '@fm-homelab/administrators') && 'Admin' || 'Viewer'"
   extraSecretMounts:
     - name: github-oauth-credentials
       mountPath: /etc/secrets/oauth_github
