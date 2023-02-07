@@ -19,10 +19,11 @@ external-dns:
     - --annotation-filter=kubernetes.io/ingress.class in (traefik-external)
   sources:
     - ingress
-  rbac.additionalPermissions:
-    - apiGroups: ["externaldns.k8s.io"]
-      resources: ["dnsendpoints"]
-      verbs: ["get","watch","list"]
-    - apiGroups: ["externaldns.k8s.io"]
-      resources: ["dnsendpoints/status"]
-      verbs: ["*"]
+  rbac:
+    additionalPermissions:
+      - apiGroups: ["externaldns.k8s.io"]
+        resources: ["dnsendpoints"]
+        verbs: ["get","watch","list"]
+      - apiGroups: ["externaldns.k8s.io"]
+        resources: ["dnsendpoints/status"]
+        verbs: ["*"]
