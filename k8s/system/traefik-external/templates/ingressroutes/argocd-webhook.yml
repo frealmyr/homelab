@@ -4,8 +4,6 @@ kind: IngressRoute
 metadata:
   name: argocd-webhook
   namespace: argocd
-  labels:
-    traefik-instance: external
   annotations:
     kubernetes.io/ingress.class: traefik-external
 spec:

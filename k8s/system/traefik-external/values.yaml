@@ -10,7 +10,6 @@ traefik:
       allowCrossNamespace: true
       allowExternalNameServices: true
       ingressClass: traefik-external
-      labelSelector: traefik-instance=external
     kubernetesIngress:
       allowExternalNameServices: true
       ingressClass: traefik-external

@@ -4,8 +4,6 @@ kind: Middleware
 metadata:
   name: security
   namespace: traefik-external
-  labels:
-    traefik-instance: public
   annotations:
     kubernetes.io/ingress.class: traefik-external
 spec:

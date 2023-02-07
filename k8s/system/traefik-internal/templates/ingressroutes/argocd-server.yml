@@ -4,8 +4,6 @@ kind: IngressRoute
 metadata:
   name: argocd-server
   namespace: argocd
-  labels:
-    traefik-instance: internal
   annotations:
     kubernetes.io/ingress.class: traefik-internal
 spec:
