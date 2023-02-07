@@ -8,6 +8,7 @@ external-dns:
     - fmlab.no
   interval: 168h
   triggerLoopOnEvent: true
+  provider: cloudflare
   cloudflare:
     secretName: cloudflare-credentials
   annotationFilter: kubernetes.io/ingress.class in (traefik-external)
