@@ -13,19 +13,16 @@ appProject:
         namespace:
           name: databases
         sync:
-          autoSync: true
           wave: "-1"
       postgres:
         namespace:
           name: databases
         sync:
-          autoSync: true
           wave: "-1"
       redis:
         namespace:
           name: databases
         sync:
-          autoSync: true
           wave: "-1"
 
   entertainment:
@@ -33,59 +30,39 @@ appProject:
       jellyfin:
         namespace:
           create: true
-        sync:
-          autoSync: true
       sonarr:
         namespace:
           create: true
-        sync:
-          autoSync: true
       transmission:
         namespace:
           create: true
-        sync:
-          autoSync: true
 
   home:
     applications:
       adguard:
         namespace:
           create: true
-        sync:
-          autoSync: true
       homeassistant:
         namespace:
           create: true
-        sync:
-          autoSync: true
       homebox:
         namespace:
           create: true
-        sync:
-          autoSync: true
       homer:
         namespace:
           create: true
-        sync:
-          autoSync: true
       omada:
         namespace:
           create: true
-        sync:
-          autoSync: true
       yarr:
         namespace:
           create: true
-        sync:
-          autoSync: true
 
   monitoring:
     applications:
       grafana:
         namespace:
           name: monitoring
-        sync:
-          autoSync: true
       prometheus:
         namespace:
           name: monitoring
@@ -98,21 +75,15 @@ appProject:
       freshrss:
         namespace:
           create: true
-        sync:
-          autoSync: true
 
   public:
     applications:
       photoview:
         namespace:
           create: true
-        sync:
-          autoSync: true
       wireguard:
         namespace:
           create: true
-        sync:
-          autoSync: true
 
   system:
     applications:
@@ -192,5 +163,3 @@ appProject:
       librespeed:
         namespace:
           create: true
-        sync:
-          autoSync: true
