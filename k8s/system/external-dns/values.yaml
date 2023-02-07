@@ -1,21 +1,17 @@
 external-dns:
-  provider: cloudflare
+  crd:
+    create: true
+    apiversion: externaldns.k8s.io/v1alpha1
+    kind: DNSEndpoint
+  sources:
+    - ingress
+    - crd
   domainFilters:
     - fmlab.no
   interval: 168h
   triggerLoopOnEvent: true
-  env:
-    - name: CF_API_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: cloudflare-credentials
-          key: api_token
-    - name: CF_API_EMAIL
-      valueFrom:
-        secretKeyRef:
-          name: cloudflare-credentials
-          key: email
-  extraArgs:
-    - --annotation-filter=kubernetes.io/ingress.class in (traefik-external)
-  sources:
-    - ingress
+  provider: cloudflare
+  cloudflare:
+    secretName: cloudflare-credentials
+    proxied: false
+  annotationFilter: kubernetes.io/ingress.class in (traefik-external)

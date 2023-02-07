@@ -1,0 +1,12 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: "argocd-webhook.fmlab.no"
+spec:
+  endpoints:
+    - dnsName: "argocd-webhook.fmlab.no"
+      recordTTL: 180
+      recordType: CNAME
+      targets:
+        - "vpn.fmlab.no"
