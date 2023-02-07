@@ -10,8 +10,8 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`traefik.fmlab.no`)
-      kind: Rule
+    - kind: Rule
+      match: Host(`traefik.fmlab.no`)
       middlewares:
         - name: traefik-internal-security@kubernetescrd
       services:
@@ -19,3 +19,15 @@ spec:
           kind: TraefikService
   tls:
     secretName: traefik-dashboard
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-dashboard
+spec:
+  secretName: traefik-dashboard
+  dnsNames:
+    - traefik.fmlab.no
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer

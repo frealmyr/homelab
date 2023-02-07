@@ -5,9 +5,9 @@ description: Traefik with authproxy and middlewares
 type: application
 
 version: 1.0.0
-appVersion: 2.7.1
+appVersion: 2.9.6
 
 dependencies:
   - name: traefik
-    version: 19.0.3
+    version: 20.8.0
     repository: https://helm.traefik.io/traefik
