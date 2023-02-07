@@ -6,7 +6,7 @@ metadata:
 spec:
   endpoints:
     - dnsName: argocd-webhook.fmlab.no
-    recordTTL: 180
-    recordType: CNAME
-    targets:
-      - vpn.fmlab.no
+      recordTTL: 180
+      recordType: CNAME
+      targets:
+        - vpn.fmlab.no
