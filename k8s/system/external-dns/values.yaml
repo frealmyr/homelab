@@ -19,6 +19,7 @@ external-dns:
     - --annotation-filter=kubernetes.io/ingress.class in (traefik-external)
     - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
     - --crd-source-kind=DNSEndpoint
+    - --kubeconfig="$KUBECONFIG"
   sources:
     - ingress
     - crd
