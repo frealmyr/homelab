@@ -13,4 +13,5 @@ external-dns:
   provider: cloudflare
   cloudflare:
     secretName: cloudflare-credentials
+    proxied: false
   annotationFilter: kubernetes.io/ingress.class in (traefik-external)
