@@ -5,7 +5,7 @@ metadata:
   name: argocd-webhook
   namespace: argocd
   labels:
-    traefik-instance: public
+    traefik-instance: external
   annotations:
     kubernetes.io/ingress.class: traefik-external
 spec:

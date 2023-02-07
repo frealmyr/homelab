@@ -5,7 +5,7 @@ metadata:
   name: argocd-server
   namespace: argocd
   labels:
-    traefik-instance: private
+    traefik-instance: internal
   annotations:
     kubernetes.io/ingress.class: traefik-internal
 spec:
@@ -13,7 +13,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`argocd.fmlab.no`) && !PathPrefix(`/api/webhook`)
+      match: Host(`argocd.fmlab.no`)
       priority: 10
       services:
         - name: argocd-server

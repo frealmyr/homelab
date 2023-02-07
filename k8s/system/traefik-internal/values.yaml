@@ -3,7 +3,6 @@ traefik:
     dashboard:
       enabled: false
   namespaceOverride: traefik-internal
-  
   podSecurityPolicy:
     enabled: false
   ports:
@@ -14,7 +13,7 @@ traefik:
       allowCrossNamespace: true
       allowExternalNameServices: true
       ingressClass: traefik-internal
-      labelSelector: traefik-instance=private
+      labelSelector: traefik-instance=internal
     kubernetesIngress:
       allowExternalNameServices: true
       ingressClass: traefik-internal
