@@ -61,7 +61,7 @@ traefik:
                 service:
                   name: traefik-api
                   port:
-                    name: 8080
+                    number: 8080
         tls:
           - hosts:
               - traefik-external.fmlab.no
