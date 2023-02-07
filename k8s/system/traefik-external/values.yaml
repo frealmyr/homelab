@@ -34,7 +34,7 @@ traefik:
         type: ClusterIP
         selector:
           app.kubernetes.io/name: traefik
-          app.kubernetes.io/instance: traefik-default
+          app.kubernetes.io/instance: traefik-external-traefik-external
         ports:
         - port: 8080
           name: traefik
@@ -61,7 +61,7 @@ traefik:
                 service:
                   name: traefik-api
                   port:
-                    number: 8080
+                    name: traefik
         tls:
           - hosts:
               - traefik-external.fmlab.no
