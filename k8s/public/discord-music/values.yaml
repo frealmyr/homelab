@@ -1,0 +1,13 @@
+app:
+  image:
+    repository: ghcr.io/frealmyr/discord-bot
+    tag: latest
+
+  secretEnvironmentVariables:
+    - name: DISCORD_TOKEN
+      secret:
+        name: credentials-discord-music
+        key: bot-token
+
+  ingresses:
+    enabled: false
