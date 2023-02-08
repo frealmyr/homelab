@@ -28,8 +28,8 @@ resource "kubernetes_secret_v1" "sso_github" {
 
   type = "Opaque"
   data = {
-    client_id     = local.sso_github.client_id
-    client_secret = local.sso_github.client_secret
+    client_id     = local.sso_github.argocd_client_id
+    client_secret = local.sso_github.argocd_client_secret
   }
 }
 
