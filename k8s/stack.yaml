@@ -78,6 +78,9 @@ appProject:
 
   public:
     applications:
+      discord-music:
+        namespace:
+          create: true
       photoview:
         namespace:
           create: true
