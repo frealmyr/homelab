@@ -1,0 +1,35 @@
+---
+- hosts: k8s_controller, k8s_workers
+  become: true
+  max_fail_percentage: 0 # Stop if checks.yml fails
+  tasks:
+    ##################
+    ## RPM Packages ##
+    ##################
+
+    - name: dnf - upgrade latest
+      dnf:
+        name: "*"
+        state: latest
+
+    - name: dnf - remove default packages
+      dnf:
+        name:
+          - zram-generator
+          - zram-generator-defaults
+        state: absent
+
+    - name: dnf - install system packages
+      dnf:
+        name:
+          - nut-client
+
+    - name: dnf - install kubernetes packages
+      dnf:
+        name:
+          - cri-o
+          - cri-tools
+          - iproute-tc
+          - kubernetes-client
+          - kubernetes-kubeadm
+          - kubernetes-node

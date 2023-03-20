@@ -10,9 +10,9 @@
         state: restarted
       when: "'k8s_workers' in group_names"
 
-    - name: containerd - restart service
+    - name: crio - restart service
       service:
-        name: containerd
+        name: crio
         daemon_reload: yes
         state: restarted
       when: "'k8s_workers' in group_names"

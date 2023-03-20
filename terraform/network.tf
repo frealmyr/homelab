@@ -1,41 +1,54 @@
 ################
 ## Calico CNI ##
 ################
+# resource "helm_release" "tigera_operator" {
+#   name       = "flannel"
+#   repository = "https://docs.projectcalico.org/charts/"
+#   chart      = "flannel"
 
-resource "helm_release" "tigera_operator" {
-  name       = "tigera-operator"
-  repository = "https://docs.projectcalico.org/charts/"
-  chart      = "tigera-operator"
+#   version = "0.21.3"
 
-  version = "3.24.5"
+#   namespace        = "tigera-operator"
+#   create_namespace = true
 
-  namespace        = "tigera-operator"
-  create_namespace = true
+#   timeout = 600 # toleration for not-ready kicks in after 300s
 
-  timeout = 600 # toleration for not-ready kicks in after 300s
+# }
 
-  values = [<<EOF
-    installation:
-      cni:
-        type: Calico
-      calicoNetwork:
-        mtu: 1450
-        bgp: Disabled
-        ipPools:
-        - cidr: 10.244.0.0/16
-          encapsulation: VXLAN
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-          - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-              - k8s-controller-0
-  EOF
-  ]
-}
+# resource "helm_release" "tigera_operator" {
+#   name       = "tigera-operator"
+#   repository = "https://docs.projectcalico.org/charts/"
+#   chart      = "tigera-operator"
+
+#   version = "3.24.5"
+
+#   namespace        = "tigera-operator"
+#   create_namespace = true
+
+#   timeout = 600 # toleration for not-ready kicks in after 300s
+
+#   values = [<<EOF
+#     installation:
+#       cni:
+#         type: Calico
+#       calicoNetwork:
+#         mtu: 1450
+#         bgp: Disabled
+#         ipPools:
+#         - cidr: 10.244.0.0/16
+#           encapsulation: VXLAN
+#     affinity:
+#       nodeAffinity:
+#         requiredDuringSchedulingIgnoredDuringExecution:
+#           nodeSelectorTerms:
+#           - matchExpressions:
+#             - key: kubernetes.io/hostname
+#               operator: In
+#               values:
+#               - k8s-controller-0
+#   EOF
+#   ]
+# }
 
 ##############
 ## Metal LB ##
@@ -61,7 +74,7 @@ resource "helm_release" "metallb" {
 
   namespace        = kubernetes_namespace.metallb.metadata[0].name
 
-  depends_on = [helm_release.tigera_operator]
+  # depends_on = [helm_release.tigera_operator]
 }
 
 resource "helm_release" "metallb_address_pool" {

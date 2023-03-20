@@ -4,7 +4,6 @@
 
   vars:
     subnet_pod: 10.244.0.0/16
-    subnet_svc: 10.122.0.0/16
 
   tasks:
     #####################
@@ -29,14 +28,6 @@
     ## Create cluster ##
     ####################
 
-    - name: modprobe - double-check that modules are enabled
-      community.general.modprobe:
-        name: "{{ item }}"
-        state: present
-      with_items:
-        - br_netfilter
-        - overlay
-
     # allowedUnsafeSysctls is used for wg-easy
     - name: kubectl - copy KubeletConfiguration.yaml
       copy:
@@ -49,11 +40,11 @@
           kind: InitConfiguration
           nodeRegistration:
             name: "{{ ansible_hostname }}"
-            criSocket: "unix:///run/containerd/containerd.sock"
+            criSocket: "unix:///var/run/crio/crio.sock"
             imagePullPolicy: IfNotPresent
             taints: []
           localAPIEndpoint:
-            advertiseAddress: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}"
+            advertiseAddress: "{{ ansible_ssh_host }}"
             bindPort: 6443
           ---
           apiVersion: kubelet.config.k8s.io/v1beta1
@@ -75,15 +66,15 @@
             - 'net.ipv4.conf.all.src_valid_mark'
           featureGates:
             DevicePlugins: true
+          resolvConf: '/run/systemd/resolve/resolv.conf'
           ---
           apiVersion: kubeadm.k8s.io/v1beta3
           kind: ClusterConfiguration
           clusterName: "homelab"
           networking:
             podSubnet: "{{ subnet_pod }}"
-            serviceSubnet: "{{ subnet_svc }}"
             dnsDomain: cluster.local
-          controlPlaneEndpoint: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}:6443"
+          controlPlaneEndpoint: "{{ ansible_ssh_host }}:6443"
           apiServer:
             extraArgs:
               service-node-port-range: 1-65535
