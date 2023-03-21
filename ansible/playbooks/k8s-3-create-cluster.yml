@@ -3,8 +3,12 @@
   become: true
 
   vars:
-    subnet_pod: 10.244.0.0/16
-    subnet_svc: 10.122.0.0/16
+    subnet:
+      kubernetes:
+        pod: 10.244.0.0/16
+    interface:
+      private: 10.8.0.10
+      mgmt: 10.8.0.50
 
   tasks:
     #####################
@@ -25,17 +29,15 @@
         path: /etc/cni/net.d
         state: absent
 
+    - name: crio - restart service
+      service:
+        name: crio
+        daemon_reload: yes
+        state: restarted
+
     ####################
     ## Create cluster ##
     ####################
-
-    - name: modprobe - double-check that modules are enabled
-      community.general.modprobe:
-        name: "{{ item }}"
-        state: present
-      with_items:
-        - br_netfilter
-        - overlay
 
     # allowedUnsafeSysctls is used for wg-easy
     - name: kubectl - copy KubeletConfiguration.yaml
@@ -49,11 +51,11 @@
           kind: InitConfiguration
           nodeRegistration:
             name: "{{ ansible_hostname }}"
-            criSocket: "unix:///run/containerd/containerd.sock"
+            criSocket: "unix:///var/run/crio/crio.sock"
             imagePullPolicy: IfNotPresent
             taints: []
           localAPIEndpoint:
-            advertiseAddress: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}"
+            advertiseAddress: "{{ interface.private }}"
             bindPort: 6443
           ---
           apiVersion: kubelet.config.k8s.io/v1beta1
@@ -75,18 +77,20 @@
             - 'net.ipv4.conf.all.src_valid_mark'
           featureGates:
             DevicePlugins: true
+          resolvConf: "/etc/resolv.conf"
           ---
           apiVersion: kubeadm.k8s.io/v1beta3
           kind: ClusterConfiguration
           clusterName: "homelab"
           networking:
-            podSubnet: "{{ subnet_pod }}"
-            serviceSubnet: "{{ subnet_svc }}"
+            podSubnet: "{{ subnet.kubernetes.pod }}"
             dnsDomain: cluster.local
-          controlPlaneEndpoint: "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}:6443"
+          controlPlaneEndpoint: "{{ interface.private }}:6443"
           apiServer:
             extraArgs:
               service-node-port-range: 1-65535
+            certSANs:
+              - "{{ interface.mgmt }}"
             timeoutForControlPlane: 5m0s
           ---
           apiVersion: kubeproxy.config.k8s.io/v1alpha1

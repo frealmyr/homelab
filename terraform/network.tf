@@ -7,7 +7,7 @@ resource "helm_release" "tigera_operator" {
   repository = "https://docs.projectcalico.org/charts/"
   chart      = "tigera-operator"
 
-  version = "3.24.5"
+  version = "3.25.0"
 
   namespace        = "tigera-operator"
   create_namespace = true
@@ -57,7 +57,7 @@ resource "helm_release" "metallb" {
   repository = "https://metallb.github.io/metallb"
   chart      = "metallb"
 
-  version = "0.13.7"
+  version = "0.13.9"
 
   namespace        = kubernetes_namespace.metallb.metadata[0].name
 

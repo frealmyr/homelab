@@ -38,7 +38,7 @@ resource "helm_release" "argocd" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
 
-  version = "5.13.8"
+  version = "5.27.1"
 
   namespace = "argocd"
 
@@ -131,7 +131,7 @@ resource "helm_release" "argocd_apps_homelab" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argocd-apps"
 
-  version    = "0.0.3"
+  version    = "0.0.9"
 
   values = [<<EOF
     applications:
@@ -150,6 +150,10 @@ resource "helm_release" "argocd_apps_homelab" {
               - ../../k8s/stack.yaml
         destination:
           server: 'https://kubernetes.default.svc'
+        syncPolicy:
+          automated:
+            prune: false
+            selfHeal: false
   EOF
   ]
   depends_on = [helm_release.argocd]
