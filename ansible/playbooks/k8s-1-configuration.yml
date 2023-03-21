@@ -18,6 +18,7 @@
           - 10.8.0.10/24
           - 10.8.0.11/24
         gw4: 10.8.0.1
+        route_metric4: 50
         dns4:
           - 1.1.1.1
           - 1.0.0.1
@@ -43,150 +44,201 @@
         state: restarted
       when: nmcli_default.changed or nmcli_mgmt.changed
 
-    # # Something else is fucky, kubelet should detect systemd-resolved by default
-    # # # CoreDNS will be stuch in crashloopbackoff if dns caching is enabled on host
-    # # # https://github.com/coredns/coredns/blob/master/plugin/loop/README.md#troubleshooting-loops-in-kubernetes-clusters
-    # # # https://fedoraproject.org/wiki/Changes/systemd-resolved
-    # # - name: network - disable dns caching on host
-    # #   service:
-    # #     name: systemd-resolved
-    # #     enabled: no
-    # #     state: stopped
-    # #   register: dns_caching_disabled
+    # CoreDNS will be stuck in crashloopbackoff due to systemd-resoved, which will create a loopback device, which CoreDNS will detect as a loop, and yeah lets disable this non-sense
+    # https://github.com/coredns/coredns/blob/master/plugin/loop/README.md#troubleshooting-loops-in-kubernetes-clusters
+    # https://fedoraproject.org/wiki/Changes/systemd-resolved
+    - name: network - disable dns caching on host
+      service:
+        name: systemd-resolved
+        enabled: no
+        state: stopped
+      register: dns_caching_disabled
 
-    # # - name: network - delete /etc/resolv.conf
-    # #   ansible.builtin.file:
-    # #     path: /etc/resolv.conf
-    # #     state: absent
-    # #   when: dns_caching_disabled.changed
+    - name: network - delete /etc/resolv.conf
+      ansible.builtin.file:
+        path: /etc/resolv.conf
+        state: absent
+      when: dns_caching_disabled.changed
 
-    # # - name: network - restart nm to regenerate /etc/resolv.conf
-    # #   service:
-    # #     name: NetworkManager
-    # #     state: restarted
-    # #   when: dns_caching_disabled.changed
+    - name: network - nm use classic non-caching dns backend
+      ansible.builtin.lineinfile:
+        path: /etc/NetworkManager/NetworkManager.conf
+        regexp: '^dns=default$'
+        insertafter: '^\[main\]'
+        firstmatch: yes
+        line: dns=default
 
-    # # - name: network - stat /etc/resolv.conf
-    # #   stat:
-    # #     path: /etc/resolv.conf
-    # #   register: stat_resolv
+    - name: network - restart nm to regenerate /etc/resolv.conf
+      service:
+        name: NetworkManager
+        state: restarted
+      when: dns_caching_disabled.changed
 
-    # # - name: network - validate /etc/resolv.conf exists
-    # #   assert:
-    # #     that:
-    # #       - "stat_resolv.stat.exists"
-    # #     success_msg: '/etc/resolv.conf exists.'
-    # #     fail_msg: '/etc/resolv.conf does not exist!'
+    - name: network - stat /etc/resolv.conf
+      stat:
+        path: /etc/resolv.conf
+      register: stat_resolv
 
-    # ##############
-    # ## Hostname ##
-    # ##############
-    # - name: hostname - change hostname to ansible_hostname
-    #   command: hostnamectl set-hostname --static "{{ ansible_hostname }}"
-    #   register: hostsfile
+    - name: network - validate /etc/resolv.conf exists
+      assert:
+        that:
+          - "stat_resolv.stat.exists"
+        success_msg: '/etc/resolv.conf exists.'
+        fail_msg: '/etc/resolv.conf does not exist!'
 
-    # - name: hostname - validate ansible_fqdn == inventory_hostname
-    #   tags:
-    #     - validate
-    #   assert:
-    #     that: ansible_fqdn == inventory_hostname
+    ##############
+    ## Hostname ##
+    ##############
 
-    # #######################
-    # ## SSD Optimizations ##
-    # #######################
-    # - name: fstab - add sdd mount flags
-    #   replace:
-    #     backup: yes
-    #     path: /etc/fstab
-    #     regexp: '^(\S+)(\s+)(\S+)(\s+)(ext4|xfs|btrfs)(\s+)(((?!{{item}})\S)*)(\s+)(\d)(\s+)(\d)$'
-    #     replace: '\1\2\3\4\5\6\7,{{item}}\9\10\11\12'
-    #   with_items:
-    #     - discard
-    #     - noatime
+    - name: hostname - start hostnamed service
+      systemd:
+        name: systemd-hostnamed
+        state: started
+        enabled: true
+        daemon_reload: true
 
-    # #########
-    # ## UPS ##
-    # #########
+    - name: hostname - change hostname to ansible_hostname
+      command: "/usr/bin/hostnamectl --static --pretty --transient set-hostname {{ inventory_hostname | replace('_', '-') | quote }}"
+      when: inventory_hostname != ansible_fqdn
 
-    # # Piggyback the UPS running on Synology NAS, simply need to allowlist the IPs of clients.
-    # - name: ups - configure nut to use netclient
-    #   replace:
-    #     path: /etc/ups/nut.conf
-    #     regexp: '^MODE=none'
-    #     replace: 'MODE=netclient'
-    #   register: nut_netclient
+    - name: hostname - validate ansible_fqdn == inventory_hostname
+      tags:
+        - validate
+      assert:
+        that: ansible_fqdn == inventory_hostname
 
-    # - name: ups - configure nut to monitor nas
-    #   lineinfile:
-    #     path: /etc/ups/upsmon.conf
-    #     regexp: '^MONITOR.*'
-    #     line: "MONITOR ups@{{ synology_ip }} 1 monuser secret slave"
-    #     state: present
-    #   register: nut_monitor
+    #######################
+    ## SSD Optimizations ##
+    #######################
+    - name: fstab - add sdd mount flags
+      replace:
+        backup: yes
+        path: /etc/fstab
+        regexp: '^(\S+)(\s+)(\S+)(\s+)(ext4|xfs|btrfs)(\s+)(((?!{{item}})\S)*)(\s+)(\d)(\s+)(\d)$'
+        replace: '\1\2\3\4\5\6\7,{{item}}\9\10\11\12'
+      with_items:
+        - discard
+        - noatime
 
-    # - name: ups - restart and enable service
-    #   service:
-    #     name: nut-monitor
-    #     enabled: yes
-    #     state: restarted
-    #   when: nut_netclient.changed or nut_monitor.changed
+    ###########
+    ## Power ##
+    ###########
 
-    # ##############
-    # ## Modprobe ##
-    # ##############
-    # - name: modprobe - load modules on boot
-    #   copy:
-    #     dest: /etc/modules-load.d/k8s_req_modules.conf
-    #     content: |
-    #       br_netfilter
-    #       overlay
+    - name: power - simple script for setting power-saver
+      copy:
+        dest: /home/fredrick/power-saver.sh
+        content: "{{ content }}"
+        mode: a+x
+      vars:
+        content: |
+          #!/bin/bash
+          powerprofilesctl set power-saver
 
-    # - name: modprobe - load modules for this session
-    #   community.general.modprobe:
-    #     name: "{{ item }}"
-    #     state: present
-    #   with_items:
-    #     - br_netfilter
-    #     - overlay
+    - name: power - run power-saver script on boot
+      ansible.builtin.cron:
+        name: "set power-saver profile"
+        special_time: reboot
+        job: "/home/fredrick/power-saver.sh"
 
-    # #############
-    # ## Systemd ##
-    # #############
-    # - name: systemctl - allow ip forwarding
-    #   sysctl:
-    #     name: "{{ item.key }}"
-    #     value: "{{ item.value }}"
-    #     sysctl_set: yes
-    #     state: present
-    #     reload: yes
-    #     ignoreerrors: no
-    #   with_dict: "{{ sysctl_config }}"
-    #   vars:
-    #     sysctl_config:
-    #       net.ipv4.ip_forward: 1
-    #       net.ipv4.conf.all.forwarding: 1
-    #       net.ipv6.conf.all.forwarding: 1
-    #       net.bridge.bridge-nf-call-iptables: 1
-    #       net.bridge.bridge-nf-call-ip6tables: 1
-    #       fs.inotify.max_user_watches: 524288
-    #       fs.inotify.max_user_instances: 512
+    #########
+    ## UPS ##
+    #########
 
-    # ##############
-    # ## K8s Misc ##
-    # ##############
-    # - name: k8s - enable systemd services
-    #   service:
-    #     name: "{{ item }}"
-    #     enabled: yes
-    #     state: started
-    #   with_items:
-    #     - crio
-    #     - kubelet
+    # Piggyback the UPS running on Synology NAS, simply need to allowlist the IPs of clients.
+    - name: ups - configure nut to use netclient
+      replace:
+        path: /etc/ups/nut.conf
+        regexp: '^MODE=none'
+        replace: 'MODE=netclient'
+      register: nut_netclient
 
-    # - name: k8s - create directory for persistent hostPath "volumes"
-    #   file:
-    #     path: /var/lib/k8s/volumes
-    #     state: directory
+    - name: ups - configure nut to monitor nas
+      lineinfile:
+        path: /etc/ups/upsmon.conf
+        regexp: '^MONITOR.*'
+        line: "MONITOR ups@{{ synology_ip }} 1 monuser secret slave"
+        state: present
+      register: nut_monitor
 
-    # - name: system - reboot (configuration)
-    #   reboot:
+    - name: ups - restart and enable service
+      service:
+        name: nut-monitor
+        enabled: yes
+        state: restarted
+      when: nut_netclient.changed or nut_monitor.changed
+
+    ##############
+    ## Modprobe ##
+    ##############
+    - name: modprobe - load modules on boot
+      copy:
+        dest: /etc/modules-load.d/k8s_req_modules.conf
+        content: |
+          br_netfilter
+          overlay
+
+    - name: modprobe - load modules for this session
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - br_netfilter
+        - overlay
+
+    #############
+    ## Systemd ##
+    #############
+
+    - name: systemctl - tweak systemd ip forwarding and limits
+      sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        sysctl_set: yes
+        state: present
+        reload: yes
+        ignoreerrors: no
+      with_dict: "{{ sysctl_config }}"
+      vars:
+        sysctl_config:
+          net.ipv4.ip_forward: 1
+          net.ipv4.conf.all.forwarding: 1
+          net.ipv6.conf.all.forwarding: 1
+          net.bridge.bridge-nf-call-iptables: 1
+          net.bridge.bridge-nf-call-ip6tables: 1
+          fs.inotify.max_user_watches: 524288
+          fs.inotify.max_user_instances: 512
+
+    #############
+    ## SELinux ##
+    #############
+
+    # # SELinux seems to work fine for my setup, leaving it commented until the day it breaks
+    # # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
+    # - name: selinux - setenforce 0
+    #   command: setenforce 0
+
+    # - name: selinux - set permissive mode
+    #   ansible.builtin.replace:
+    #     path: /etc/selinux/config
+    #     regexp: '^SELINUX=enforcing$'
+    #     replace: 'SELINUX=permissive'
+
+    ##############
+    ## K8s Misc ##
+    ##############
+    - name: k8s - enable systemd services
+      service:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      with_items:
+        - crio
+        - kubelet
+
+    - name: k8s - create directory for persistent hostPath "volumes"
+      file:
+        path: /var/lib/k8s/volumes
+        state: directory
+
+    - name: system - reboot (configuration)
+      reboot:

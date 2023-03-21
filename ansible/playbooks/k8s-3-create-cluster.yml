@@ -3,7 +3,12 @@
   become: true
 
   vars:
-    subnet_pod: 10.244.0.0/16
+    subnet:
+      kubernetes:
+        pod: 10.244.0.0/16
+    interface:
+      private: 10.8.0.10
+      mgmt: 10.8.0.50
 
   tasks:
     #####################
@@ -23,6 +28,12 @@
       file:
         path: /etc/cni/net.d
         state: absent
+
+    - name: crio - restart service
+      service:
+        name: crio
+        daemon_reload: yes
+        state: restarted
 
     ####################
     ## Create cluster ##
@@ -44,7 +55,7 @@
             imagePullPolicy: IfNotPresent
             taints: []
           localAPIEndpoint:
-            advertiseAddress: "{{ ansible_ssh_host }}"
+            advertiseAddress: "{{ interface.private }}"
             bindPort: 6443
           ---
           apiVersion: kubelet.config.k8s.io/v1beta1
@@ -66,18 +77,20 @@
             - 'net.ipv4.conf.all.src_valid_mark'
           featureGates:
             DevicePlugins: true
-          resolvConf: '/run/systemd/resolve/resolv.conf'
+          resolvConf: "/etc/resolv.conf"
           ---
           apiVersion: kubeadm.k8s.io/v1beta3
           kind: ClusterConfiguration
           clusterName: "homelab"
           networking:
-            podSubnet: "{{ subnet_pod }}"
+            podSubnet: "{{ subnet.kubernetes.pod }}"
             dnsDomain: cluster.local
-          controlPlaneEndpoint: "{{ ansible_ssh_host }}:6443"
+          controlPlaneEndpoint: "{{ interface.private }}:6443"
           apiServer:
             extraArgs:
               service-node-port-range: 1-65535
+            certSANs:
+              - "{{ interface.mgmt }}"
             timeoutForControlPlane: 5m0s
           ---
           apiVersion: kubeproxy.config.k8s.io/v1alpha1

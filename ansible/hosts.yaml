@@ -1,7 +1,7 @@
 k8s_controller:
   hosts:
     k8s-controller-0:
-      ansible_host: 10.8.0.10
+      ansible_host: 10.8.0.50
       ansible_user: fredrick
 
 # k8s_workers:

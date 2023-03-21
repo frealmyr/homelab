@@ -22,7 +22,9 @@
     - name: dnf - install system packages
       dnf:
         name:
+          - cronie
           - nut-client
+          - power-profiles-daemon
 
     - name: dnf - install kubernetes packages
       dnf:

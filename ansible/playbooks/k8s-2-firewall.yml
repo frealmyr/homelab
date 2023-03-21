@@ -2,52 +2,90 @@
 - hosts: k8s_controller, k8s_workers
   become: true
   vars:
-    subnet_pod: 10.244.0.0/16
-    subnet_svc: 10.122.0.0/16
-    mgmt_ip: 10.8.0.12
+    subnet:
+      kubernetes:
+        pod: 10.244.0.0/16
+        svc: 10.96.0.0/16
+      homelab:
+        lan: 10.0.0.0/24
+        vpn: 10.100.0.0/24
+    interface:
+      private: 10.8.0.10/32
+      public: 10.8.0.11/32
+      mgmt: 10.8.0.50/32
 
   tasks:
-    - name: firewall - reset firewall to installation defaults
-      community.general.ufw:
-        state: reset
+    - name: firewall - enable and start firewalld service
+      service:
+        name: firewalld
+        enabled: yes
+        state: started
 
     #########
     ## LAN ##
     #########
 
-    - name: firewall - allow ssh from LAN and VPN
-      community.general.ufw:
-        rule: limit
-        src: "{{ item }}"
-        port: '22'
-        proto: tcp
-      loop:
-        - '10.0.0.0/24'
-        - '10.100.0.0/24'
-
-    - name: firewall - allow ingress ports from LAN
-      community.general.ufw:
-        rule: allow
-        src: 10.0.0.0/24
-        port: "{{ item }}"
-        proto: tcp
-      loop:
-        - '80'
-        - '443'
-        - '8080'
-        - '8443'
+    - name: firewall - allow ssh to mgmt port from LAN and VPN
+      ansible.posix.firewalld:
+        permanent: true
+        immediate: true
+        state: enabled
+        rich_rule: rule family=ipv4 source address={{ item }} destination address={{ interface.mgmt }} port port=22 protocol=tcp accept
+      with_items:
+        - "{{ subnet.homelab.lan }}"
+        - "{{ subnet.homelab.vpn }}"
 
     - name: firewall - allow kubectl access to controller from LAN and VPN
-      community.general.ufw:
-        rule: allow
-        src: "{{ item }}"
-        port: '6443'
-        proto: tcp
-        dest: "{{ mgmt_ip }}"
-      loop:
-        - '10.0.0.0/24'
-        - '10.100.0.0/24'
+      ansible.posix.firewalld:
+        permanent: true
+        immediate: true
+        state: enabled
+        rich_rule: rule family=ipv4 source address={{ item }} destination address={{ interface.mgmt }} port port=6443 protocol=tcp accept
+      with_items:
+        - "{{ subnet.homelab.lan }}"
+        - "{{ subnet.homelab.vpn }}"
       when: "'k8s_controller' in group_names"
+
+    - name: firewall - allow ingress from lan to private interface
+      ansible.posix.firewalld:
+        permanent: true
+        immediate: true
+        state: enabled
+        rich_rule: rule family=ipv4 source address={{ subnet.homelab.lan }} destination address={{ interface.private }} port port={{ item.port }} protocol={{ item.protocol }} accept
+      with_items:
+        - { port: '80', protocol: 'tcp' }
+        - { port: '443', protocol: 'tcp' }
+        - { port: '8080', protocol: 'tcp' }
+        - { port: '8443', protocol: 'tcp' }
+
+    - name: firewall - allow ingress from vpn to private interface
+      ansible.posix.firewalld:
+        permanent: true
+        immediate: true
+        state: enabled
+        rich_rule: rule family=ipv4 source address={{ subnet.homelab.vpn }} destination address={{ interface.private }} port port={{ item.port }} protocol={{ item.protocol }} accept
+      with_items:
+        - { port: '80', protocol: 'tcp' }
+        - { port: '443', protocol: 'tcp' }
+        - { port: '8080', protocol: 'tcp' }
+        - { port: '8443', protocol: 'tcp' }
+
+    ############
+    ## Public ##
+    ############
+
+    - name: firewall - allow ingress ports to public interface
+      ansible.posix.firewalld:
+        permanent: true
+        immediate: true
+        state: enabled
+        rich_rule: rule family=ipv4 destination address={{ interface.public }} port port={{ item.port }} protocol={{ item.protocol }} accept
+      with_items:
+        - { port: '80', protocol: 'tcp' }
+        - { port: '443', protocol: 'tcp' }
+        - { port: '8080', protocol: 'tcp' }
+        - { port: '8443', protocol: 'tcp' }
+        - { port: '51820', protocol: 'udp' }
 
     ################
     ## Kubernetes ##
@@ -55,52 +93,12 @@
 
     # K8s nodes are running in a seperate VLAN
     # NetworkPolicies are used for in-cluster firewall
-
     - name: firewall - allow all traffic between nodes
-      community.general.ufw:
-        rule: allow
-        src: "{{ item }}"
-      loop:
-        - "{{ subnet_pod }}"
-        - "{{ subnet_svc }}"
-        - 10.8.0.0/24 # K8s VLAN
-
-    ############
-    ## Public ##
-    ############
-
-    - name: firewall - allow ingress ports to worker-1
-      community.general.ufw:
-        rule: allow
-        port: "{{ item }}"
-        proto: tcp
-      loop:
-        - '80'
-        - '443'
-      when: "'k8s-worker-1' in inventory_hostname"
-
-    - name: firewall - allow wireguard ingress to worker-1
-      community.general.ufw:
-        rule: allow
-        direction: in
-        port: '51820'
-        proto: udp
-      when: "'k8s-worker-1' in inventory_hostname"
-
-    ############
-    ## Global ##
-    ############
-
-    - name: firewall - allow outgoing
-      community.general.ufw:
-        direction: outgoing
-        policy: allow
-
-    - name: firewall - deny incoming
-      community.general.ufw:
-        direction: incoming
-        policy: deny
-
-    - name: firewall - reload and enable firewall on boot
-      community.general.ufw:
+      ansible.posix.firewalld:
         state: enabled
+        permanent: true
+        source: "{{ item }}"
+      loop:
+        - "{{ subnet.kubernetes.pod }}"
+        - "{{ subnet.kubernetes.svc }}"
+        - 10.8.0.0/24 # K8s VLAN

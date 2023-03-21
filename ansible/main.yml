@@ -11,8 +11,8 @@
 - name: k8s - configure os
   import_playbook: playbooks/k8s-1-configuration.yml
 
-# - name: k8s - configure firewall
-#   import_playbook: playbooks/k8s-2-firewall.yml
+- name: k8s - configure firewall
+  import_playbook: playbooks/k8s-2-firewall.yml
 
 - name: k8s - create cluster
   import_playbook: playbooks/k8s-3-create-cluster.yml
