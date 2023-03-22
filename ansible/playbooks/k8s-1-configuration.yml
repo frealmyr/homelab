@@ -228,6 +228,30 @@
     #     regexp: '^SELINUX=enforcing$'
     #     replace: 'SELINUX=permissive'
 
+    # Fix for SELinux throwing avc: denied { dac_override } errors when using Longhorn volumes.
+    # https://ioflair.com/blog/fix-longhorn-volumes-stuck-in-attach-detach-loop-on-openshift-okd/
+    # https://github.com/openshift/okd-machine-os/pull/541/files
+    - name: power - simple script for setting power-saver
+      copy:
+        dest: /etc/iscsiadm-selinux-fix.cil
+        content: "{{ content }}"
+      vars:
+        content: |
+          (allow iscsid_t self (capability (dac_override)))
+
+    - name: power - simple script for setting power-saver
+      copy:
+        dest: /lib/systemd/system/iscsiadm-selinux-fix.service
+        content: "{{ content }}"
+      vars:
+        content: |
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/sbin/semodule -i /etc/iscsiadm-selinux-fix.cil
+          RemainAfterExit=yes
+          [Install]
+          WantedBy=multi-user.target
+
     ##############
     ## K8s Misc ##
     ##############

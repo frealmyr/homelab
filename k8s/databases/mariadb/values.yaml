@@ -4,19 +4,23 @@ app:
     tag: 10
 
   persistentVolumes:
-    static:
-      - name: data
-        mountPath: /var/lib/mysql
+    pvc:
+      - name: config
+        create: true
+        size: 20Gi
+        mounts:
+          - path: /var/lib/mysql
+            subPath: data
 
   mountSecrets:
     - name: credentials-sql
       secretName: credentials-sql
       mountPath: /run/secrets/sql
 
+  # Do not attempt to "create" root again
+  # https://github.com/docker-library/mysql/issues/129#issuecomment-178265632
   environmentVariables:
     MARIADB_ROOT_PASSWORD_FILE: "/run/secrets/sql/root_password"
-    MARIADB_USER_FILE: "/run/secrets/sql/username"
-    MARIADB_PASSWORD_FILE: "/run/secrets/sql/password"
 
   containerPorts:
     - name: mysql

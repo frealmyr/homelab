@@ -10,3 +10,9 @@ longhorn:
     host: longhorn.fmlab.no
     tls: true
     tlsSecret: certificate-longhorn
+  defaultSettings:
+    replicaSoftAntiAffinity: true
+    orphanAutoDeletion: true
+  persistence:
+    defaultDataLocality: strict-local
+    removeSnapshotsDuringFilesystemTrim: true

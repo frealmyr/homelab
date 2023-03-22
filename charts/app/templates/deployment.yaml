@@ -73,10 +73,10 @@ spec:
               protocol: {{ .protocol }}
           {{- end }}
           {{- end }}
-          {{- if or .Values.persistentVolumes.static .Values.persistentVolumes.dynamic .Values.persistentVolumes.hostPath .Values.persistentVolumes.nfs .Values.mountSecrets .Values.mountConfigmaps }}
+          {{- if or .Values.persistentVolumes.static .Values.persistentVolumes.pvc .Values.persistentVolumes.hostPath .Values.persistentVolumes.nfs .Values.mountSecrets .Values.mountConfigmaps }}
           volumeMounts:
-          {{- if .Values.persistentVolumes }}
-          {{- range .Values.persistentVolumes.dynamic }}
+          {{- if .Values.persistentVolumes.pvc }}
+          {{- range .Values.persistentVolumes.pvc }}
           {{- if .create }}
             - name: {{ include "app.name" $ }}-{{ .name }}
           {{- else }}
@@ -163,8 +163,8 @@ spec:
           {{- end }}
           {{- if .persistentVolumes }}
           volumeMounts:
-          {{- if .persistentVolumes.dynamic }}
-          {{- range .persistentVolumes.dynamic }}
+          {{- if .persistentVolumes.pvc }}
+          {{- range .persistentVolumes.pvc }}
           {{- if .create }}
             - name: {{ include "app.name" $ }}-{{ .name }}
           {{- else }}
@@ -203,10 +203,10 @@ spec:
             {{- toYaml .resources | nindent 12 }}
         {{- end }}
 
-      {{- if or .Values.persistentVolumes.dynamic .Values.persistentVolumes.static .Values.persistentVolumes.hostPath .Values.persistentVolumes.nfs .Values.mountSecrets .Values.mountConfigmaps }}
+      {{- if or .Values.persistentVolumes.pvc .Values.persistentVolumes.static .Values.persistentVolumes.hostPath .Values.persistentVolumes.nfs .Values.mountSecrets .Values.mountConfigmaps }}
       volumes:
-      {{- if .Values.persistentVolumes }}
-      {{- range .Values.persistentVolumes.dynamic }}
+      {{- if .Values.persistentVolumes.pvc }}
+      {{- range .Values.persistentVolumes.pvc }}
       {{- if .create }}
         - name: {{ include "app.name" $ }}-{{ .name }}
           persistentVolumeClaim:
