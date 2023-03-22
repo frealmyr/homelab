@@ -27,11 +27,12 @@
           - nut-client
           - power-profiles-daemon
 
-    - name: dnf - install crio and iproute packages
+    - name: dnf - install k8s prerequisites
       dnf:
         name:
           - cri-o
           - cri-tools
+          - iscsi-initiator-utils
           - iproute-tc
 
     - name: yum - add kubernetes repository
