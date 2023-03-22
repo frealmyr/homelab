@@ -10,6 +10,7 @@
     - name: dnf - upgrade latest
       dnf:
         name: "*"
+        update_cache: true
         state: latest
 
     - name: dnf - remove default packages
@@ -26,12 +27,32 @@
           - nut-client
           - power-profiles-daemon
 
-    - name: dnf - install kubernetes packages
+    - name: dnf - install crio and iproute packages
       dnf:
         name:
           - cri-o
           - cri-tools
           - iproute-tc
-          - kubernetes-client
-          - kubernetes-kubeadm
-          - kubernetes-node
+
+    - name: yum - add kubernetes repository
+      ansible.builtin.yum_repository:
+        name: Kubernetes
+        description: Kubernetes
+        baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch
+        enabled: true
+        gpgcheck: true
+        gpgkey: https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        exclude: kubelet kubeadm kubectl
+
+    # Kubernetes packages should not be upgraded out of sync with a cluster upgrade using kubeadm.
+    # Therefore, use state present and upgrade packages manually during kubeadm upgrade.
+    # https://github.com/kubernetes/kubeadm/issues/954
+    - name: yum - install kubernetes packages
+      ansible.builtin.yum:
+        name:
+          - kubeadm
+          - kubectl
+          - kubelet
+        disable_excludes: Kubernetes
+        update_cache: true
+        state: present

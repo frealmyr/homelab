@@ -101,6 +101,10 @@
       command: "/usr/bin/hostnamectl --static --pretty --transient set-hostname {{ inventory_hostname | replace('_', '-') | quote }}"
       when: inventory_hostname != ansible_fqdn
 
+    # without this step, old chaced fqdn value will be validated
+    - name: ansible - run setup to refresh ansible_fqdn
+      setup:
+
     - name: hostname - validate ansible_fqdn == inventory_hostname
       tags:
         - validate
@@ -212,7 +216,7 @@
     ## SELinux ##
     #############
 
-    # # SELinux seems to work fine for my setup, leaving it commented until the day it breaks
+    # # Breaks nodefeaturediscovery, hostpathprovisioner, some db's inside containers
     # # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
     # - name: selinux - setenforce 0
     #   command: setenforce 0

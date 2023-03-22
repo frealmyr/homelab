@@ -102,6 +102,11 @@
 
     - name: kubeadm - initialize the Kubernetes cluster
       command: kubeadm init --config /etc/kubernetes/kube-init-config.yaml
+      register: cluster_creation_output
+
+    - name: kubadm - cluster creation output
+      debug:
+        msg: "{{ cluster_creation_output.stdout_lines }}"
 
     - name: ansible - sleep for 45 seconds (wait for cluster startup)
       wait_for:
