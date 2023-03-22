@@ -47,7 +47,7 @@ persistentVolumes: {}
   #   - name: backups
   #     mountPath: /config
   #     type: Directory
-  # dynamic:
+  # pvc:
   #   - name: shared
   #     accessMode: ReadWriteMany
   #     storageClassName: nas

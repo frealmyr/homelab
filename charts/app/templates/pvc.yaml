@@ -11,8 +11,8 @@ metadata:
 spec:
   accessModes:
     - {{ .accessMode | default "ReadWriteOnce" }}
-  {{- with .storageClassName }}
-  storageClassName: {{ . }}
+  {{- if .storageClassName }}
+  storageClassName: {{ .storageClassName }}
   {{- end }}
   resources:
     requests:
