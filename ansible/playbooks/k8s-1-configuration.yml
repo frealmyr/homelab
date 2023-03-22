@@ -216,7 +216,8 @@
     ## SELinux ##
     #############
 
-    # # Breaks nodefeaturediscovery, hostpathprovisioner, some db's inside containers
+    # Will attempt to run with SELinux and just fix the issues as they come up for now.
+    # # Breaks nodefeaturediscovery, hostpathprovisioner, some db's inside containers.
     # # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
     # - name: selinux - setenforce 0
     #   command: setenforce 0
