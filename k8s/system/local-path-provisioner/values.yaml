@@ -1,8 +1,0 @@
-local-path-provisioner:
-  storageClass:
-    defaultClass: true
-    reclaimPolicy: Delete
-  nodePathMap:
-    - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
-      paths:
-        - /var/lib/k8s/volumes
