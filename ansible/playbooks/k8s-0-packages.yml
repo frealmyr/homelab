@@ -34,6 +34,7 @@
           - cri-tools
           - iscsi-initiator-utils
           - iproute-tc
+          - nfs-utils
 
     - name: yum - add kubernetes repository
       ansible.builtin.yum_repository:

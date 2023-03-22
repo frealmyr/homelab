@@ -4,9 +4,13 @@ app:
     tag: 10
 
   persistentVolumes:
-    static:
-      - name: data
-        mountPath: /var/lib/mysql
+    dynamic:
+      - name: config
+        create: true
+        size: 20Gi
+        mounts:
+          - path: /var/lib/mysql
+            subPath: data
 
   mountSecrets:
     - name: credentials-sql
