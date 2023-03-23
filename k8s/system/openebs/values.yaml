@@ -1,6 +1,6 @@
 openebs:
   provisioner:
-    enabled: false
+    enabled: true
   localprovisioner:
     enabled: true
     deviceClass:
