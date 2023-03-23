@@ -8,7 +8,7 @@ spec:
     matchLabels:
       name: openebs-ndm-node-exporter
   endpoints:
-  - port: 9101
+  - port: '9101'
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -19,4 +19,4 @@ spec:
     matchLabels:
       name: openebs-ndm-cluster-exporter
   endpoints:
-  - port: 9100
+  - port: '9100'
