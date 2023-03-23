@@ -36,15 +36,16 @@ spec:
   {{- if ($app_value.namespace).create }}
     syncOptions:
       - CreateNamespace=true
+  {{- if ($app_value.sync).serverSideApply }}
+      - ServerSideApply=true
+  {{- end }}
   {{- end }}
   {{- if ($app_value.sync).autoSync }}
     automated:
       selfHeal: true
       prune: true
   {{- end }}
-  {{- if ($app_value.sync).serverSideApply }}
-    ServerSideApply: true
-  {{- end }}
+
   {{- end }}
 {{- end }}
 {{- end }}
