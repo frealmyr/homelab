@@ -4,9 +4,13 @@ app:
     tag: 7-alpine
 
   persistentVolumes:
-    static:
+    pvc:
       - name: data
-        mountPath: /data
+        create: true
+        size: 20Gi
+        mounts:
+          - path: /data
+            subPath: data
 
   command:
     - redis-server

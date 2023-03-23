@@ -4,9 +4,13 @@ app:
     tag: 7
 
   persistentVolumes:
-    static:
+    pvc:
       - name: config
-        mountPath: /etc/wireguard
+        create: true
+        size: 20Gi
+        mounts:
+          - path: /etc/wireguard
+            subPath: config
 
   environmentVariables:
     WG_HOST: "vpn.fmlab.no"

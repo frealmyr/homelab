@@ -54,9 +54,6 @@ appProject:
       omada:
         namespace:
           create: true
-      yarr:
-        namespace:
-          create: true
 
   monitoring:
     applications:
