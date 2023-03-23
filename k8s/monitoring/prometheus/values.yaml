@@ -9,10 +9,7 @@ kube-prometheus-stack:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.middlewares: traefik-internal-security@kubernetescrd
       hosts:
-        - host: alertmanager.fmlab.no
-          paths:
-            - path: /
-              pathType: Prefix
+        - alertmanager.fmlab.no
       tls:
         - secretName: certificate-alertmanager
           hosts:
