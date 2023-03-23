@@ -43,7 +43,7 @@ spec:
       prune: true
   {{- end }}
   {{- if ($app_value.sync).serverSideApply }}
-    ServerSideApply=true
+    ServerSideApply: true
   {{- end }}
   {{- end }}
 {{- end }}
