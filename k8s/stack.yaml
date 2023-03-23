@@ -64,6 +64,7 @@ appProject:
         namespace:
           name: monitoring
         sync:
+          serverSideApply: true
           autoSync: true
           wave: "-1"
 
