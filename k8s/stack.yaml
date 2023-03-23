@@ -54,9 +54,6 @@ appProject:
       omada:
         namespace:
           create: true
-      yarr:
-        namespace:
-          create: true
 
   monitoring:
     applications:
@@ -120,9 +117,9 @@ appProject:
         sync:
           autoSync: true
           wave: "-3"
-      longhorn:
+      openebs:
         namespace:
-          name: longhorn-system
+          name: openebs
           create: true
         sync:
           autoSync: true

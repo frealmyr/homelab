@@ -4,11 +4,15 @@ app:
     tag: latest
 
   persistentVolumes:
-    static:
-      - name: work
-        mountPath: /opt/adguardhome/work
-      - name: conf
-        mountPath: /opt/adguardhome/conf
+    pvc:
+      - name: data
+        create: true
+        size: 20Gi
+        mounts:
+          - path: /opt/adguardhome/work
+            subPath: work
+          - path: /opt/adguardhome/conf
+            subPath: conf
 
   containerPorts:
     - name: http
