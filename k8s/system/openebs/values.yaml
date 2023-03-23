@@ -1,0 +1,11 @@
+openebs:
+  provisioner:
+    enabled: false
+  localprovisioner:
+    enabled: true
+    deviceClass:
+      enabled: false
+    hostpathClass:
+      enabled: true
+      isDefaultClass: true
+      basePath: /var/lib/k8s/volumes
