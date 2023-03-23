@@ -5,3 +5,5 @@ openebs:
     hostpathClass:
       enabled: true
       isDefaultClass: true
+  ndmExporter:
+    enabled: true

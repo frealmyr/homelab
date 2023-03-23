@@ -1,0 +1,22 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: openebs-ndm-node-exporter
+spec:
+  selector:
+    matchLabels:
+      name: openebs-ndm-node-exporter
+  endpoints:
+  - port: 9101
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: openebs-ndm-cluster-exporter
+spec:
+  selector:
+    matchLabels:
+      name: openebs-ndm-cluster-exporter
+  endpoints:
+  - port: 9100
