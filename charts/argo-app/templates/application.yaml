@@ -33,9 +33,11 @@ spec:
   {{- end }}
   {{- if or ($app_value.namespace).create ($app_value.sync).autoSync ($app_value.sync).serverSideApply }}
   syncPolicy:
-  {{- if ($app_value.namespace).create }}
+  {{- if or ($app_value.namespace).create ($app_value.sync).serverSideApply }}
     syncOptions:
+  {{- if ($app_value.namespace).create }}
       - CreateNamespace=true
+  {{- end }}
   {{- if ($app_value.sync).serverSideApply }}
       - ServerSideApply=true
   {{- end }}
