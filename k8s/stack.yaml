@@ -60,6 +60,9 @@ appProject:
       grafana:
         namespace:
           name: monitoring
+      metrics-server:
+        namespace:
+          name: kube-system
       prometheus:
         namespace:
           name: monitoring
