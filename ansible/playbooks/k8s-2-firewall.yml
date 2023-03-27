@@ -97,8 +97,15 @@
       ansible.posix.firewalld:
         state: enabled
         permanent: true
+        zone: trusted
         source: "{{ item }}"
       loop:
         - "{{ subnet.kubernetes.pod }}"
         - "{{ subnet.kubernetes.svc }}"
         - 10.8.0.0/24 # K8s VLAN
+
+    - name: firewall - reload firewalld service
+      service:
+        name: firewalld
+        enabled: yes
+        state: reloaded
