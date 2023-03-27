@@ -33,3 +33,7 @@ kube-prometheus-stack:
 
   grafana:
     enabled: false
+
+metrics-server:
+  args:
+    - --kubelet-insecure-tls
