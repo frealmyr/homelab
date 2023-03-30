@@ -31,6 +31,12 @@ appProject:
         namespace:
           create: true
 
+  office:
+    applications:
+      freshrss:
+        namespace:
+          create: true
+
   monitoring:
     applications:
       grafana:

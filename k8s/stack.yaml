@@ -33,12 +33,6 @@ appProject:
         namespace:
           create: true
 
-  office:
-    applications:
-      freshrss:
-        namespace:
-          create: true
-
   public:
     applications:
       discord-music:
