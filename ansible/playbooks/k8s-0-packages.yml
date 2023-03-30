@@ -25,7 +25,7 @@
         name:
           - cronie
           - nut-client
-          - power-profiles-daemon
+          - tuned
 
     - name: dnf - install k8s prerequisites
       dnf:

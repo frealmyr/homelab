@@ -128,21 +128,27 @@
     ## Power ##
     ###########
 
-    - name: power - simple script for setting power-saver
-      copy:
-        dest: /home/fredrick/power-saver.sh
-        content: "{{ content }}"
-        mode: a+x
-      vars:
-        content: |
-          #!/bin/bash
-          powerprofilesctl set power-saver
+    - name: systemd - enable tuned service
+      ansible.builtin.systemd:
+        name: tuned
+        state: started
+        enabled: true
 
-    - name: power - run power-saver script on boot
-      ansible.builtin.cron:
-        name: "set power-saver profile"
-        special_time: reboot
-        job: "/home/fredrick/power-saver.sh"
+    # - name: power - simple script for setting power-saver
+    #   copy:
+    #     dest: /home/fredrick/power-saver.sh
+    #     content: "{{ content }}"
+    #     mode: a+x
+    #   vars:
+    #     content: |
+    #       #!/bin/bash
+    #       powerprofilesctl set power-saver
+
+    # - name: power - run power-saver script on boot
+    #   ansible.builtin.cron:
+    #     name: "set power-saver profile"
+    #     special_time: reboot
+    #     job: "/home/fredrick/power-saver.sh"
 
     #########
     ## UPS ##
