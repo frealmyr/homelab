@@ -222,41 +222,41 @@
     ## SELinux ##
     #############
 
-    # Will attempt to run with SELinux and just fix the issues as they come up for now.
-    # # Breaks nodefeaturediscovery, hostpathprovisioner, some db's inside containers.
-    # # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
-    # - name: selinux - setenforce 0
-    #   command: setenforce 0
+    # Breaks nodefeaturediscovery, localpathprovisioner, some db's inside containers, wireguard, hostpaths, and so on. Not what i want to do.
+    # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
+    - name: selinux - setenforce 0
+      command: setenforce 0
 
-    # - name: selinux - set permissive mode
-    #   ansible.builtin.replace:
-    #     path: /etc/selinux/config
-    #     regexp: '^SELINUX=enforcing$'
-    #     replace: 'SELINUX=permissive'
+    - name: selinux - set permissive mode
+      ansible.builtin.replace:
+        path: /etc/selinux/config
+        regexp: '^SELINUX=enforcing$'
+        replace: 'SELINUX=permissive'
 
     # Fix for SELinux throwing avc: denied { dac_override } errors when using Longhorn volumes.
     # https://ioflair.com/blog/fix-longhorn-volumes-stuck-in-attach-detach-loop-on-openshift-okd/
     # https://github.com/openshift/okd-machine-os/pull/541/files
-    - name: power - simple script for setting power-saver
-      copy:
-        dest: /etc/iscsiadm-selinux-fix.cil
-        content: "{{ content }}"
-      vars:
-        content: |
-          (allow iscsid_t self (capability (dac_override)))
 
-    - name: power - simple script for setting power-saver
-      copy:
-        dest: /lib/systemd/system/iscsiadm-selinux-fix.service
-        content: "{{ content }}"
-      vars:
-        content: |
-          [Service]
-          Type=oneshot
-          ExecStart=/usr/sbin/semodule -i /etc/iscsiadm-selinux-fix.cil
-          RemainAfterExit=yes
-          [Install]
-          WantedBy=multi-user.target
+    # - name: selinux - longhorn - iscsiadm-selinux-fix
+    #   copy:
+    #     dest: /etc/iscsiadm-selinux-fix.cil
+    #     content: "{{ content }}"
+    #   vars:
+    #     content: |
+    #       (allow iscsid_t self (capability (dac_override)))
+
+    # - name: power - selinux - longhorn - iscsiadm-selinux-fix - systemd service
+    #   copy:
+    #     dest: /lib/systemd/system/iscsiadm-selinux-fix.service
+    #     content: "{{ content }}"
+    #   vars:
+    #     content: |
+    #       [Service]
+    #       Type=oneshot
+    #       ExecStart=/usr/sbin/semodule -i /etc/iscsiadm-selinux-fix.cil
+    #       RemainAfterExit=yes
+    #       [Install]
+    #       WantedBy=multi-user.target
 
     ##############
     ## K8s Misc ##
