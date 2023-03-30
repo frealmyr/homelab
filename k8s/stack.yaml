@@ -45,45 +45,38 @@ appProject:
         namespace:
           name: kube-system
         sync:
-          autoSync: true
           wave: "-1"
       external-dns:
         namespace:
           create: true
         sync:
-          autoSync: true
           wave: "-3"
       external-secrets:
         namespace:
           name: external-secrets
         sync:
-          autoSync: true
           wave: "-4"
       cloudflare-ddns:
         namespace:
           create: true
         sync:
-          autoSync: true
           wave: "-3"
       cert-manager:
         namespace:
           create: true
         sync:
-          autoSync: true
           wave: "-3"
       local-path-provisioner:
         namespace:
           name: local-path-provisioner
           create: true
         sync:
-          autoSync: true
           wave: "-2"
       traefik-internal:
         namespace:
           name: traefik-internal
           create: true
         sync:
-          autoSync: true
           wave: "-1"
         ignoreDifferences:
           - group: ""
@@ -96,7 +89,6 @@ appProject:
           name: traefik-external
           create: true
         sync:
-          autoSync: true
           wave: "-1"
         ignoreDifferences:
           - group: ""
