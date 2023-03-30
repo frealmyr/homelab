@@ -35,9 +35,6 @@ appProject:
 
   public:
     applications:
-      discord-music:
-        namespace:
-          create: true
       wireguard:
         namespace:
           create: true
