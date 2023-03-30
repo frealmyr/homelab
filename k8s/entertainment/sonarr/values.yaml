@@ -4,18 +4,13 @@ app:
     tag: latest
 
   persistentVolumes:
-    pvc:
+    static:
       - name: config
-        create: true
-        size: 20Gi
-        mounts:
-          - path: /config
-            subPath: config
+        mountPath: /config
     hostPath:
-      - name: media
+      - name: downloads
         mountPath: /media
         hostPath: /home/fredrick/media # TODO public user
-        type: DirectoryOrCreate
 
   environmentVariables:
     PUID: 1000

@@ -4,17 +4,13 @@ app:
     tag: 10.8.9
 
   persistentVolumes:
-    pvc:
+    static:
       - name: config
-        create: true
-        size: 20Gi
-        mounts:
-          - path: /config
-            subPath: config
-          - path: /cache
-            subPath: cache
+        mountPath: /config
+      - name: cache
+        mountPath: /cache
     hostPath:
-      - name: media
+      - name: downloads
         mountPath: /media
         hostPath: /home/fredrick/media # TODO public user
 

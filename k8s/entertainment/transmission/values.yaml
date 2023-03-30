@@ -4,24 +4,19 @@ app:
     tag: latest
 
   persistentVolumes:
-    pvc:
+    static:
       - name: config
-        create: true
-        size: 20Gi
-        mounts:
-          - path: /config
-            subPath: config
+        mountPath: /config
     hostPath:
-      - name: media
+      - name: downloads
         mountPath: /media
         hostPath: /home/fredrick/media # TODO public user
-        type: DirectoryOrCreate
 
   environmentVariables:
     PUID: 1000
     PGID: 1000
     TZ: Europe/Oslo
-    DOCKER_MODS: linuxserver/mods:transmission-floodui
+    TRANSMISSION_WEB_HOME: /flood-for-transmission/
     PEERPORT: 54213
 
   containerPorts:

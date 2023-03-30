@@ -4,15 +4,11 @@ app:
     tag: 2.3.13
 
   persistentVolumes:
-    pvc:
-      - name: data
-        create: true
-        size: 20Gi
-        mounts:
-          - path: /app/cache
-            subPath: cache
-          - path: /app/database
-            subPath: sqlite
+    static:
+      - name: cache
+        mountPath: /app/cache
+      - name: sqlite
+        mountPath: /app/database
     # nfs:
     #   - name: gallery
     #     server: 10.7.0.11

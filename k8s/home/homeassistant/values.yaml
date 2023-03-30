@@ -9,13 +9,9 @@ app:
     TZ: "Europe/Oslo"
 
   persistentVolumes:
-    pvc:
-      - name: data
-        create: true
-        size: 20Gi
-        mounts:
-          - path: /config
-            subPath: config
+    static:
+      - name: config
+        mountPath: /config
 
   containerPorts:
     - name: http

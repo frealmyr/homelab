@@ -2,29 +2,7 @@ repoURL: https://github.com/frealmyr/homelab
 targetRevision: main
 basePath: k8s
 
-namespaces:
-  databases:
-  monitoring:
-
 appProject:
-  databases:
-    applications:
-      mariadb:
-        namespace:
-          name: databases
-        sync:
-          wave: "-1"
-      postgres:
-        namespace:
-          name: databases
-        sync:
-          wave: "-1"
-      redis:
-        namespace:
-          name: databases
-        sync:
-          wave: "-1"
-
   entertainment:
     applications:
       jellyfin:
@@ -55,19 +33,6 @@ appProject:
         namespace:
           create: true
 
-  monitoring:
-    applications:
-      grafana:
-        namespace:
-          name: monitoring
-      prometheus:
-        namespace:
-          name: monitoring
-        sync:
-          serverSideApply: true
-          autoSync: true
-          wave: "-1"
-
   office:
     applications:
       freshrss:
@@ -77,9 +42,6 @@ appProject:
   public:
     applications:
       discord-music:
-        namespace:
-          create: true
-      photoview:
         namespace:
           create: true
       wireguard:
@@ -118,16 +80,9 @@ appProject:
         sync:
           autoSync: true
           wave: "-3"
-      openebs:
+      local-path-provisioner:
         namespace:
-          name: openebs
-          create: true
-        sync:
-          autoSync: true
-          wave: "-2"
-      crossplane:
-        namespace:
-          name: crossplane-system
+          name: local-path-provisioner
           create: true
         sync:
           autoSync: true

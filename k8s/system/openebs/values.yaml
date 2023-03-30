@@ -1,9 +1,0 @@
-openebs:
-  localprovisioner:
-    deviceClass:
-      enabled: false
-    hostpathClass:
-      enabled: true
-      isDefaultClass: true
-  ndmExporter:
-    enabled: true

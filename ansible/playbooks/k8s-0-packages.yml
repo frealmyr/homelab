@@ -32,7 +32,6 @@
         name:
           - cri-o
           - cri-tools
-          - iscsi-initiator-utils
           - iproute-tc
           - nfs-utils
 

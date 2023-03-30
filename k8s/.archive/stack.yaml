@@ -1,0 +1,61 @@
+repoURL: https://github.com/frealmyr/homelab
+targetRevision: main
+basePath: k8s
+
+namespaces:
+  databases:
+  monitoring:
+
+appProject:
+  databases:
+    applications:
+      mariadb:
+        namespace:
+          name: databases
+        sync:
+          wave: "-1"
+      postgres:
+        namespace:
+          name: databases
+        sync:
+          wave: "-1"
+      redis:
+        namespace:
+          name: databases
+        sync:
+          wave: "-1"
+
+  home:
+    applications:
+      yarr:
+        namespace:
+          create: true
+
+  monitoring:
+    applications:
+      grafana:
+        namespace:
+          name: monitoring
+      prometheus:
+        namespace:
+          name: monitoring
+        sync:
+          serverSideApply: true
+          autoSync: true
+          wave: "-1"
+
+  public:
+    applications:
+      photoview:
+        namespace:
+          create: true
+
+  system:
+    applications:
+      crossplane:
+        namespace:
+          name: crossplane-system
+          create: true
+        sync:
+          autoSync: true
+          wave: "-2"

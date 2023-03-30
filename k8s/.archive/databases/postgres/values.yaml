@@ -4,13 +4,9 @@ app:
     tag: 15
 
   persistentVolumes:
-    pvc:
+    static:
       - name: data
-        create: true
-        size: 20Gi
-        mounts:
-          - path: /var/lib/postgresql/data
-            subPath: data
+        mountPath: /var/lib/postgresql/data
 
   mountSecrets:
     - name: credentials-postgres

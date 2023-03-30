@@ -4,17 +4,13 @@ app:
     tag: 5.7
 
   persistentVolumes:
-    pvc:
+    static:
       - name: data
-        create: true
-        size: 20Gi
-        mounts:
-          - path: /opt/tplink/EAPController/data
-            subPath: data
-          - path: /opt/tplink/EAPController/work
-            subPath: work
-          - path: /opt/tplink/EAPController/logs
-            subPath: logs
+        mountPath: /opt/tplink/EAPController/data
+      - name: work
+        mountPath: /opt/tplink/EAPController/work
+      - name: logs
+        mountPath: /opt/tplink/EAPController/logs
     hostPath:
       - name: backups
         mountPath: /opt/tplink/EAPController/data/autobackup
