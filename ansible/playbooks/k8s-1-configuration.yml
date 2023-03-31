@@ -185,6 +185,7 @@
         dest: /etc/modules-load.d/k8s_req_modules.conf
         content: |
           br_netfilter
+          iptable_nat
           overlay
 
     - name: modprobe - load modules for this session
@@ -193,6 +194,7 @@
         state: present
       with_items:
         - br_netfilter
+        - iptable_nat
         - overlay
 
     #############
