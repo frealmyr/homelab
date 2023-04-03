@@ -1,0 +1,13 @@
+apiVersion: v2
+name: keel
+description: Open source, tool for automating Kubernetes deployment updates. Keel is stateless, robust and lightweight.
+
+type: application
+
+version: 1.0.0
+appVersion: 0.18.0
+
+dependencies:
+- name: keel
+  version: ^1.0.0
+  repository: https://charts.keel.sh

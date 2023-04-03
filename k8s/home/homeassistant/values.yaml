@@ -1,7 +1,13 @@
 app:
   image:
-    repository: lscr.io/linuxserver/homeassistant
-    tag: latest
+    repository: ghcr.io/home-assistant/home-assistant
+    tag: stable
+    pullPolicy: Always
+
+  annotations:
+    keel.sh/policy: "all"
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 168h"
 
   environmentVariables:
     PID: "1000"
