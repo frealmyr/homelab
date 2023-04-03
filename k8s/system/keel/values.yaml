@@ -30,5 +30,5 @@ keel:
           - keel.fmlab.no
   persistence:
     enabled: true
-    storageClass: "-"
+    storageClass: "local-path"
     size: 1Gi
