@@ -12,6 +12,9 @@ keel:
     images:
       - repository: keelhq/keel
         tag: latest
+  service:
+    enabled: true
+    type: ClusterIP
   ingress:
     enabled: true
     annotations:
