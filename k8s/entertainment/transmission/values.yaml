@@ -15,6 +15,9 @@ app:
         mountPath: /config
     hostPath:
       - name: downloads
+        mountPath: /downloads
+        hostPath: /home/fredrick/downloads # TODO public user
+      - name: media
         mountPath: /media
         hostPath: /home/fredrick/media # TODO public user
 
