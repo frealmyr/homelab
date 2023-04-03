@@ -2,18 +2,21 @@ repoURL: https://github.com/frealmyr/homelab
 targetRevision: main
 basePath: k8s
 
+namespaces:
+  entertainment:
+
 appProject:
   entertainment:
     applications:
       jellyfin:
         namespace:
-          create: true
+          name: entertainment
       sonarr:
         namespace:
-          create: true
+          name: entertainment
       transmission:
         namespace:
-          create: true
+          name: entertainment
 
   home:
     applications:
