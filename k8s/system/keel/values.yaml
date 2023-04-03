@@ -21,7 +21,9 @@ keel:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.middlewares: traefik-internal-security@kubernetescrd
     hosts:
-      - keel.fmlab.no
+      - host: keel.fmlab.no
+        paths:
+          - /
     tls:
       - secretName: certificate-keel
         hosts:
