@@ -2,6 +2,12 @@ app:
   image:
     repository: b4bz/homer
     tag: latest
+    pullPolicy: Always
+
+  annotations:
+    keel.sh/policy: "all"
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 168h"
 
   environmentVariables:
     INIT_ASSETS: "1"

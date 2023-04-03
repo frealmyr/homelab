@@ -1,7 +1,13 @@
 app:
   image:
     repository: ghcr.io/hay-kot/homebox
-    tag: v0.7.0
+    tag: latest
+    pullPolicy: Always
+
+  annotations:
+    keel.sh/policy: "all"
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 168h"
 
   persistentVolumes:
     static:

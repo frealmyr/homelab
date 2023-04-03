@@ -2,6 +2,12 @@ app:
   image:
     repository: weejewel/wg-easy
     tag: 7
+    pullPolicy: Always
+
+  annotations:
+    keel.sh/policy: "minor"
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 168h"
 
   persistentVolumes:
     static:

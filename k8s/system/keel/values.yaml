@@ -1,0 +1,32 @@
+keel:
+  image:
+    repository: keelhq/keel
+    tag: latest
+    pullPolicy: Always
+  helmProvider:
+    version: "v3"
+  keel:
+    policy: all
+    trigger: poll
+    pollSchedule: "@every 24h"
+    images:
+      - repository: keelhq/keel
+        tag: latest
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: traefik-internal
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-internal-security@kubernetescrd
+    hosts:
+      - keel.fmlab.no
+    tls:
+      - secretName: certificate-keel
+        hosts:
+          - keel.fmlab.no
+  persistence:
+    enabled: true
+    storageClass: "-"
+    size: 1Gi

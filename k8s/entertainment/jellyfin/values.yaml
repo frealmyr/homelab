@@ -2,6 +2,12 @@ app:
   image:
     repository: jellyfin/jellyfin
     tag: 10.8.9
+    pullPolicy: Always
+
+  annotations:
+    keel.sh/policy: "minor"
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 168h"
 
   persistentVolumes:
     static:

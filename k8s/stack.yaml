@@ -96,6 +96,9 @@ appProject:
             name: traefik-whitelist
             jsonPointers:
               - /data/whitelist
+      keel:
+        namespace:
+          name: kube-system
 
   tools:
     applications:
