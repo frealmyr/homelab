@@ -12,6 +12,10 @@ keel:
     images:
       - repository: keelhq/keel
         tag: latest
+  basicauth:
+    enabled: true
+    user: admin
+    password: foobar
   service:
     enabled: true
     type: ClusterIP
