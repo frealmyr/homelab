@@ -1,57 +1,3 @@
-################
-## Calico CNI ##
-################
-
-resource "helm_release" "tigera_operator" {
-  name       = "tigera-operator"
-  repository = "https://docs.projectcalico.org/charts/"
-  chart      = "tigera-operator"
-
-  version = "3.25.0"
-
-  namespace        = "tigera-operator"
-  create_namespace = true
-
-  timeout = 600 # toleration for not-ready kicks in after 300s
-
-  values = [<<EOF
-    installation:
-      cni:
-        type: Calico
-      calicoNetwork:
-        mtu: 1450
-        bgp: Disabled
-        ipPools:
-        - cidr: 10.244.0.0/16
-          encapsulation: VXLAN
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-          - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-              - k8s-controller-0
-  EOF
-  ]
-}
-
-##############
-## Metal LB ##
-##############
-
-resource "kubernetes_namespace" "metallb" {
-  metadata {
-    name = "metallb-system"
-    labels = {
-      "pod-security.kubernetes.io/enforce" = "privileged"
-      "pod-security.kubernetes.io/audit" = "privileged"
-      "pod-security.kubernetes.io/warn" = "privileged"
-    }
-  }
-}
-
 resource "helm_release" "metallb" {
   name       = "metallb"
   repository = "https://metallb.github.io/metallb"
@@ -59,9 +5,39 @@ resource "helm_release" "metallb" {
 
   version = "0.13.9"
 
-  namespace        = kubernetes_namespace.metallb.metadata[0].name
+  namespace = kubernetes_namespace.metallb.metadata[0].name
+  values = [<<EOF
+    controller:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - k3s-controller-0
+    speaker:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - k3s-controller-0
+  EOF
+  ]
+}
 
-  depends_on = [helm_release.tigera_operator]
+resource "kubernetes_namespace" "metallb" {
+  metadata {
+    name = "metallb-system"
+    labels = {
+      "pod-security.kubernetes.io/enforce" = "privileged"
+    }
+  }
 }
 
 resource "helm_release" "metallb_address_pool" {
@@ -79,8 +55,8 @@ resource "helm_release" "metallb_address_pool" {
           namespace: metallb-system
         spec:
           addresses:
-            - 10.8.0.10/32 # private
-            - 10.8.0.11/32 # public
+            - 10.8.0.10/32
+            - 10.8.0.11/32
       - apiVersion: metallb.io/v1beta1
         kind: L2Advertisement
         metadata:

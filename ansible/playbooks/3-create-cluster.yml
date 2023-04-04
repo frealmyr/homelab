@@ -1,0 +1,41 @@
+---
+- hosts: k3s_controller
+  become: true
+
+  tasks:
+    #####################
+    ## Destroy cluster ##
+    #####################
+
+    - name: k3s - nuke cluster
+      shell: /usr/local/bin/k3s-uninstall.sh
+      ignore_errors: true
+
+    ####################
+    ## Create cluster ##
+    ####################
+
+    - name: k3s - create cluster configuration file
+      copy:
+        dest: ~/k3s-config.yml
+        content: "{{ content }}"
+      become_user: fredrick
+      vars:
+        content: |
+          disable-cloud-controller: true
+          disable:
+            - servicelb
+            - traefik
+          write-kubeconfig: "/home/fredrick/.kube/config"
+          write-kubeconfig-mode: "0644"
+          tls-san:
+            - "10.8.0.50"
+          cluster-init: true
+
+    - name: k3s - create cluster
+      shell: curl -sfL https://get.k3s.io | K3S_CONFIG_FILE=/home/fredrick/k3s-config.yml sh -
+      register: cluster_creation_output
+
+    - name: kubadm - cluster creation output
+      debug:
+        msg: "{{ cluster_creation_output.stdout_lines }}"

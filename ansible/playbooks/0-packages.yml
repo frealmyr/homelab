@@ -1,0 +1,45 @@
+---
+- hosts: all
+  become: true
+  max_fail_percentage: 0
+
+  tasks:
+    - name: apt - update & upgrade packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+      register: package_upgrade
+
+    - name: system - reboot (kernel update)
+      reboot:
+      when: package_upgrade.changed
+
+    # Reboot should take place after configuring static ips in 1-config.yml
+    # Else we will be stuck with no IP configuration
+    - name: apt - remove packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+        autoremove: true
+        purge: true
+      vars:
+        packages:
+          - dhcpcd5
+          - fake-hwclock
+          - ifupdown
+          - isc-dhcp-client
+          - isc-dhcp-common
+          - openresolv
+
+    - name: apt - install misc packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - curl
+          - htop
+          - nut
+          - ufw

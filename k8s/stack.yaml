@@ -20,9 +20,6 @@ appProject:
 
   home:
     applications:
-      adguard:
-        namespace:
-          create: true
       homeassistant:
         namespace:
           create: true
@@ -44,11 +41,6 @@ appProject:
 
   system:
     applications:
-      amd-gpu:
-        namespace:
-          name: kube-system
-        sync:
-          wave: "-1"
       external-dns:
         namespace:
           create: true
@@ -69,12 +61,6 @@ appProject:
           create: true
         sync:
           wave: "-3"
-      local-path-provisioner:
-        namespace:
-          name: local-path-provisioner
-          create: true
-        sync:
-          wave: "-2"
       traefik-internal:
         namespace:
           name: traefik-internal

@@ -1,0 +1,254 @@
+---
+- hosts: all
+  become: true
+
+  vars:
+    synology_ip: 10.7.0.11
+    sysctl_config:
+      net.ipv4.ip_forward: 1
+      net.ipv4.conf.all.forwarding: 1
+      net.ipv6.conf.all.forwarding: 1
+      net.bridge.bridge-nf-call-iptables: 1
+      net.bridge.bridge-nf-call-ip6tables: 1
+      fs.inotify.max_user_watches: 524288
+      fs.inotify.max_user_instances: 512
+
+  tasks:
+    ###############
+    ## Static IP ##
+    ###############
+
+    - name: network - configure static ip
+      copy:
+        dest: /etc/systemd/network/20-ethernet.network
+        content: "{{ content }}"
+      vars:
+        content: |
+          [Match]
+          Name=eth0
+
+          [Network]
+          DHCP=no
+          DNS=10.8.0.1
+          NTP=10.8.0.1
+
+          [Route]
+          Gateway=10.8.0.1
+          Metric=1024
+
+          [Address]
+          Address=10.8.0.10/16
+          RouteMetric=50
+
+          [Address]
+          Address=10.8.0.11/16
+          RouteMetric=100
+
+          [Address]
+          Address=10.8.0.50/16
+          RouteMetric=150
+
+    - name: network - enable systemd services
+      systemd:
+        name: "systemd-networkd"
+        enabled: yes
+        masked: no
+        state: started
+      with_items:
+        - systemd-networkd
+        - systemd-resolved
+        - systemd-timesyncd
+
+    ##############
+    ## Hostname ##
+    ##############
+
+    - name: hostname - change if mismatch from inventory name
+      hostname: name="{{ inventory_hostname }}"
+      when: ansible_fqdn != ansible_ssh_host
+      register: hostname
+
+    - name: hostname - fix /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1    {{ ansible_hostname }}"
+        state: present
+      when: hostname.changed
+
+    - name: system - reboot
+      reboot:
+      when: hostname.changed
+
+    - name: hostname - validate ansible_fqdn == inventory_hostname
+      tags:
+        - validate
+      assert:
+        that: ansible_fqdn == inventory_hostname
+
+    ##########
+    ## Swap ##
+    ##########
+
+    # Kubernetes requires swap to be disabled
+    # removing swap also speeds up reboots on rpi
+    - name: swap - remove swapfile from /etc/fstab if it exist
+      mount:
+        name: "{{ item }}"
+        fstype: swap
+        state: absent
+      with_items:
+        - none
+        - swap
+
+    - name: swap - mask swap dphys service
+      service:
+        name: dphys-swapfile
+        enabled: no
+        masked: yes
+        state: stopped
+
+    - name: swap - disable swap
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+
+    ##################
+    ## Raspberry Pi ##
+    ##################
+
+    - name: rpi - enable container related cgroups
+      replace:
+        path: /boot/cmdline.txt
+        regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
+        replace: '\1 {{ item }}'
+      with_items:
+        - "cgroup_enable=cpuset"
+        - "cgroup_enable=memory"
+        - "cgroup_memory=1"
+        - "swapaccount=1"
+
+    - name: rpi - set config parameters
+      lineinfile:
+        path: /boot/config.txt
+        regexp: "{{ item.find }}"
+        line: "{{ item.value }}"
+        state: present
+      with_items:
+        - find: ^gpu_mem=.*
+          value: gpu_mem=16
+        - find: ^dtparam=audio=on
+          value: "#dtparam=audio=on"
+        - find: ^dtoverlay=disable-bt
+          value: dtoverlay=disable-bt
+        - find: ^dtoverlay=disable-wifi
+          value: dtoverlay=disable-wifi
+
+    - name: rpi - disable services
+      systemd:
+        name: "{{ item }}"
+        enabled: no
+        masked: yes
+        state: stopped
+      with_items:
+        - apt-daily-upgrade.timer
+        - apt-daily.timer
+        - hciuart.service
+        - man-db.timer
+        - raspi-config.service
+        - rpi-eeprom-update.service
+        - wpa_supplicant.service
+
+    - name: rpi - fstab move logs to RAM
+      lineinfile:
+        path: /etc/fstab
+        regexp: "^tmpfs \/var\/log.*"
+        line: "tmpfs /var/log tmpfs defaults,noatime,mode=0755 0 0"
+        state: present
+
+    # UNI-T voltmeter shows 1.15A max with USB SSD connected. So around 1A lower than the 2.4A max the PSU provides.
+    # The 120mm desktop FAN which is connected to the same power supply should cool this effectivly
+    # - name: rpi - overclock to 2.0GHz
+    #   lineinfile:
+    #     path: /boot/config.txt
+    #     regexp: "{{ item.find }}"
+    #     line: "{{ item.value }}"
+    #     state: present
+    #   with_items:
+    #     - find: .*over_voltage=.*
+    #       value: over_voltage=6
+    #     - find: .*arm_freq=.*
+    #       value: arm_freq=2000
+
+    # #########
+    # ## UPS ##
+    # #########
+
+    # # Here we piggyback the UPS running on Synology NAS, simply need to allowlist the IPs of clients.
+    # - name: ups - configure nut to use netclient
+    #   replace:
+    #     path: /etc/nut/nut.conf
+    #     regexp: '^MODE=none'
+    #     replace: 'MODE=netclient'
+
+    # - name: ups - configure nut to monitor nas
+    #   lineinfile:
+    #     path: /etc/nut/upsmon.conf
+    #     regexp: '^MONITOR.*'
+    #     line: "MONITOR ups@{{ synology_ip }} 1 monuser secret slave"
+    #     state: present
+
+    # - name: ups - restart and enable service
+    #   service:
+    #     name: nut-client
+    #     enabled: yes
+    #     state: restarted
+
+    ########################
+    ## Modprobe / Systemd ##
+    ########################
+
+    - name: modprobe - enable modules
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - br_netfilter
+        - overlay
+
+    - name: modprobe - load modules on boot
+      lineinfile:
+        path: /etc/modules
+        line: "{{item}}"
+        state: present
+      with_items:
+        - br_netfilter
+        - overlay
+
+    - name: systemctl - allow ip forwarding
+      sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        sysctl_set: yes
+        state: present
+        reload: yes
+        ignoreerrors: no
+      with_dict: "{{ sysctl_config }}"
+
+    ############
+    ## Reboot ##
+    ############
+
+    - name: system - reboot (configuration)
+      reboot:
+
+    # - name: add host to inventory
+    #   add_host:
+    #     name: k3s-controller-0
+    #     ansible_host: "10.8.0.50"
+    #     groups: [all]
+
+    # - name: add host to inventory
+    #   add_host:
+    #     name: k3s-controller-0
+    #     ansible_host: "10.8.0.50"
+    #     groups: [k3s_controller]

@@ -5,26 +5,10 @@
 - name: checks
   import_playbook: playbooks/checks.yml
 
-- name: k8s - install packages
-  import_playbook: playbooks/k8s-0-packages.yml
-
-- name: k8s - configure os
-  import_playbook: playbooks/k8s-1-configuration.yml
-
-- name: k8s - configure firewall
-  import_playbook: playbooks/k8s-2-firewall.yml
-
-- name: k8s - create cluster
-  import_playbook: playbooks/k8s-3-create-cluster.yml
-
-# - name: k8s - configure worker nodes
-#   import_playbook: playbooks/k8s-4-workers.yml
-
-- name: k8s - create & upload kubeconfig
-  import_playbook: playbooks/k8s-5-kubeconfig.yml
-
-- name: k8s - configure node taints
-  import_playbook: playbooks/k8s-6-taints.yml
-
-- name: k8s - reboot nodes
-  import_playbook: playbooks/k8s-7-reboot.yml
+- import_playbook: playbooks/0-packages.yml
+- import_playbook: playbooks/1-config.yml
+# - import_playbook: playbooks/2-firewall.yml
+- import_playbook: playbooks/3-create-cluster.yml
+# - import_playbook: playbooks/4-workers.yml
+- import_playbook: playbooks/5-kubeconfig.yml
+- import_playbook: playbooks/6-reboot.yml

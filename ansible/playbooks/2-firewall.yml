@@ -1,0 +1,104 @@
+---
+- hosts: k3s_controller, k3s_workers
+  become: true
+  vars:
+    subnet_pod: 10.244.0.0/16
+    subnet_svc: 10.122.0.0/16
+
+  tasks:
+    - name: firewall - reset firewall to installation defaults
+      community.general.ufw:
+        state: reset
+
+    # #########
+    # ## LAN ##
+    # #########
+
+    # - name: firewall - allow ssh from LAN and VPN
+    #   community.general.ufw:
+    #     rule: limit
+    #     src: "{{ item }}"
+    #     port: '22'
+    #     proto: tcp
+    #   loop:
+    #     - '10.0.0.0/24'
+    #     - '10.100.0.0/24'
+
+    # - name: firewall - allow ingress ports from LAN
+    #   community.general.ufw:
+    #     rule: allow
+    #     src: 10.0.0.0/24
+    #     port: "{{ item }}"
+    #     proto: tcp
+    #   loop:
+    #     - '80'
+    #     - '443'
+    #     - '8080'
+    #     - '8443'
+
+    # - name: firewall - allow kubectl access to controller from LAN and VPN
+    #   community.general.ufw:
+    #     rule: allow
+    #     src: "{{ item }}"
+    #     port: '6443'
+    #     proto: tcp
+    #   loop:
+    #     - '10.0.0.0/24'
+    #     - '10.100.0.0/24'
+    #   when: "'k8s_controller' in group_names"
+
+    # ################
+    # ## Kubernetes ##
+    # ################
+
+    # # K8s nodes are running in a seperate VLAN
+    # # NetworkPolicies are used for in-cluster firewall
+
+    # - name: firewall - allow all traffic between nodes
+    #   community.general.ufw:
+    #     rule: allow
+    #     src: "{{ item }}"
+    #   loop:
+    #     - "{{ subnet_pod }}"
+    #     - "{{ subnet_svc }}"
+    #     - 10.8.0.0/24 # K8s VLAN
+
+    # ############
+    # ## Public ##
+    # ############
+
+    # - name: firewall - allow ingress ports to worker-1
+    #   community.general.ufw:
+    #     rule: allow
+    #     port: "{{ item }}"
+    #     proto: tcp
+    #   loop:
+    #     - '80'
+    #     - '443'
+    #   when: "'k8s-worker-1' in inventory_hostname"
+
+    # - name: firewall - allow wireguard ingress to worker-1
+    #   community.general.ufw:
+    #     rule: allow
+    #     direction: in
+    #     port: '51820'
+    #     proto: udp
+    #   when: "'k8s-worker-1' in inventory_hostname"
+
+    # ############
+    # ## Global ##
+    # ############
+
+    # - name: firewall - allow outgoing
+    #   community.general.ufw:
+    #     direction: outgoing
+    #     policy: allow
+
+    # - name: firewall - deny incoming
+    #   community.general.ufw:
+    #     direction: incoming
+    #     policy: deny
+
+    - name: firewall - reload and enable firewall on boot
+      community.general.ufw:
+        state: disabled
