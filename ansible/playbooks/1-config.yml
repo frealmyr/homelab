@@ -234,6 +234,15 @@
         ignoreerrors: no
       with_dict: "{{ sysctl_config }}"
 
+    ##############
+    ## K8s Misc ##
+    ##############
+
+    - name: k8s - create directory for persistent hostPath "volumes"
+      file:
+        path: /var/lib/k8s/volumes
+        state: directory
+
     ############
     ## Reboot ##
     ############
