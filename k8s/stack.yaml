@@ -6,6 +6,19 @@ namespaces:
   entertainment:
 
 appProject:
+  databases:
+    applications:
+      postgres:
+        namespace:
+          name: databases
+        sync:
+          wave: "-1"
+      redis:
+        namespace:
+          name: databases
+        sync:
+          wave: "-1"
+
   entertainment:
     applications:
       jellyfin:
@@ -61,6 +74,13 @@ appProject:
           create: true
         sync:
           wave: "-3"
+      crossplane:
+        namespace:
+          name: crossplane-system
+          create: true
+        sync:
+          autoSync: true
+          wave: "-2"
       traefik-internal:
         namespace:
           name: traefik-internal

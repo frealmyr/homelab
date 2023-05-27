@@ -1,0 +1,70 @@
+app:
+  image:
+    repository: ghcr.io/oae/kaizoku
+    tag: v1
+
+  persistentVolumes:
+    static:
+      - name: config
+        mountPath: /config
+      - name: logs
+        mountPath: /logs
+    hostPath:
+      - name: data
+        mountPath: /data
+        hostPath: /home/fredrick/media/manga # TODO public user
+
+  environmentVariables:
+    PUID: "1000"
+    PGID: "1000"
+    TZ: "Europe/Oslo"
+    REDIS_HOST: ""
+    REDIS_PORT: 6379
+
+  secretEnvironmentVariables:
+    - name: DB_USERNAME
+      secret:
+        name: credentials-db-freshrss
+        key: username
+    - name: DB_PASSWORD
+      secret:
+        name: credentials-db-freshrss
+        key: password
+    - name: DB_HOST
+      secret:
+        name: credentials-db-freshrss
+        key: endpoint
+    - name: DB_PORT
+      secret:
+        name: credentials-db-freshrss
+        key: port
+
+  containerPorts:
+    - name: http
+      containerPort: 3000
+      protocol: TCP
+
+  services:
+    - name: http
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 3000
+          targetPort: 3000
+
+  ingresses:
+    enabled: true
+    ingress:
+      - name: frontend
+        service:
+          name: http
+          port: 3000
+        hosts:
+          - host: kaizoku.fmlab.no
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
+        tls:
+          - secretName: kaizoku
+            hosts:
+              - kaizoku.fmlab.no

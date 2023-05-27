@@ -9,11 +9,6 @@ namespaces:
 appProject:
   databases:
     applications:
-      mariadb:
-        namespace:
-          name: databases
-        sync:
-          wave: "-1"
       postgres:
         namespace:
           name: databases

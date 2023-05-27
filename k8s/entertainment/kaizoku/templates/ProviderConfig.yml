@@ -1,0 +1,45 @@
+---
+apiVersion: postgresql.sql.crossplane.io/v1alpha1
+kind: Database
+metadata:
+  name: kaizoku
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+spec:
+  providerConfigRef:
+    name: postgres
+  forProvider: {}
+---
+apiVersion: postgresql.sql.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  name: kaizoku
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  providerConfigRef:
+    name: postgres
+  forProvider:
+    privileges:
+      login: true
+  writeConnectionSecretToRef:
+    name: credentials-db-kaizoku
+    namespace: kaizoku
+---
+apiVersion: postgresql.sql.crossplane.io/v1alpha1
+kind: Grant
+metadata:
+  name: kaizoku
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  providerConfigRef:
+    name: postgres
+  forProvider:
+    privileges:
+      - ALL
+    withOption: GRANT
+    roleRef:
+      name: kaizoku
+    databaseRef:
+      name: kaizoku
