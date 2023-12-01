@@ -1,0 +1,13 @@
+http:
+  routers:
+    dashboard:
+      entryPoints:
+        - https
+      rule: Host(`traefik.fmlab.no`)
+      tls:
+        certResolver: letsEncrypt
+        domains:
+          - main: traefik.fmlab.no
+      service: api@internal
+      middlewares:
+        - security@file

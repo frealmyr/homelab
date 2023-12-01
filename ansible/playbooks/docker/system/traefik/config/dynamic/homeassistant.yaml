@@ -1,0 +1,17 @@
+http:
+  routers:
+    homeassistant:
+      entryPoints:
+        - https
+      rule: Host(`ha.fmlab.no`)
+      tls:
+        certResolver: letsEncrypt
+      service: homeassistant
+      middlewares:
+        - security@file
+
+  services:
+    homeassistant:
+      loadBalancer:
+        servers:
+          - url: http://192.168.0.20:8123

@@ -1,0 +1,22 @@
+- name: hostname - change if mismatch from inventory name
+  hostname: name="{{ inventory_hostname }}"
+  when: ansible_fqdn != ansible_ssh_host
+  register: hostname
+
+- name: hostname - fix /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '^127\.0\.1\.1'
+    line: "127.0.1.1 {{ ansible_hostname }}"
+    state: present
+  when: hostname.changed
+
+- name: system - reboot (hostname changed)
+  reboot:
+  when: hostname.changed
+
+- name: hostname - validate ansible_fqdn == inventory_hostname
+  tags:
+    - validate
+  assert:
+    that: ansible_fqdn == inventory_hostname

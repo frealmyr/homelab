@@ -1,0 +1,45 @@
+
+- name: apt - install unattended-upgrades
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - unattended-upgrades
+
+- name: unattended-upgrades - configure package pattern match
+  copy:
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    content: "{{ content }}"
+  vars:
+    content: |
+      Unattended-Upgrade::Allowed-Origins {
+        "${distro_id}:${distro_codename}";
+        "${distro_id}:${distro_codename}-security";
+        "${distro_id}ESMApps:${distro_codename}-apps-security";
+        "${distro_id}ESM:${distro_codename}-infra-security";
+        "${distro_id}:${distro_codename}-updates";
+      };
+      Unattended-Upgrade::Automatic-Reboot "true";
+      Unattended-Upgrade::Automatic-Reboot-Time "03:00";
+  register: unattended_upgrades
+
+- name: unattended-upgrades - configure to check for updates each week
+  copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: "{{ content }}"
+  vars:
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Download-Upgradeable-Packages "1";
+      APT::Periodic::AutocleanInterval "3";
+      APT::Periodic::Verbose "1";
+      APT::Periodic::Unattended-Upgrade "1";
+  register: auto_upgrades
+
+- name: unattended-upgrades - restart and enable service
+  service:
+    name: unattended-upgrades.service
+    enabled: yes
+    state: restarted
+  when: unattended_upgrades.changed or auto_upgrades.changed

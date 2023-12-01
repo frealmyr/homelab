@@ -1,0 +1,146 @@
+- hosts: all
+  become: true
+  tasks:
+
+###########
+## Users ##
+###########
+
+    - name: traefik - create non-root user
+      user:
+        name: traefik
+        create_home: false
+        shell: /usr/sbin/nologin
+        state: present
+      register: user
+
+##################
+## Config Files ##
+##################
+
+    - name: traefik - create config sub-directory
+      file:
+        path: "/var/lib/homelab/configs/traefik"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: 0700
+
+    - name: traefik - copy local config folder to remote target
+      copy:
+        src: "config/"
+        dest: "/var/lib/homelab/configs/traefik/"
+        owner: "traefik"
+        group: "traefik"
+        mode: "0700"
+        directory_mode: "0700"
+        force: true
+
+#############
+## Secrets ##
+#############
+
+    - name: traefik - create secrets sub-directory
+      file:
+        path: "/var/lib/homelab/secrets/traefik"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: 0700
+
+    - name: traefik - touch secret file
+      copy:
+        content: ""
+        dest: "/var/lib/homelab/secrets/traefik/acme.json"
+        force: false
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: 0700
+
+    - name: traefik - fetch secrets from secrets.yaml
+      ansible.builtin.include_vars:
+        file: secrets.yaml
+
+    - name: traefik - copy secret to remote target
+      copy:
+        content: "{{ cloudflare_token }}"
+        dest: "/var/lib/homelab/secrets/traefik/cloudflare_token"
+        owner: '{{ user.uid }}'
+        group: '{{ user.group }}'
+
+#####################
+## Docker Networks ##
+#####################
+
+    - name: traefik - create reverse proxy network
+      community.docker.docker_network:
+        name: reverse-proxy
+
+    - name: traefik - create docker proxy network
+      community.docker.docker_network:
+        name: docker-proxy-traefik
+        driver: bridge
+        internal: true
+
+#######################
+## Docker Containers ##
+#######################
+
+    - name: traefik - remove containers
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - docker-proxy-traefik
+        - traefik
+
+    - name: traefik - start docker proxy container
+      community.docker.docker_container:
+        name: docker-proxy-traefik
+        image: tecnativa/docker-socket-proxy:latest
+        networks:
+          - name: docker-proxy-traefik
+        env:
+          CONTAINERS: "1"
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        restart_policy: unless-stopped
+
+    - name: traefik - start traefik container
+      community.docker.docker_container:
+        name: traefik
+        image: traefik:v3.0
+        user: "{{ user.uid }}:{{ user.group }}"
+        env:
+          TZ: "Europe/Oslo"
+          CF_DNS_API_TOKEN_FILE: /run/secrets/cloudflare_token
+        ports:
+          - 80:10080 # HTTP non-root
+          - 443:10443 # HTTPS non-root
+        networks:
+          - name: reverse-proxy
+          - name: docker-proxy-traefik
+        volumes:
+          - /var/lib/homelab/configs/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+          - /var/lib/homelab/configs/traefik/dynamic/:/etc/traefik/dynamic/:ro
+          - /var/lib/homelab/secrets/traefik/acme.json:/etc/traefik/acme/acme.json
+          - /var/lib/homelab/secrets/traefik/cloudflare_token:/run/secrets/cloudflare_token:ro
+        mounts:
+          - type: bind
+            read_only: true
+            target: /etc/localtime
+            source: /etc/localtime
+        security_opts:
+          - no-new-privileges:true
+        read_only: true
+        # mem_limit: 2G
+        # cpus: 0.75m
+        healthcheck:
+          test: ["CMD", "traefik", "healthcheck"]
+          interval: 60s
+          timeout: 5s
+          retries: 3
+          start_period: 60s
+        labels:
+          autoheal: "true"
+        restart_policy: unless-stopped

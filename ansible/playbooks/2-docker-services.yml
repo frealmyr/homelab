@@ -1,0 +1,44 @@
+---
+- hosts: all
+  become: true
+  tasks:
+
+  - name: docker - create groups
+    ansible.builtin.group:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - backup
+      - entertainment
+
+  - name: docker - create folders
+    file:
+      path: "{{ item.path }}"
+      state: directory
+      group: "{{ item.group }}"
+      mode: 0770 # owner+group rwx, others none
+    loop:
+      - { path: /media/storage/downloads, group: entertainment }
+      - { path: /media/storage/entertainment, group: entertainment }
+      - { path: /var/lib/homelab, group: root }
+      - { path: /var/lib/homelab/backups, group: backup }
+      - { path: /var/lib/homelab/configs, group: root }
+      - { path: /var/lib/homelab/secrets, group: root }
+
+# System
+- import_playbook: docker/system/traefik/main.yaml
+- import_playbook: docker/system/watchtower/main.yaml
+
+# Network
+- import_playbook: docker/network/omada/main.yaml
+- import_playbook: docker/network/librespeed/main.yaml
+- import_playbook: docker/network/adguard/main.yaml
+
+# Home
+- import_playbook: docker/home/homeassistant/main.yaml
+- import_playbook: docker/home/homebox/main.yaml
+- import_playbook: docker/home/homer/main.yaml
+
+# Entertainment
+- import_playbook: docker/entertainment/jellyfin/main.yaml
+- import_playbook: docker/entertainment/yarr/main.yaml

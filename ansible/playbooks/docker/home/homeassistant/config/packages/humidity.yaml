@@ -1,0 +1,32 @@
+template:
+  - sensor:
+      - name: "Forecast Outdoor Temperature"
+        state: "{{state_attr('weather.forecast_home', 'temperature')}}"
+        unit_of_measurement: '°C'
+        icon: mdi:thermometer
+        device_class: temperature
+sensor:
+  - platform: mold_indicator
+    name: "Stue"
+    indoor_temp_sensor: sensor.stue_sensor_temperature
+    indoor_humidity_sensor: sensor.stue_sensor_humidity
+    outdoor_temp_sensor: sensor.forecast_outdoor_temperature
+    calibration_factor: 1.34
+  - platform: mold_indicator
+    name: "Soverom"
+    indoor_temp_sensor: sensor.soverom_sensor_temperature
+    indoor_humidity_sensor: sensor.soverom_sensor_humidity
+    outdoor_temp_sensor: sensor.forecast_outdoor_temperature
+    calibration_factor: 1.34
+  - platform: mold_indicator
+    name: "Gjesterom"
+    indoor_temp_sensor: sensor.gjesterom_sensor_temperature
+    indoor_humidity_sensor: sensor.gjesterom_sensor_humidity
+    outdoor_temp_sensor: sensor.forecast_outdoor_temperature
+    calibration_factor: 1.34
+  - platform: mold_indicator
+    name: "Bad"
+    indoor_temp_sensor: sensor.bad_sensor_temperature
+    indoor_humidity_sensor: sensor.bad_sensor_humidity
+    outdoor_temp_sensor: sensor.forecast_outdoor_temperature
+    calibration_factor: 1.34

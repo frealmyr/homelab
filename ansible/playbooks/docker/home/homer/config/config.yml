@@ -1,0 +1,101 @@
+---
+title: "Fredrick's Nerdebule"
+header: false
+footer: false
+links: false
+columns: "2"
+connectivityCheck: false
+stylesheet:
+  - "assets/custom.css"
+services:
+  - name: "Home"
+    icon: "fas fa-house"
+    items:
+      - name: "Homebox"
+        logo: "assets/icons/homebox.svg"
+        subtitle: "Inventory and organization for those boxes"
+        url: "https://homebox.fmlab.no"
+      - name: "Home Assistant"
+        logo: "assets/icons/homeassistant.svg"
+        subtitle: "Smart rules for a smart home"
+        url: "https://homeassistant.fmlab.no"
+
+  - name: "Entertainment"
+    icon: "fas fa-tv"
+    items:
+      - name: "Jellyfin"
+        logo: "assets/icons/jellyfin.svg"
+        subtitle: "Personal streaming service"
+        url: "https://jellyfin.fmlab.no"
+      - name: "Sonarr"
+        logo: "assets/icons/sonarr.svg"
+        subtitle: "Fetch TV-Series"
+        url: "https://sonarr.fmlab.no"
+      - name: "Radarr"
+        logo: "assets/icons/radarr.svg"
+        subtitle: "Fetch Movies"
+        url: "https://radarr.fmlab.no"
+
+  - name: "Streaming"
+    icon: "fas fa-dice"
+    items:
+      - name: "WOL"
+        logo: "assets/icons/upsnap.svg"
+        subtitle: "Wake up sleeping computers"
+        url: "https://wol.fmlab.no"
+      - name: "Sunshine: Shuna"
+        logo: "assets/icons/sunshine.png"
+        subtitle: "Game streaming dashboard for Shuna"
+        url: "https://192.168.0.40:47990"
+      - name: "Sunshine: Diablo"
+        logo: "assets/icons/sunshine.png"
+        subtitle: "Game streaming dashboard for Diablo"
+        url: "https://192.168.0.41:47990"
+
+  - name: "Network"
+    icon: "fas fa-network-wired"
+    items:
+      - name: "Speedtest"
+        logo: "assets/icons/librespeed.png"
+        subtitle: "Check ping & speed to local server"
+        url: "https://speedtest.fmlab.no"
+      - name: "Omada"
+        logo: "assets/icons/omada.svg"
+        subtitle: "Omada network controller"
+        url: "https://192.168.0.10:8043"
+      - name: "AdGuard"
+        logo: "assets/icons/adguard.svg"
+        subtitle: "Ad-Blocker and DNS Cache"
+        url: "https://adguard.fmlab.no"
+
+  - name: "Configuration"
+    icon: "fas fa-gear"
+    items:
+      - name: "Transmission"
+        logo: "assets/icons/transmission.svg"
+        subtitle: "Sail the high seas in search of Torrents"
+        url: "https://transmission.fmlab.no"
+      - name: "Prowlarr"
+        logo: "assets/icons/prowlarr.svg"
+        subtitle: "Indexes for Radarr & Sonarr"
+        url: "https://prowlarr.fmlab.no"
+
+  - name: "Data & Backup"
+    icon: "fas fa-floppy-disk"
+    items:
+      - name: "Synology DSM"
+        logo: "assets/icons/ds920.png"
+        subtitle: "Network storage aka. NAS"
+        url: "https://nas.fmlab.no"
+      - name: "Duplicati"
+        logo: "assets/icons/duplicati.png"
+        subtitle: "Backups for NAS"
+        url: "https://duplicati.fmlab.no"
+
+  # - name: "Public"
+  #   icon: "fas fa-earth-europe"
+  #   items:
+  #     - name: "Lychee"
+  #       logo: "assets/icons/lychee.png"
+  #       subtitle: "Photo Gallery"
+  #       url: "https://photos.fmlab.no"

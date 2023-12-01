@@ -1,0 +1,15 @@
+- name: Disable snapd services
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop:
+    - snapd.service
+    - snapd.socket
+    - snapd.seeded.service
+
+- name: Mask snapd service
+  systemd:
+    name: snapd.service
+    state: stopped
+    masked: true

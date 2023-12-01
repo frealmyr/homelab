@@ -1,0 +1,47 @@
+log:
+  level: WARN
+
+providers:
+  docker:
+    network: traefik-servicenet
+    exposedbydefault: false
+    endpoint: "tcp://docker-proxy-traefik:2375"
+  file:
+    directory: "/etc/traefik/dynamic/"
+    watch: true
+
+api:
+  dashboard: true
+
+entryPoints:
+  http:
+    address: :10080
+    http:
+      redirections:
+        entryPoint:
+          to: ':443'
+          scheme: https
+  https:
+    address: :10443
+    http3:
+      advertisedPort: 443
+
+# Allow backends to use insecure SSL
+# Required for using HTTPS backend with self-signed certificates, such as Omada Controller
+serversTransport:
+  insecureSkipVerify: true
+
+certificatesResolvers:
+  letsEncrypt:
+    acme:
+      email: "support@fmlab.no"
+      storage: "/etc/traefik/acme/acme.json"
+      dnschallenge:
+        provider: cloudflare
+        delaybeforecheck: 5
+
+experimental:
+  http3: true
+
+global:
+  sendAnonymousUsage: true

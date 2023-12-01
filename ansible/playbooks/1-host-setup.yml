@@ -1,0 +1,29 @@
+---
+- hosts: all
+  become: true
+  tasks:
+
+####################
+## System Upgrade ##
+####################
+
+    - name: apt - update & upgrade packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+      register: package_upgrade
+
+    - name: system - reboot (kernel update)
+      reboot:
+      when: package_upgrade.changed
+
+##############
+## Features ##
+##############
+
+    - include_tasks: '{{ task_name }}'
+      with_fileglob:
+        - features/*.yml
+      loop_control:
+        loop_var: task_name

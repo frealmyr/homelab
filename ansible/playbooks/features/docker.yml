@@ -1,0 +1,77 @@
+- name: apt - remove packages
+  apt:
+    name: "{{ packages }}"
+    state: absent
+    autoremove: true
+    purge: true
+  vars:
+    packages:
+      - docker.io
+      - docker-doc
+      - docker-compose-v2
+      - podman-docker
+      - containerd
+      - runc
+
+- name: apt - download gpg key
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - url: https://download.docker.com/linux/ubuntu/gpg
+      dest: /etc/apt/keyrings/docker.gpg.armored
+  register: docker_gpg_download
+
+- name: apt - gpg dearmor key
+  shell: "cat {{ item }}.armored | gpg --dearmor | tee {{ item }}"
+  with_items:
+    - /etc/apt/keyrings/docker.gpg
+  when: docker_gpg_download.changed
+
+- name: apt - add repository
+  apt_repository:
+    repo: "{{ item.repo }}"
+    state: present
+    filename: "{{ item.filename }}"
+  with_items:
+    - repo: deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+      filename: docker
+
+- name: apt - install docker packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose
+      - docker-compose-plugin
+  register: docker_apt
+
+- name: docker - pull and run hello-world test container
+  docker_container:
+    name: hello-world
+    image: hello-world
+    state: started
+    pull: true
+    restart_policy: "no"
+    auto_remove: true
+    cleanup: true
+  register: hello_world
+  until: hello_world is succeeded
+  retries: 3
+  delay: 5
+  when: docker_apt.changed
+
+- name: docker - assert hello-world ran successfully
+  assert:
+    that:
+      - hello_world is succeeded
+    fail_msg: "Docker hello-world failed"
+    success_msg: "Docker hello-world succeeded"
+  when: hello_world.changed

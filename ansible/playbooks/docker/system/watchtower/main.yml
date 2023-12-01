@@ -1,0 +1,98 @@
+#############
+## Secrets ##
+#############
+
+- name: watchtower - create secrets sub-directory
+  file:
+    path: "/var/lib/homelab/secrets/{{ item.folder }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+    mode: 0700
+  loop:
+    - { folder: watchtower, owner: root }
+
+- name: watchtower - fetch secrets from secrets.yaml
+  ansible.builtin.include_vars:
+    file: secrets.yaml
+
+- name: watchtower - copy secrets to remote target
+  copy:
+    content: "{{ discord_webhook }}"
+    dest: "/var/lib/homelab/secrets/{{ item.file }}"
+    owner: '{{ item.owner }}'
+    group: '{{ item.owner }}'
+  loop:
+    - { file: watchtower/discord_webhook, owner: root }
+  register: copy_secrets_discord_webhook
+
+- name: watchtower - copy secrets to remote target
+  copy:
+    content: "{{ config_json }}"
+    dest: "/var/lib/homelab/secrets/{{ item.file }}"
+    owner: '{{ item.owner }}'
+    group: '{{ item.owner }}'
+  loop:
+    - { file: watchtower/config_json, owner: root }
+  register: copy_secrets_config_json
+
+####################
+## Docker Network ##
+####################
+
+- name: watchtower - create docker proxy network
+  community.docker.docker_network:
+    name: docker-proxy-watchtower
+    driver: bridge
+    internal: true
+
+#######################
+## Docker Container ##
+#######################
+
+- name: watchtower - remove containers
+  community.docker.docker_container:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - docker-proxy-watchtower
+    - watchtower
+
+- name: watchtower - start docker proxy container
+  community.docker.docker_container:
+    name: docker-proxy-watchtower
+    image: tecnativa/docker-socket-proxy:latest
+    networks:
+      - name: docker-proxy-watchtower
+    env:
+      POST: "1"
+      CONTAINERS: "1"
+      NETWORKS: "1"
+      IMAGES: "1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart_policy: unless-stopped
+
+- name: watchtower - start watchtower container
+  community.docker.docker_container:
+    name: watchtower
+    image: containrrr/watchtower:latest
+    env:
+      TZ: "Europe/Oslo"
+      DOCKER_HOST: "tcp://docker-proxy-watchtower:2375"
+      WATCHTOWER_SCHEDULE: "0 4 * * *"
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_NOTIFICATION_URL: /run/secrets/discord_webhook
+      WATCHTOWER_NOTIFICATION_REPORT: "true"
+      WATCHTOWER_WARN_ON_HEAD_FAILURE: "never"
+    networks:
+      - name: docker-proxy-watchtower
+    volumes:
+      - /var/lib/homelab/secrets/watchtower/discord_webhook:/run/secrets/discord_webhook:ro
+      - /var/lib/homelab/secrets/watchtower/config_json:/config.json:ro
+    security_opts:
+      - no-new-privileges:true
+    read_only: true
+    # mem_limit: 2G
+    # cpus: 0.75m
+    restart_policy: unless-stopped

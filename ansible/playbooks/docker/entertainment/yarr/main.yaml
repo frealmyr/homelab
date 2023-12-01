@@ -1,0 +1,200 @@
+- hosts: all
+  become: true
+  vars:
+    service_name: yarr
+    domain: fmlab.no
+  tasks:
+
+###########
+## Users ##
+###########
+
+    - name: "{{ service_name }} - create non-root user"
+      user:
+        name: "{{ service_name }}"
+        create_home: false
+        shell: /usr/sbin/nologin
+        state: present
+      register: user
+
+###################
+## Data & Backup ##
+###################
+
+    - name: "{{ service_name }} - create docker volumes"
+      community.docker.docker_volume:
+        volume_name: "{{ service_name }}_{{ item }}"
+        state: present
+      loop:
+        - prowlarr_config
+        - radarr_config
+        - sonarr_config
+        - transmission_config
+
+    - name: "{{ service_name }} - create backup sub-directory"
+      file:
+        path: "/var/lib/homelab/backups/{{ service_name }}"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: "0770"
+
+    - name: "{{ service_name }} - create weekly dump-volume-to-backup-folder job"
+      ansible.builtin.cron:
+        name: "docker-volume-backup-{{ item }}"
+        minute: "10"
+        hour: "3" # 03:10
+        weekday: "6" # Saturday
+        job: >
+          docker stop {{ service_name }}
+          && tar -czf /var/lib/homelab/backups/{{ service_name }}/{{ service_name }}_{{ item }}_backup-$(date +%F).tar.gz -C /var/lib/docker/volumes/{{ service_name }}_{{ item }}/_data .
+          && docker start {{ service_name }}
+      with_items:
+        - prowlarr_config
+        - radarr_config
+        - sonarr_config
+        - transmission_config
+
+###################
+## Reverse Proxy ##
+###################
+
+    - name: "{{ service_name }} - configure prowlarr labels"
+      set_fact:
+          prowlarr_traefik_labels: "{{ prowlarr_traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      with_items:
+        - { 'key': 'traefik.enable' , 'value': 'true'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`prowlarr.{{ domain }}`)'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.service' , 'value': '{{ service_name }}'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
+        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '9696'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.middlewares' , 'value': 'security@file'}
+
+    - name: "{{ service_name }} - configure radarr labels"
+      set_fact:
+          radarr_traefik_labels: "{{ radarr_traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      with_items:
+        - { 'key': 'traefik.enable' , 'value': 'true'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`radarr.{{ domain }}`)'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.service' , 'value': '{{ service_name }}'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
+        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '7878'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.middlewares' , 'value': 'security@file'}
+
+    - name: "{{ service_name }} - configure sonarr labels"
+      set_fact:
+          sonarr_traefik_labels: "{{ sonarr_traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      with_items:
+        - { 'key': 'traefik.enable' , 'value': 'true'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`sonarr.{{ domain }}`)'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.service' , 'value': '{{ service_name }}'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
+        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '8989'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.middlewares' , 'value': 'security@file'}
+
+    - name: "{{ service_name }} - configure transmission labels"
+      set_fact:
+          transmission_traefik_labels: "{{ transmission_traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      with_items:
+        - { 'key': 'traefik.enable' , 'value': 'true'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`transmission.{{ domain }}`)'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.service' , 'value': '{{ service_name }}'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
+        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '9091'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.middlewares' , 'value': 'security@file'}
+
+#######################
+## Docker Containers ##
+#######################
+
+    - name: "{{ service_name }} - remove containers"
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - prowlarr
+        - radarr
+        - sonarr
+        - transmission
+
+    - name: "{{ service_name }} - start prowlarr container"
+      community.docker.docker_container:
+        name: "prowlarr"
+        image: lscr.io/linuxserver/prowlarr:latest
+        env:
+          PGID: "{{ user.group }}"
+          PUID: "{{ user.uid }}"
+          TZ: "Europe/Oslo"
+        volumes:
+          - "{{ service_name }}_prowlarr_config:/config"
+        networks:
+          - name: reverse-proxy
+        labels: "{{ prowlarr_traefik_labels }}"
+        security_opts:
+          - no-new-privileges:true
+        restart_policy: unless-stopped
+
+    - name: "{{ service_name }} - start radarr container"
+      community.docker.docker_container:
+        name: "radarr"
+        image: lscr.io/linuxserver/radarr:latest
+        env:
+          PGID: "{{ user.group }}"
+          PUID: "{{ user.uid }}"
+          TZ: "Europe/Oslo"
+        volumes:
+          - "{{ service_name }}_radarr_config:/config"
+          - /media/storage/downloads:/media/storage/downloads
+          - /media/storage/entertainment:/media/storage/entertainment
+        networks:
+          - name: reverse-proxy
+        labels: "{{ radarr_traefik_labels }}"
+        security_opts:
+          - no-new-privileges:true
+        restart_policy: unless-stopped
+
+    - name: "{{ service_name }} - start sonarr container"
+      community.docker.docker_container:
+        name: "sonarr"
+        image: lscr.io/linuxserver/sonarr:latest
+        env:
+          PGID: "{{ user.group }}"
+          PUID: "{{ user.uid }}"
+          TZ: "Europe/Oslo"
+        volumes:
+          - "{{ service_name }}_sonarr_config:/config"
+          - /media/storage/downloads:/media/storage/downloads
+          - /media/storage/entertainment:/media/storage/entertainment
+        networks:
+          - name: reverse-proxy
+        labels: "{{ sonarr_traefik_labels }}"
+        security_opts:
+          - no-new-privileges:true
+        restart_policy: unless-stopped
+
+    - name: "{{ service_name }} - start transmission container"
+      community.docker.docker_container:
+        name: "transmission"
+        image: lscr.io/linuxserver/transmission:latest
+        env:
+          PGID: "{{ user.group }}"
+          PUID: "{{ user.uid }}"
+          TZ: "Europe/Oslo"
+          PEERPORT: "54213"
+        volumes:
+          - "{{ service_name }}_transmission_config:/config"
+          - /media/storage/downloads:/media/storage/downloads
+          - /media/storage/entertainment:/media/storage/entertainment
+        networks:
+          - name: reverse-proxy
+        ports:
+          - "54213:54213"
+          - "54213:54213/udp"
+        security_opts:
+          - no-new-privileges:true
+        labels: "{{ transmission_traefik_labels }}"
+        restart_policy: unless-stopped

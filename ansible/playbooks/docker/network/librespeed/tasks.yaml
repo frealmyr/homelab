@@ -1,0 +1,47 @@
+- hosts: all
+  become: true
+  vars:
+    service_name: librespeed
+    domain: fmlab.no
+  tasks:
+
+#############
+## Traefik ##
+#############
+
+    - name: "{{ service_name }} - configure traefik labels"
+      set_fact:
+          traefik_labels: "{{ traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      with_items:
+        - { 'key': 'traefik.enable' , 'value': 'true'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`{{ service_name }}.{{ domain }}`)'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.service' , 'value': '{{ service_name }}'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
+        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '8080'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.middlewares' , 'value': 'security@file'}
+
+#######################
+## Docker Containers ##
+#######################
+
+    - name: "{{ service_name }} - remove containers"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        state: absent
+
+    - name: "{{ service_name }} - start docker proxy container"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        image: adolfintel/speedtest:latest
+        env:
+          TZ: "Europe/Oslo"
+          MODE: "standalone"
+          DISTANCE: "km"
+          TELEMETRY: "false"
+          DISABLE_IPINFO: "false"
+          WEBPORT: "8080"
+        networks:
+          - name: reverse-proxy
+        labels: "{{ traefik_labels }}"
+        restart_policy: unless-stopped

@@ -1,0 +1,66 @@
+- hosts: all
+  become: true
+  vars:
+    service_name: adguard
+    domain: fmlab.no
+  tasks:
+
+#############
+## Traefik ##
+#############
+
+    - name: "{{ service_name }} - create dynamic traefik file"
+      copy:
+        dest: "/var/lib/homelab/configs/traefik/dynamic/{{ service_name }}.yaml"
+        force: true
+        owner: "traefik"
+        group: "traefik"
+        mode: 0700
+        content: |
+          http:
+            routers:
+              {{ service_name }}:
+                entryPoints:
+                  - https
+                rule: Host(`{{ service_name }}.fmlab.no`)
+                tls:
+                  certResolver: letsEncrypt
+                service: {{ service_name }}
+                middlewares:
+                  - security@file
+            services:
+              {{ service_name }}:
+                loadBalancer:
+                  servers:
+                    - url: http://192.168.0.20:3000
+
+####################
+## Docker Volumes ##
+####################
+
+    - name: "{{ service_name }} - create docker volumes"
+      community.docker.docker_volume:
+        volume_name: "{{ service_name }}_{{ item }}"
+      loop:
+        - conf
+        - work
+      register: volume
+
+#######################
+## Docker Containers ##
+#######################
+
+    - name: "{{ service_name }} - remove containers"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        state: absent
+
+    - name: "{{ service_name }} - start docker proxy container"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        image: adguard/adguardhome:latest
+        volumes:
+          - "{{ service_name }}_conf:/opt/adguardhome/conf"
+          - "{{ service_name }}_work:/opt/adguardhome/work"
+        network_mode: host
+        restart_policy: unless-stopped

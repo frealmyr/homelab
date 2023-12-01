@@ -1,0 +1,24 @@
+- name: disks - create partiton on storage disk
+  community.general.parted:
+    device: /dev/sda
+    number: 1
+    fs_type: ext4
+    state: present
+
+- name: disks - format storage disk partition
+  community.general.filesystem:
+    fstype: ext4
+    dev: /dev/sda1
+
+- name: disks - create mount directory
+  file:
+    path: /media/storage
+    state: directory
+
+- name: disks - mount storage disk
+  mount:
+    fstype: ext4
+    src: /dev/sda1
+    path: /media/storage
+    opts: defaults,noatime
+    state: mounted

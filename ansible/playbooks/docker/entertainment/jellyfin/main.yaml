@@ -1,0 +1,113 @@
+- hosts: all
+  become: true
+  vars:
+    service_name: jellyfin
+    domain: fmlab.no
+  tasks:
+
+###########
+## Users ##
+###########
+
+    - name: "{{ service_name }} - create non-root user"
+      user:
+        name: "{{ service_name }}"
+        create_home: false
+        shell: /usr/sbin/nologin
+        state: present
+      register: user
+
+###################
+## Data & Backup ##
+###################
+
+    - name: "{{ service_name }} - create docker volumes"
+      community.docker.docker_volume:
+        volume_name: "{{ service_name }}_{{ item }}"
+        state: present
+      loop:
+        - config
+        - cache
+
+    - name: "{{ service_name }} - create backup sub-directory"
+      file:
+        path: "/var/lib/homelab/backups/{{ service_name }}"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: "0770"
+
+    - name: "{{ service_name }} - create weekly dump-volume-to-backup-folder job"
+      ansible.builtin.cron:
+        name: "docker-volume-backup-{{ item }}"
+        minute: "0"
+        hour: "3" # 03:00
+        weekday: "6" # Saturday
+        job: >
+          docker stop {{ service_name }}
+          && tar -czf /var/lib/homelab/backups/{{ service_name }}/{{ item }}_backup-$(date +%F).tar.gz -C /var/lib/docker/volumes/{{ item }}/_data .
+          && docker start {{ service_name }}
+      with_items:
+        - "{{ service_name }}_config"
+
+###################
+## Reverse Proxy ##
+###################
+
+    - name: "{{ service_name }} - configure traefik labels"
+      set_fact:
+          traefik_labels: "{{ traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      with_items:
+        - { 'key': 'traefik.enable' , 'value': 'true'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`{{ service_name }}.{{ domain }}`)'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.service' , 'value': '{{ service_name }}'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
+        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '8096'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.middlewares' , 'value': 'security@file'}
+
+#############
+## Helpers ##
+#############
+
+    - name: helper - get group_id - video
+      getent:
+        database: group
+        key: video
+      register: group_video
+
+    - name: helper - get group_id - render
+      getent:
+        database: group
+        key: render
+      register: group_render
+
+#######################
+## Docker Containers ##
+#######################
+
+    - name: "{{ service_name }} - remove containers"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        state: absent
+
+    - name: "{{ service_name }} - start docker proxy container"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        image: jellyfin/jellyfin:latest
+        user: "{{ user.uid }}:{{ user.group }}"
+        groups:
+          - '{{ group_video.ansible_facts.getent_group.video[1] }}'
+          - '{{ group_render.ansible_facts.getent_group.render[1] }}'
+        volumes:
+          - "{{ service_name }}_cache:/cache"
+          - "{{ service_name }}_config:/config"
+          - /media/storage/entertainment:/media/storage/entertainment:ro
+        devices:
+          - /dev/dri/card0:/dev/dri/card0
+          - /dev/dri/renderD128:/dev/dri/renderD128
+        network_mode: host
+        labels: "{{ traefik_labels }}"
+        security_opts:
+          - no-new-privileges:true
+        restart_policy: unless-stopped

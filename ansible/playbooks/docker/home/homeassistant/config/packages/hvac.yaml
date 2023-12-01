@@ -1,0 +1,121 @@
+sensor:
+  - platform: min_max
+    name: "HVAC Target Speed"
+    type: max
+    entity_ids:
+      - input_number.hvac_speed_stue
+      - input_number.hvac_speed_soverom
+      - input_number.hvac_speed_gjesterom
+      - input_number.hvac_speed_bad
+    round_digits : 0
+    unique_id: hvac_target_speed
+input_boolean:
+  hvac_api_call:
+    name: HVAC API Call
+    initial: false
+    icon: mdi:api
+  hvac_override:
+    name: HVAC Override Toggle
+    icon: mdi:hvac
+input_number:
+  hvac_override:
+    name: HVAC Override Speed
+    min: 0
+    max: 3300
+    step: 100
+    unit_of_measurement: "RPM"
+    icon: mdi:hvac
+  hvac_speed_stue:
+    name: HVAC Speed - Stue
+    min: 0
+    max: 3300
+    step: 100
+    mode: box
+    unit_of_measurement: "RPM"
+    icon: mdi:hvac
+  hvac_speed_soverom:
+    name: HVAC Speed - Soverom
+    min: 0
+    max: 3300
+    step: 100
+    mode: box
+    unit_of_measurement: "RPM"
+    icon: mdi:hvac
+  hvac_speed_gjesterom:
+    name: HVAC Speed - Gjesterom
+    min: 0
+    max: 3300
+    step: 100
+    mode: box
+    unit_of_measurement: "RPM"
+    icon: mdi:hvac
+  hvac_speed_bad:
+    name: HVAC Speed - Bad
+    min: 0
+    max: 3300
+    step: 100
+    mode: box
+    unit_of_measurement: "RPM"
+    icon: mdi:hvac
+rest_command:
+  ventilation_speed_change:
+    url: http://192.168.0.6/mwrite?%7B%221414%22%3A{{ rpm }}%2C%221415%22%3A{{ rpm }}%7D
+rest:
+  - resource: http://192.168.0.6/mread?%7B%223021%22%3A1%2C%2211000%22%3A7%2C%2211100%22%3A6%2C%2211200%22%3A6%2C%2212100%22%3A8%2C%2212135%22%3A1%2C%2212150%22%3A6%2C%2212160%22%3A6%2C%2212400%22%3A2%2C%2212542%22%3A1%2C%2212543%22%3A1%7D
+    scan_interval: 31536000
+    sensor:
+      - name: HVAC Outdoor Air Temperature
+        value_template: >
+          {% if value_json['12101'] | int > 32767 %}
+            {{ ( value_json['12101'] | int - 65536 ) / 10 }}
+          {% else %}
+            {{ value_json['12101'] | float / 10 }}
+          {% endif %}
+        device_class: temperature
+        unit_of_measurement: '°C'
+      - name: HVAC Supply Air Temperature
+        value_template: >
+          {% if value_json['12102'] | int > 32767 %}
+            {{ ( value_json['12102'] | int - 65536 ) / 10 }}
+          {% else %}
+            {{ value_json['12102'] | float / 10 }}
+          {% endif %}
+        device_class: temperature
+        unit_of_measurement: '°C'
+      - name: HVAC Overheat Temperature Sensor
+        value_template: >
+          {% if value_json['12107'] | int > 32767 %}
+            {{ ( value_json['12107'] | int - 65536 ) / 10 }}
+          {% else %}
+            {{ value_json['12107'] | float / 10 }}
+          {% endif %}
+        device_class: temperature
+        unit_of_measurement: '°C'
+      - name: HVAC Inbuilt Extract Air Temperature
+        value_template: >
+          {% if value_json['12543'] | int > 32767 %}
+            {{ ( value_json['12543'] | int - 65536 ) / 10 }}
+          {% else %}
+            {{ value_json['12543'] | float / 10 }}
+          {% endif %}
+        device_class: temperature
+        unit_of_measurement: '°C'
+      - name: HVAC Supply air fan level
+        value_template: "{{ value_json['12400'] | int }}"
+        unit_of_measurement: 'RPM'
+      - name: HVAC Extract air fan level
+        value_template: "{{ value_json['12401'] | int }}"
+        unit_of_measurement: 'RPM'
+      - name: HVAC Inbuilt Relative Humidity
+        value_template: "{{ value_json['12135'] | int }}"
+        unit_of_measurement: '%'
+input_datetime:
+  hvac_override:
+    name: HVAC Override Datetime
+    has_time: true
+    icon: mdi:clock
+timer:
+  hvac_override:
+    name: HVAC Override Timer
+    icon: mdi:clock
+    restore: true
