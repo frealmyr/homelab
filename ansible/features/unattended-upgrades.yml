@@ -1,0 +1,84 @@
+
+- name: apt - install unattended-upgrades
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - unattended-upgrades
+
+- name: apt-timer - override apt update timer
+  copy:
+    dest: /etc/systemd/system/apt-daily.timer
+    content: "{{ content }}"
+  vars:
+    content: |
+      [Unit]
+      Description=Daily apt download activities
+
+      [Timer]
+      OnCalendar=Mon *-*-* 3:15
+      RandomizedDelaySec=60m
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+  register: apt_update_timer
+
+- name: unattended-upgrades - configure to check for updates each week
+  copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: "{{ content }}"
+  vars:
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Download-Upgradeable-Packages "1";
+      APT::Periodic::AutocleanInterval "3";
+      APT::Periodic::Verbose "1";
+      APT::Periodic::Unattended-Upgrade "1";
+  register: auto_upgrades
+
+- name: apt-timer - override apt upgrade timer
+  copy:
+    dest: /etc/systemd/system/apt-daily-upgrade.timer
+    content: "{{ content }}"
+  vars:
+    content: |
+      [Unit]
+      Description=Daily apt upgrade and clean activities
+      After=apt-daily.timer
+
+      [Timer]
+      OnCalendar=Mon *-*-* 4:15
+      RandomizedDelaySec=60m
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+  register: apt_upgrade_timer
+
+- name: unattended-upgrades - configure package pattern match
+  copy:
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    content: "{{ content }}"
+  vars:
+    content: |
+      Unattended-Upgrade::Origins-Pattern {
+        "o=*";
+        "o=";
+      };
+      Unattended-Upgrade::Automatic-Reboot "true";
+      Unattended-Upgrade::Automatic-Reboot-Time "05:15";
+  register: unattended_upgrades
+
+- name: unattended-upgrades - restart and enable service
+  service:
+    name: unattended-upgrades.service
+    enabled: yes
+    state: restarted
+  when: unattended_upgrades.changed or auto_upgrades.changed
+
+- name: systemd - reload daemon
+  systemd:
+    daemon_reload: yes
+  when: apt_update_timer.changed or apt_upgrade_timer.changed

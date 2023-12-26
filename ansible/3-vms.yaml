@@ -1,0 +1,210 @@
+---
+- hosts: homelab
+  become: true
+  vars:
+    nodes:
+      k8s-mgmt:
+        name: k8s-mgmt
+        cpu: 4
+        memory: 6144
+        maxmemory: 8196
+        address: 192.168.0.120
+      k8s-test:
+        name: k8s-test
+        cpu: 4
+        memory: 6144
+        maxmemory: 8196
+        address: 192.168.0.121
+      k8s-prod:
+        name: k8s-prod
+        cpu: 4
+        memory: 6144
+        maxmemory: 8196
+        address: 192.168.0.122
+    recreate_nodes: true # destroy vms and recreate
+  tasks:
+
+##################
+## APT Packages ##
+##################
+
+    - name: apt - install misc packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - cloud-image-utils
+          - libvirt-daemon-system
+          - qemu-kvm
+          - virt-manager
+          - virtinst
+
+#############
+## Folders ##
+#############
+
+    - name: folders - create root vm folders
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "libvirt-qemu"
+        group: "kvm"
+        mode: 0770 # owner+group rwx, others none
+      loop:
+        - /var/lib/vms
+        - /var/lib/vms/configs
+        - /var/lib/vms/images
+        - /var/lib/vms/volumes
+
+    - name: folders - create vm folders
+      file:
+        path: "/var/lib/vms/configs/{{ item.value.name }}"
+        state: directory
+        owner: "libvirt-qemu"
+        group: "kvm"
+        mode: 0770 # owner+group rwx, others none
+      loop: "{{ nodes | dict2items }}"
+
+################
+## Public Key ##
+################
+
+    - name: pubkey - copy public key from local machine to remote target
+      copy:
+        src: ~/.ssh/homelab.pub
+        dest: /home/fredrick/.ssh/homelab.pub
+        owner: fredrick
+        group: fredrick
+        mode: 0600
+
+    - name: pubkey - use content of ~/.ssh/homelab.pub as a variable
+      set_fact:
+        public_key: "{{ lookup('file', '~/.ssh/homelab.pub') }}"
+
+#################
+## Cloud Image ##
+#################
+
+    - name: images - download ubuntu cloud image
+      get_url:
+        url: https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img
+        dest: /var/lib/vms/images/jammy-server-cloudimg-amd64-disk-kvm.img
+        owner: libvirt-qemu
+        group: kvm
+        mode: 0770
+
+################
+## Cloud Init ##
+################
+
+    - name: cloud-init - create user-data configuration
+      copy:
+        dest: /var/lib/vms/configs/{{ item.value.name }}/user-data.yaml
+        owner: libvirt-qemu
+        group: kvm
+        mode: 0770
+        content: |
+          #cloud-config
+          hostname: {{ item.value.name }}
+          users:
+            - name: fredrick
+              gecos: Fredrick
+              groups: users,admin,wheel
+              sudo: ALL=(ALL) NOPASSWD:ALL
+              shell: /bin/bash
+              lock_passwd: true
+              ssh_authorized_keys:
+                - {{ public_key }}
+          package_update: true
+          package_reboot_if_required: true
+          packages:
+            - "wget"
+            - "zsh"
+            - "htop"
+            - "vim"
+            - "linux-generic"
+          growpart:
+            mode: auto
+            devices: ['/']
+          autoinstall:
+            late-commands:
+              - |
+                cat <<'EOF' > /target/etc/default/grub.d/40my.cfg
+                GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory systemd.unified_cgroup_hierarchy=0"
+                EOF
+                curtin in-target --target=/target -- update-grub
+      loop: "{{ nodes | dict2items }}"
+      register: cloud_init_user_data
+
+    - name: cloud-init - create network configuration
+      copy:
+        dest: /var/lib/vms/configs/{{ item.value.name }}/network-config.yaml
+        owner: libvirt-qemu
+        group: kvm
+        mode: 0770
+        content: |
+          version: 2
+          ethernets:
+            enp1s0:
+              dhcp4: no
+              dhcp6: no
+              addresses: [{{ item.value.address }}/24]
+              gateway4: 192.168.0.1
+              nameservers:
+                addresses:
+                  - 8.8.8.8
+                  - 8.8.4.4
+      loop: "{{ nodes | dict2items }}"
+      register: cloud_init_network_config
+
+    - name: cloud-localds - create configuration disk
+      command: >
+        cloud-localds
+        -v
+        /var/lib/vms/configs/{{ item.value.name }}/config-disk.img
+        --network-config=/var/lib/vms/configs/{{ item.value.name }}/network-config.yaml
+        /var/lib/vms/configs/{{ item.value.name }}/user-data.yaml
+      loop: "{{ nodes | dict2items }}"
+      when: cloud_init_user_data.changed or cloud_init_network_config.changed
+
+######################
+## Virtual Machines ##
+######################
+
+    - name: virsh - check if vm exists
+      shell:
+        cmd: virsh list --all --name | grep -w "{{ item.value.name }}"
+      loop: "{{ nodes | dict2items }}"
+      register: vm_check
+      ignore_errors: true
+      no_log: true
+
+    - name: virsh - make a collection of existing vm names
+      set_fact:
+        existing_vm_names: "{{ vm_check.results | selectattr('rc', 'eq', 0) | map(attribute='item.value.name') | list }}"
+
+    - name: virsh - destroy vm
+      shell: >
+        virsh destroy --domain {{ item.value.name }}
+        && virsh undefine --domain {{ item.value.name }}
+      loop: "{{ nodes | dict2items }}"
+      when: recreate_nodes and item.value.name in existing_vm_names
+
+    - name: virt-install - create
+      shell: |
+        virt-install \
+          --name {{ item.value.name }} \
+          --vcpus {{ item.value.cpu }} \
+          --memory={{ item.value.memory }},currentMemory={{ item.value.memory }},maxmemory={{ item.value.maxmemory }} \
+          --network bridge=br0,model=virtio \
+          --graphics none \
+          --os-variant ubuntu22.04 \
+          --import \
+          --disk /var/lib/vms/volumes/{{ item.value.name }}.img,device=disk,bus=virtio,size=40,backing_store="/var/lib/vms/images/jammy-server-cloudimg-amd64-disk-kvm.img" \
+          --disk /var/lib/vms/configs/{{ item.value.name }}/config-disk.img,format=raw \
+          --noautoconsole \
+          --autostart
+      when: item.value.name not in existing_vm_names or recreate_nodes
+      loop: "{{ nodes | dict2items }}"

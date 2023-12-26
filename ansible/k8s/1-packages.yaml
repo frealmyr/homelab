@@ -1,0 +1,154 @@
+---
+- hosts: k8s
+  become: true
+  vars:
+    k8s_version: v1.29
+    k8s_version_upgrade: false # flag for upgrading k8s version
+  tasks:
+
+#############################
+## Remove default packages ##
+#############################
+
+    - name: apt - remove packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+        autoremove: true
+        purge: true
+      vars:
+        packages:
+          - docker.io
+          - docker-doc
+          - docker-compose-v2
+          - podman-docker
+          - containerd
+          - runc
+
+#################
+## APT Upgrade ##
+#################
+
+    - name: apt - update & upgrade packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+      register: package_upgrade
+
+    - name: system - reboot (kernel update)
+      reboot:
+      when: package_upgrade.changed
+
+####################
+## Pre-requisites ##
+####################
+
+    - name: apt - add prerequite packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gpg
+
+######################
+## APT Repositories ##
+######################
+
+    - name: apt - download gpg key
+      get_url:
+        url: "{{ item.url }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - url: https://download.docker.com/linux/ubuntu/gpg
+          dest: /etc/apt/keyrings/docker.gpg.armored
+        - url: https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/Release.key
+          dest: /etc/apt/keyrings/kubernetes-apt-keyring.gpg.armored
+      register: kubernetes_gpg_download
+
+    - name: apt - gpg dearmor key
+      shell: "cat {{ item }}.armored | gpg --dearmor | tee {{ item }}"
+      with_items:
+        - /etc/apt/keyrings/docker.gpg
+        - /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      when: kubernetes_gpg_download.changed
+      register: kubernetes_gpg_dearmor
+
+    - name: apt - add repository
+      apt_repository:
+        repo: "{{ item.repo }}"
+        state: present
+        filename: "{{ item.filename }}"
+      with_items:
+        - repo: deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+          filename: docker
+        - repo: deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }} signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/ /
+          filename: kubernetes
+      when: kubernetes_gpg_dearmor.changed
+
+##################
+## APT Packages ##
+##################
+
+    - name: dpkg - allow upgrading kubeadm packages
+      ansible.builtin.dpkg_selections:
+        name: "{{ item }}"
+        selection: install
+      with_items:
+        - kubelet
+        - kubeadm
+        - kubectl
+      when: k8s_version_upgrade == true
+
+    - name: apt - install docker packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
+      vars:
+        packages:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+      register: docker_apt
+
+    - name: apt - install kubernetes packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - kubelet
+          - kubeadm
+          - kubectl
+      register: kubernetes_apt_packages
+
+    - name: dpkg - hold kubeadm packages
+      ansible.builtin.dpkg_selections:
+        name: "{{ item }}"
+        selection: hold
+      with_items:
+        - kubelet
+        - kubeadm
+        - kubectl
+      when: kubernetes_apt_packages.changed
+
+    - name: apt - install misc packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - curl
+          - htop
+          - prometheus-node-exporter
+          - prometheus-node-exporter-collectors
+          - prometheus-process-exporter
+          - ufw

@@ -1,0 +1,126 @@
+- hosts: all
+  become: true
+  vars:
+    service_name: homeassistant
+    domain: fmlab.no
+  tasks:
+
+#####################
+## Stop Containers ##
+#####################
+
+    - name: "{{ service_name }} - remove containers"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        state: absent
+
+###########
+## Users ##
+###########
+
+    - name: "{{ service_name }} - create non-root user"
+      user:
+        name: "{{ service_name }}"
+        create_home: false
+        shell: /usr/sbin/nologin
+        state: present
+      register: user
+
+###################
+## Configuration ##
+###################
+
+    - name: "{{ service_name }} - create config sub-directory"
+      file:
+        path: "/var/lib/homelab/configs/{{ service_name }}"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: 0700
+
+    - name: "{{ service_name }} - copy local config folder to remote target"
+      copy:
+        src: "config/"
+        dest: "/var/lib/homelab/configs/{{ service_name }}/"
+        owner: "{{ service_name }}"
+        group: "{{ service_name }}"
+        mode: 0700
+        directory_mode: 0700
+        force: true
+
+#####################
+## Persistent Data ##
+#####################
+
+    - name: "{{ service_name }} - create backup sub-directory"
+      file:
+        path: "/var/lib/homelab/backups/{{ service_name }}"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: 0770
+
+    - name: "{{ service_name }} - create docker volumes"
+      community.docker.docker_volume:
+        volume_name: "{{ service_name }}_{{ item }}"
+        state: absent
+      loop:
+        - config
+
+###################
+## Reverse Proxy ##
+###################
+
+    - name: "{{ service_name }} - create dynamic traefik file"
+      copy:
+        dest: "/var/lib/homelab/configs/traefik/dynamic/{{ service_name }}.yaml"
+        force: true
+        owner: "traefik"
+        group: "traefik"
+        mode: 0700
+        content: |
+          http:
+            routers:
+              {{ service_name }}:
+                entryPoints:
+                  - https
+                rule: Host(`{{ service_name }}.{{ domain }}`)
+                tls:
+                  certResolver: letsEncrypt
+                service: {{ service_name }}
+                middlewares:
+                  - security@file
+            services:
+              {{ service_name }}:
+                loadBalancer:
+                  servers:
+                    - url: http://192.168.0.20:8123
+
+#######################
+## Docker Containers ##
+#######################
+
+    - name: "{{ service_name }} - start container"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        image: lscr.io/linuxserver/homeassistant:latest
+        env:
+          TZ: "Europe/Oslo"
+          PUID: "{{ user.uid }}"
+          PGID: "{{ user.group }}"
+        volumes:
+          - "/var/lib/homelab/configs/{{ service_name }}:/config"
+          - "/var/lib/homelab/backups/{{ service_name }}:/config/backups"
+        mounts:
+          - type: bind
+            read_only: true
+            target: /run/dbus
+            source: /run/dbus
+          - type: bind
+            read_only: true
+            target: /etc/localtime
+            source: /etc/localtime
+        network_mode: host
+        security_opts:
+          - no-new-privileges:true
+        restart_policy: unless-stopped

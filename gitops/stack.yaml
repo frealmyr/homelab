@@ -1,0 +1,29 @@
+repoURL: https://github.com/frealmyr/homelab
+targetRevision: main
+basePath: gitops
+
+appProject:
+  system:
+    applications:
+      external-secrets:
+        namespace:
+          name: external-secrets
+        sync:
+          wave: "-4"
+      cert-manager:
+        namespace:
+          create: true
+        sync:
+          wave: "-3"
+      traefik-internal:
+        namespace:
+          name: traefik-internal
+          create: true
+        sync:
+          wave: "-1"
+        ignoreDifferences:
+          - group: ""
+            kind: ConfigMap
+            name: traefik-whitelist
+            jsonPointers:
+              - /data/whitelist

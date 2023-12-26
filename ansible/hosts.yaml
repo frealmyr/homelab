@@ -1,5 +1,17 @@
-all:
+servers:
   hosts:
     homelab:
       ansible_host: 192.168.0.20
+      ansible_user: fredrick
+
+k8s:
+  hosts:
+    k8s-mgmt:
+      ansible_host: 192.168.0.120
+      ansible_user: fredrick
+    k8s-test:
+      ansible_host: 192.168.0.121
+      ansible_user: fredrick
+    k8s-prod:
+      ansible_host: 192.168.0.122
       ansible_user: fredrick

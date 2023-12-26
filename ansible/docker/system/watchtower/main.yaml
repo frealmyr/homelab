@@ -1,0 +1,121 @@
+- hosts: all
+  become: true
+  tasks:
+
+    #############
+    ## Secrets ##
+    #############
+
+    - name: watchtower - create secrets sub-directory
+      file:
+        path: "/var/lib/homelab/secrets/{{ item.folder }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.owner }}"
+        mode: 0700
+      loop:
+        - { folder: watchtower, owner: root }
+
+    - name: watchtower - fetch secrets from secrets.yaml
+      ansible.builtin.include_vars:
+        file: secrets.yaml
+
+    - name: watchtower - copy secrets to remote target
+      copy:
+        content: "{{ discord_webhook }}"
+        dest: "/var/lib/homelab/secrets/{{ item.file }}"
+        owner: '{{ item.owner }}'
+        group: '{{ item.owner }}'
+      loop:
+        - { file: watchtower/discord_webhook, owner: root }
+      register: copy_secrets_discord_webhook
+
+    ####################
+    ## Docker Network ##
+    ####################
+
+    - name: watchtower - create docker proxy network
+      community.docker.docker_network:
+        name: watchtower-docker-proxy
+        driver: bridge
+        internal: true
+
+    - name: watchtower - create watchtower network
+      community.docker.docker_network:
+        name: watchtower-bridge
+        driver: bridge
+
+    #######################
+    ## Docker Container ##
+    #######################
+
+    - name: watchtower - remove containers
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - docker-proxy-watchtower
+        - watchtower
+
+    - name: watchtower - start docker proxy container
+      community.docker.docker_container:
+        name: docker-proxy-watchtower
+        image: tecnativa/docker-socket-proxy:latest
+        networks:
+          - name: watchtower-docker-proxy
+        env:
+          POST: "1"
+          CONTAINERS: "1"
+          NETWORKS: "1"
+          IMAGES: "1"
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        security_opts:
+          - no-new-privileges:true
+        restart_policy: unless-stopped
+
+    - name: watchtower - start watchtower container
+      community.docker.docker_container:
+        name: watchtower
+        image: containrrr/watchtower:latest
+        env:
+          TZ: "Europe/Oslo"
+          DOCKER_HOST: "tcp://docker-proxy-watchtower:2375"
+          WATCHTOWER_SCHEDULE: "0 0 3 * * 1"
+          WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+          WATCHTOWER_CLEANUP: "true"
+          WATCHTOWER_INCLUDE_STOPPED: "true"
+          WATCHTOWER_REVIVE_STOPPED: "false"
+          WATCHTOWER_NOTIFICATIONS: "shoutrrr"
+          WATCHTOWER_NOTIFICATION_URL: /run/secrets/discord_webhook
+          WATCHTOWER_NOTIFICATION_REPORT: "true"
+          WATCHTOWER_NOTIFICATION_TEMPLATE: !unsafe |
+            {{- if .Report -}}
+              {{- with .Report -}}
+                {{- if ( or .Updated .Failed ) -}}
+            {{ len .Scanned }} Scanned, {{ len .Updated }} Updated, {{ len .Failed }} Failed
+                  {{- range .Updated}}
+            - {{ .Name }} ({{ .ImageName }}): {{ .CurrentImageID.ShortID }} updated to {{ .LatestImageID.ShortID }}
+                  {{- end -}}
+                  {{- range .Skipped }}
+            - {{ .Name }} ({{ .ImageName }}): {{ .State }}: {{ .Error }}
+                  {{- end -}}
+                  {{- range .Failed }}
+            - {{ .Name }} ({{ .ImageName }}): {{ .State }}: {{ .Error }}
+                  {{- end -}}
+                {{- end -}}
+              {{- end -}}
+            {{- else -}}
+              {{ range .Entries -}}{{ .Message }}{{"\n"}}{{- end -}}
+            {{- end -}}
+        networks:
+          - name: watchtower-docker-proxy
+          - name: watchtower-bridge # for egress with internal bridge for docker-proxy
+        volumes:
+          - /var/lib/homelab/secrets/watchtower/discord_webhook:/run/secrets/discord_webhook:ro
+        security_opts:
+          - no-new-privileges:true
+        read_only: true
+        # mem_limit: 2G
+        # cpus: 0.75m
+        restart_policy: unless-stopped

@@ -1,0 +1,138 @@
+################
+## Static IP ###
+################
+
+- name: network - configure static ip
+  copy:
+    dest: /etc/systemd/network/20-ethernet.network
+    content: "{{ content }}"
+  vars:
+    content: |
+      [Match]
+      Name=enp86s0
+
+      [Network]
+      DHCP=no
+      DNS=1.0.0.1
+      NTP=no.pool.ntp.org
+
+      [Route]
+      Gateway=192.168.0.1
+      Metric=1024
+
+      [Address]
+      Address=192.168.0.20/16
+      RouteMetric=50
+  register: static_ip
+
+- name: apt - remove packages
+  apt:
+    name: "{{ packages }}"
+    state: absent
+    autoremove: true
+    purge: true
+  vars:
+    packages:
+      - dhcpcd5
+      - ifupdown
+      - isc-dhcp-client
+      - isc-dhcp-common
+      - openresolv
+
+- name: network - enable systemd services
+  systemd:
+    name: "systemd-networkd"
+    enabled: yes
+    masked: no
+    state: started
+  with_items:
+    - systemd-networkd
+    - systemd-resolved
+    - systemd-timesyncd
+
+- name: system - reboot (static ip set)
+  reboot:
+  when: static_ip.changed
+
+####################
+## Bridge Network ##
+####################
+
+# make bridge default to imitate interface mac address instead of random
+# https://ubuntuforums.org/showthread.php?t=2478912&s=d6a1c337190c1c50b3ae5ca5407c6786&p=14111542#post14111542
+- name: create bridge network br0 netplan file inline
+  copy:
+    dest: /etc/systemd/network/99-default.link
+    content: |
+      [Match]
+      OriginalName=*
+
+      [Link]
+      NamePolicy=keep kernel database onboard slot path
+      AlternativeNamesPolicy=database onboard slot path
+      MACAddressPolicy=none
+    owner: root
+    group: root
+    mode: 0644
+
+# bridge network will allow libvirt to bridge VMs to host network
+- name: create bridge network br0 netplan file inline
+  copy:
+    dest: /etc/netplan/00-installer-config.yaml
+    content: |
+      network:
+        version: 2
+        ethernets:
+          enp86s0:
+            dhcp4: false
+        bridges:
+          br0:
+            interfaces: [enp86s0]
+            dhcp4: yes
+    owner: root
+    group: root
+    mode: 0644
+  register: bridge_netplan
+
+# tweak systemd for bridge network forwarding
+- name: systemctl - tweak parameters
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_set: yes
+    state: present
+    reload: yes
+    ignoreerrors: no
+  with_dict: "{{ sysctl_config }}"
+  vars:
+    sysctl_config:
+      net.bridge.bridge-nf-call-ip6tables: 1
+      net.bridge.bridge-nf-call-iptables: 1
+      net.ipv4.conf.all.forwarding: 1
+      net.ipv4.ip_forward: 1
+      net.ipv6.conf.all.forwarding: 1
+
+- name: modprobe - load modules on boot
+  lineinfile:
+    path: /etc/modules
+    line: "{{item}}"
+    state: present
+  with_items:
+    - br_netfilter
+
+- name: modprobe - enable modules
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - br_netfilter
+
+- name: netplan - apply
+  command: netplan apply
+  when: bridge_netplan.changed
+
+- name: check if br0 interface is up
+  shell: ip link show br0
+  register: br0_interface
+  failed_when: false
+  changed_when: false

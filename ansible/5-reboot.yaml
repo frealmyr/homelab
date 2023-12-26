@@ -1,0 +1,6 @@
+---
+- hosts: homelab
+  become: true
+
+  tasks:
+    - reboot:
