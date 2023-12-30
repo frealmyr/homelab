@@ -1,0 +1,89 @@
+argocd-apps:
+
+  # applications:
+  #   - name: guestbook
+  #     namespace: argocd
+  #     additionalLabels: {}
+  #     additionalAnnotations: {}
+  #     finalizers:
+  #     - resources-finalizer.argocd.argoproj.io
+  #     project: guestbook
+  #     source:
+  #       repoURL: https://github.com/argoproj/argocd-example-apps.git
+  #       targetRevision: HEAD
+  #       path: guestbook
+  #       directory:
+  #         recurse: true
+  #     # ArgoCD v2.6 or later
+  #     sources:
+  #     - chart: elasticsearch
+  #       repoURL: https://helm.elastic.co
+  #       targetRevision: 8.5.1
+  #     - repoURL: https://github.com/argoproj/argocd-example-apps.git
+  #       path: guestbook
+  #       targetRevision: HEAD
+  #     destination:
+  #       server: https://kubernetes.default.svc
+  #       namespace: guestbook
+  #     syncPolicy:
+  #       automated:
+  #         prune: false
+  #         selfHeal: false
+  #       syncOptions:
+  #       - CreateNamespace=true
+  #     revisionHistoryLimit: null
+  #     ignoreDifferences:
+  #     - group: apps
+  #       kind: Deployment
+  #       jsonPointers:
+  #       - /spec/replicas
+  #     info:
+  #     - name: url
+  #       value: https://argoproj.github.io/
+
+  projects:
+    - name: system
+      namespace: argocd
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+
+  applicationsets:
+    - name: external-secrets
+      namespace: argocd
+      generators:
+        - clusters:
+          selector: {}
+          values:
+            clusterName: '{{ name }}'
+            ipAddress: '{{ metadata.annotations.ip-address }}'
+      template:
+        metadata:
+          name: '{{ name }}-external-secrets'
+        spec:
+          project: default
+          source:
+            repoURL: https://github.com/frealmyr/homelab
+            targetRevision: rewrite
+            path: gitops/system/external-secrets
+            helm:
+              releaseName: external-secrets
+          destination:
+            server: '{{ server }}'
+            namespace: external-secrets
+          syncPolicy:
+            automated:
+              prune: false
+              selfHeal: false
+            syncOptions:
+              - CreateNamespace=true
