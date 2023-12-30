@@ -62,13 +62,13 @@ argocd-apps:
     - name: external-secrets
       namespace: argocd
       generators:
-        - clusters:
-            selector:
-              matchLabels:
-                argocd.argoproj.io/secret-type: cluster
-            values:
-              clusterName: '{{ name }}'
-              ipAddress: '{{ metadata.annotations.ip-address }}'
+      - clusters:
+          selector:
+            matchLabels:
+              argocd.argoproj.io/secret-type: cluster
+          values:
+            clusterName: '{{ name }}'
+            ipAddress: '{{ metadata.annotations.ip-address }}'
       template:
         metadata:
           name: '{{ name }}-external-secrets'
