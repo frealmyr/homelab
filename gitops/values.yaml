@@ -62,8 +62,7 @@ argocd-apps:
     - name: external-secrets
       namespace: argocd
       generators:
-        - clusters:
-          selector: {}
+        - clusters: {}
           values:
             clusterName: '{{ name }}'
             ipAddress: '{{ metadata.annotations.ip-address }}'
@@ -71,7 +70,7 @@ argocd-apps:
         metadata:
           name: '{{ name }}-external-secrets'
         spec:
-          project: default
+          project: system
           source:
             repoURL: https://github.com/frealmyr/homelab
             targetRevision: rewrite
