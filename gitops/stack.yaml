@@ -10,8 +10,6 @@ spec:
     targetRevision: rewrite
     path: gitops/system
     repoURL: https://github.com/frealmyr/homelab
-    directory:
-      recurse: false
   destination:
     name: in-cluster
     namespace: external-secrets
