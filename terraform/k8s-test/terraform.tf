@@ -17,6 +17,13 @@ provider "kubernetes" {
   config_context = "test"
 }
 
+provider "kubernetes" {
+  alias = "mgmt"
+
+  config_path    = "~/.kube/config_homelab"
+  config_context = "mgmt"
+}
+
 provider "helm" {
   kubernetes {
     config_path    = "~/.kube/config_homelab"

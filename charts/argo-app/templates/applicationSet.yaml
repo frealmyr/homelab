@@ -1,5 +1,4 @@
-{{- range $project_key, $project_value := .Values.applications }}
-{{ toYaml $project_value }}
+{{- range $project_key, $project_value := .Values.appliactionSets }}
 {{- range $app_key, $app_value := $project_value }}
 ---
 apiVersion: argoproj.io/v1alpha1

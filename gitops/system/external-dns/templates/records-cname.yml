@@ -1,0 +1,14 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: "argocd-webhook.fmlab.no"
+  annotations:
+    kubernetes.io/ingress.class: traefik-external # Annotation filters are enabled, will be ignored if removed
+spec:
+  endpoints:
+    - dnsName: "argocd-webhook.fmlab.no"
+      recordTTL: 180
+      recordType: CNAME
+      targets:
+        - "vpn.fmlab.no"

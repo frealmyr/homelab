@@ -1,0 +1,68 @@
+traefik:
+  namespaceOverride: traefik-external
+  podSecurityPolicy:
+    enabled: false
+  ports:
+    web:
+      redirectTo: websecure
+  providers:
+    kubernetesCRD:
+      allowCrossNamespace: true
+      allowExternalNameServices: true
+      ingressClass: traefik-external
+    kubernetesIngress:
+      allowExternalNameServices: true
+      ingressClass: traefik-external
+      publishedService:
+        enabled: true
+  service:
+    annotations:
+      metallb.universe.tf/allow-shared-ip: sharing-is-caring
+    spec:
+      loadBalancerIP: 10.8.0.11
+  ingressRoute:
+    dashboard:
+      enabled: false
+  additionalArguments:
+    - "--api.insecure=true"
+  extraObjects:
+    - apiVersion: v1
+      kind: Service
+      metadata:
+        name: traefik-api
+      spec:
+        type: ClusterIP
+        selector:
+          app.kubernetes.io/name: traefik
+          app.kubernetes.io/instance: traefik-external-traefik-external
+        ports:
+        - port: 8080
+          name: traefik
+          targetPort: 9000
+          protocol: TCP
+    - apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: traefik-external-dashboard
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: traefik-internal-security@kubernetescrd
+          traefik.ingress.kubernetes.io/router.tls: 'true'
+      spec:
+        ingressClassName: traefik-internal
+        rules:
+        - host: traefik-external.fmlab.no
+          http:
+            paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: traefik-api
+                  port:
+                    name: traefik
+        tls:
+          - hosts:
+              - traefik-external.fmlab.no
+            secretName: traefik-external
