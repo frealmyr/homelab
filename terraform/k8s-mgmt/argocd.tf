@@ -141,15 +141,11 @@ resource "helm_release" "argocd_apps_homelab" {
           - resources-finalizer.argocd.argoproj.io
         project: default
         source:
-          repoURL: 'https://github.com/frealmyr/homelab.git'
-          targetRevision: main
-          path: charts/argo
-          helm:
-            releaseName: homelab
-            valueFiles:
-              - ../../gitops/stack.yaml
+          repoURL: https://github.com/frealmyr/homelab.git
+          targetRevision: rewrite
+          path: gitops
         destination:
-          server: 'https://kubernetes.default.svc'
+          name: in-cluster
         syncPolicy:
           automated:
             prune: false
