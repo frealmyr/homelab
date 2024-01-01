@@ -93,13 +93,12 @@ argocd-apps:
     - name: external-dns
       namespace: argocd
       generators:
-      - clusters:
-          selector:
-            matchLabels:
-              cluster-name: k8s-mgmt
-          values:
-            clusterName: 'mgmt' # hard-code since in-cluster does not have a cluster secret
-            ipAddress: '192.168.0.120'
+      - list:
+          elements:
+            - cluster: 'in-cluster'
+              values:
+                clusterName: 'mgmt' # hard-code since in-cluster does not have a cluster secret
+                ipAddress: '192.168.0.120'
       - clusters:
           selector:
             matchLabels:
