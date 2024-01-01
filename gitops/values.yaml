@@ -113,7 +113,7 @@ argocd-apps:
               releaseName: external-dns
               parameters:
                 - name: environment
-                  value: '{{ clusterName }}'
+                  value: '{{ values.clusterName }}'
           destination:
             server: '{{ server }}'
             namespace: external-dns
