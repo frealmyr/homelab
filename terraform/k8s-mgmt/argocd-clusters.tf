@@ -5,6 +5,7 @@
 
 locals {
   argocd_clusters = [
+    "k8s-mgmt",
     "k8s-test",
     "k8s-prod"
   ]
@@ -37,6 +38,9 @@ resource "helm_release" "argocd_cluster_secret" {
           name: kubeconfig-${each.key}
           labels:
             argocd.argoproj.io/secret-type: cluster
+          annotations:
+            environment: ${replace(each.key, "k8s-", "")}
+            ip-address: ${replace(replace(yamldecode(each.value).clusters.0.cluster.server, "https://", ""), ":6443", "")}
         type: Opaque
         stringData:
           name: ${yamldecode(each.value).clusters.0.name}
@@ -44,7 +48,6 @@ resource "helm_release" "argocd_cluster_secret" {
           config: |
             {
               "tlsClientConfig": {
-                "insecure": true,
                 "caData": "${yamldecode(each.value).clusters.0.cluster.certificate-authority-data}",
                 "certData": "${yamldecode(each.value).users.0.user.client-certificate-data}",
                 "keyData": "${yamldecode(each.value).users.0.user.client-key-data}"

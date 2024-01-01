@@ -1,3 +1,7 @@
+variable "environment" {
+  type    = string
+  default = "prod"
+}
 variable "gcp_project" {
   type    = string
   default = "cloudlab-267613"

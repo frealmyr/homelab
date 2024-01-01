@@ -44,7 +44,7 @@ resource "helm_release" "argocd" {
 
   values = [<<EOF
     applicationSet:
-      enabled: false
+      enabled: true
     metrics:
       enabled: true
       serviceMonitor:
@@ -92,7 +92,7 @@ resource "helm_release" "argocd" {
         data:
           admin.enabled: "true"
           exec.enabled: "true"
-          url: https://argocd.fmlab.no
+          url: https://argocd.mgmt.fmlab.no
           dex.config: |
             logger:
               level: debug

@@ -1,3 +1,8 @@
+variable "environment" {
+  type    = string
+  default = "mgmt"
+}
+
 variable "gcp_project" {
   type    = string
   default = "cloudlab-267613"
