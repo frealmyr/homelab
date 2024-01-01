@@ -112,8 +112,8 @@ argocd-apps:
             helm:
               releaseName: external-dns
               parameters:
-                - name: environment
-                  value: '{{ values.clusterName }}'
+                - name: 'environment'
+                  value: '{{ if eq values.clusterName "in-cluster" }}mgmt{{ else }}{{ values.clusterName }}{{ end }}'
           destination:
             server: '{{ server }}'
             namespace: external-dns
