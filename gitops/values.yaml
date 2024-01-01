@@ -69,6 +69,7 @@ argocd-apps:
                 values:
                   environment: 'mgmt' # hard-code since in-cluster does not have a cluster secret
                   ipAddress: '192.168.0.120'
+                  server: 'in-cluster'
         - clusters:
             selector:
               matchLabels:
@@ -88,7 +89,7 @@ argocd-apps:
             helm:
               releaseName: external-secrets
           destination:
-            server: '{{ url }}'
+            server: '{{ server }}'
             namespace: external-secrets
           syncPolicy:
             automated:
@@ -107,6 +108,7 @@ argocd-apps:
                 values:
                   environment: 'mgmt' # hard-code since in-cluster does not have a cluster secret
                   ipAddress: '192.168.0.120'
+                  server: 'in-cluster'
         - clusters:
             selector:
               matchLabels:
@@ -129,7 +131,7 @@ argocd-apps:
                 - name: 'environment'
                   value: '{{ values.environment }}'
           destination:
-            server: '{{ url }}'
+            server: '{{ server }}'
             namespace: external-dns
           syncPolicy:
             automated:
