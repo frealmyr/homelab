@@ -95,7 +95,7 @@ argocd-apps:
       generators:
       - list:
           elements:
-            - cluster: 'in-cluster'
+            - cluster: in-cluster
               values:
                 clusterName: 'mgmt' # hard-code since in-cluster does not have a cluster secret
                 ipAddress: '192.168.0.120'
