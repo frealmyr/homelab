@@ -62,14 +62,6 @@ argocd-apps:
     - name: external-secrets
       namespace: argocd
       generators:
-        - list:
-            elements:
-              - cluster: in-cluster
-                url: https://kubernetes.default.svc
-                values:
-                  environment: 'mgmt' # hard-code since in-cluster does not have a cluster secret
-                  ipAddress: '192.168.0.120'
-                  server: 'in-cluster'
         - clusters:
             selector:
               matchLabels:
@@ -101,14 +93,6 @@ argocd-apps:
     - name: external-dns
       namespace: argocd
       generators:
-        - list:
-            elements:
-              - cluster: in-cluster
-                url: https://kubernetes.default.svc
-                values:
-                  environment: 'mgmt' # hard-code since in-cluster does not have a cluster secret
-                  ipAddress: '192.168.0.120'
-                  server: 'in-cluster'
         - clusters:
             selector:
               matchLabels:
