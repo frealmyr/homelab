@@ -22,6 +22,9 @@ argocd-apps:
       finalizers:
         - resources-finalizer.argocd.argoproj.io
       project: system
+      destination:
+        name: in-cluster
+        namespace: argocd
       source:
         repoURL: https://github.com/frealmyr/homelab
         targetRevision: rewrite
