@@ -94,9 +94,16 @@ argocd-apps:
       namespace: argocd
       generators:
       - clusters:
-          # selector:
-          #   matchLabels:
-          #     argocd.argoproj.io/secret-type: cluster
+          selector:
+            matchLabels:
+              cluster-name: k8s-mgmt
+          values:
+            clusterName: 'mgmt' # hard-code since in-cluster does not have a cluster secret
+            ipAddress: '192.168.0.120'
+      - clusters:
+          selector:
+            matchLabels:
+              argocd.argoproj.io/secret-type: cluster
           values:
             clusterName: '{{ name }}'
             ipAddress: '{{ metadata.annotations.ip-address }}'
@@ -113,7 +120,7 @@ argocd-apps:
               releaseName: external-dns
               parameters:
                 - name: 'environment'
-                  value: '{{ if eq values.clusterName "in-cluster" }}mgmt{{ else }}{{ values.clusterName }}{{ end }}'
+                  value: '{{ values.clusterName }}'
           destination:
             server: '{{ server }}'
             namespace: external-dns
