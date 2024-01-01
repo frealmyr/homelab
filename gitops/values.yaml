@@ -109,7 +109,7 @@ argocd-apps:
             ipAddress: '{{ metadata.annotations.ip-address }}'
       template:
         metadata:
-          name: '{{ name }}-external-dns'
+          name: '{{ values.clusterName }}-external-dns'
         spec:
           project: system
           source:
