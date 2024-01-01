@@ -6,7 +6,8 @@ traefik:
     enabled: false
   ports:
     web:
-      redirectTo: websecure
+      redirectTo:
+        port: websecure
   providers:
     kubernetesCRD:
       allowCrossNamespace: true
