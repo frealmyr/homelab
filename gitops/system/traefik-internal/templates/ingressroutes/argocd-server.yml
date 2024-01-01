@@ -19,7 +19,7 @@ spec:
       middlewares:
         - name: traefik-internal-security@kubernetescrd
     - kind: Rule
-      match: Host(`argocd.fmlab.no`) && Headers(`Content-Type`, `application/grpc`)
+      match: Host(`argocd.mgmt.fmlab.no`) && Headers(`Content-Type`, `application/grpc`)
       priority: 11
       services:
         - name: argocd-server

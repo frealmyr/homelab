@@ -89,3 +89,34 @@ argocd-apps:
               selfHeal: false
             syncOptions:
               - CreateNamespace=true
+
+    - name: external-dns
+      namespace: argocd
+      generators:
+      - clusters:
+          # selector:
+          #   matchLabels:
+          #     argocd.argoproj.io/secret-type: cluster
+          values:
+            clusterName: '{{ name }}'
+            ipAddress: '{{ metadata.annotations.ip-address }}'
+      template:
+        metadata:
+          name: '{{ name }}-external-dns'
+        spec:
+          project: system
+          source:
+            repoURL: https://github.com/frealmyr/homelab
+            targetRevision: rewrite
+            path: gitops/system/external-dns
+            helm:
+              releaseName: external-dns
+          destination:
+            server: '{{ server }}'
+            namespace: external-dns
+          syncPolicy:
+            automated:
+              prune: false
+              selfHeal: false
+            syncOptions:
+              - CreateNamespace=true
