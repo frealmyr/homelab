@@ -1,6 +1,9 @@
 Welcome to my homelab monorepo~
 ![hello](https://user-images.githubusercontent.com/29174850/175776352-685c582f-0ded-416e-a7c7-2fbb77bca605.gif)
 
+> [!NOTE]
+> I recently got a new NUC 13i3 to use as the server, and to celebrate the occation, I'm rewriting this entire repository. Will merge to the `main` branch when the rewrite is done. :3
+
 Here, you will find all of my infrastructure-as-code, GitOps, and scripts that I currently run in my Homelab.
 
 My vision for this homelab is to provide a dual purpose for a single, power-efficient server: hosting services for everyday use using docker-compose directly on the host and having a flexible VM-based Kubernetes playground for testing out tooling and configurations.
