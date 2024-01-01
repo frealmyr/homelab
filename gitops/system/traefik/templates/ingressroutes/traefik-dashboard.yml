@@ -1,17 +1,19 @@
+{{- $environment := .Values.environment }}
+{{- if $environment }}
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: traefik-dashboard
-  namespace: traefik-internal
+  namespace: traefik
   annotations:
-    kubernetes.io/ingress.class: traefik-internal
+    kubernetes.io/ingress.class: traefik
 spec:
   entryPoints:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`traefik.fmlab.no`)
+      match: Host(`traefik.{{ $environment }}.fmlab.no`)
       middlewares:
         - name: traefik-internal-security@kubernetescrd
       services:
@@ -27,7 +29,8 @@ metadata:
 spec:
   secretName: traefik-dashboard
   dnsNames:
-    - traefik.fmlab.no
+    - traefik.{{ $environment }}.fmlab.no
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
+{{- end }}

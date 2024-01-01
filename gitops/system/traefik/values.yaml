@@ -2,7 +2,6 @@ traefik:
   ingressRoute:
     dashboard:
       enabled: false
-  namespaceOverride: traefik-internal
   podSecurityPolicy:
     enabled: false
   ports:
@@ -12,12 +11,9 @@ traefik:
     kubernetesCRD:
       allowCrossNamespace: true
       allowExternalNameServices: true
-      ingressClass: traefik-internal
+      # ingressClass: traefik
     kubernetesIngress:
-      allowExternalNameServices: true
-      ingressClass: traefik-internal
-      publishedService:
-        enabled: true
+      ingressClass: traefik
   service:
     annotations:
       metallb.universe.tf/allow-shared-ip: sharing-is-caring
