@@ -111,6 +111,9 @@ argocd-apps:
             path: gitops/system/external-dns
             helm:
               releaseName: external-dns
+              parameters:
+                - name: environment
+                  value: '{{ clusterName }}'
           destination:
             server: '{{ server }}'
             namespace: external-dns
