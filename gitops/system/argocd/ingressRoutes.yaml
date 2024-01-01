@@ -1,4 +1,3 @@
-{{- if eq .Values.environment "mgmt "}}
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -28,4 +27,3 @@ spec:
           scheme: h2c
   tls:
     secretName: argocd-server
-{{- end }}

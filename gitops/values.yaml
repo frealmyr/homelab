@@ -1,46 +1,4 @@
 argocd-apps:
-
-  # applications:
-  #   - name: guestbook
-  #     namespace: argocd
-  #     additionalLabels: {}
-  #     additionalAnnotations: {}
-  #     finalizers:
-  #     - resources-finalizer.argocd.argoproj.io
-  #     project: guestbook
-  #     source:
-  #       repoURL: https://github.com/argoproj/argocd-example-apps.git
-  #       targetRevision: HEAD
-  #       path: guestbook
-  #       directory:
-  #         recurse: true
-  #     # ArgoCD v2.6 or later
-  #     sources:
-  #     - chart: elasticsearch
-  #       repoURL: https://helm.elastic.co
-  #       targetRevision: 8.5.1
-  #     - repoURL: https://github.com/argoproj/argocd-example-apps.git
-  #       path: guestbook
-  #       targetRevision: HEAD
-  #     destination:
-  #       server: https://kubernetes.default.svc
-  #       namespace: guestbook
-  #     syncPolicy:
-  #       automated:
-  #         prune: false
-  #         selfHeal: false
-  #       syncOptions:
-  #       - CreateNamespace=true
-  #     revisionHistoryLimit: null
-  #     ignoreDifferences:
-  #     - group: apps
-  #       kind: Deployment
-  #       jsonPointers:
-  #       - /spec/replicas
-  #     info:
-  #     - name: url
-  #       value: https://argoproj.github.io/
-
   projects:
     - name: system
       namespace: argocd
@@ -58,6 +16,20 @@ argocd-apps:
       - group: '*'
         kind: '*'
 
+  applications:
+    - name: argocd-ui
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      project: system
+      source:
+        repoURL: https://github.com/frealmyr/homelab
+        targetRevision: rewrite
+        path: gitops/system/argocd
+      info:
+      - name: url
+        value: https://argocd.mgmt.fmlab.no/
+
   applicationsets:
     - name: external-secrets
       namespace: argocd
@@ -66,9 +38,6 @@ argocd-apps:
             selector:
               matchLabels:
                 argocd.argoproj.io/secret-type: cluster
-            values:
-              environment: '{{ metadata.annotations.environment }}'
-              ipAddress: '{{ metadata.annotations.ip-address }}'
       template:
         metadata:
           name: '{{ values.environment }}-external-secrets'
@@ -83,6 +52,34 @@ argocd-apps:
           destination:
             server: '{{ server }}'
             namespace: external-secrets
+          syncPolicy:
+            automated:
+              prune: false
+              selfHeal: false
+            syncOptions:
+              - CreateNamespace=true
+
+    - name: cert-manager
+      namespace: argocd
+      generators:
+        - clusters:
+            selector:
+              matchLabels:
+                argocd.argoproj.io/secret-type: cluster
+      template:
+        metadata:
+          name: '{{ values.environment }}-cert-manager'
+        spec:
+          project: system
+          source:
+            repoURL: https://github.com/frealmyr/homelab
+            targetRevision: rewrite
+            path: gitops/system/cert-manager
+            helm:
+              releaseName: cert-manager
+          destination:
+            server: '{{ server }}'
+            namespace: cert-manager
           syncPolicy:
             automated:
               prune: false

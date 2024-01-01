@@ -5,9 +5,8 @@ description: Manages certificates
 type: application
 
 version: 1.0.0
-appVersion: 1.6.1
 
 dependencies:
 - name: cert-manager
-  version: 1.6.1
+  version: "^1" # Any 1.x.x
   repository: https://charts.jetstack.io
