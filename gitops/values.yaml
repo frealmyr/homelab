@@ -62,16 +62,23 @@ argocd-apps:
     - name: external-secrets
       namespace: argocd
       generators:
-      - clusters:
-          # selector:
-          #   matchLabels:
-          #     argocd.argoproj.io/secret-type: cluster
-          values:
-            clusterName: '{{ name }}'
-            ipAddress: '{{ metadata.annotations.ip-address }}'
+        - list:
+            elements:
+              - cluster: in-cluster
+                url: https://kubernetes.default.svc
+                values:
+                  environment: 'mgmt' # hard-code since in-cluster does not have a cluster secret
+                  ipAddress: '192.168.0.120'
+        - clusters:
+            selector:
+              matchLabels:
+                argocd.argoproj.io/secret-type: cluster
+            values:
+              environment: '{{ metadata.annotations.environment }}'
+              ipAddress: '{{ metadata.annotations.ip-address }}'
       template:
         metadata:
-          name: '{{ name }}-external-secrets'
+          name: '{{ values.environment }}-external-secrets'
         spec:
           project: system
           source:
@@ -93,20 +100,20 @@ argocd-apps:
     - name: external-dns
       namespace: argocd
       generators:
-      - list:
-          elements:
-            - cluster: in-cluster
-              url: https://kubernetes.default.svc
-              values:
-                environment: 'mgmt' # hard-code since in-cluster does not have a cluster secret
-                ipAddress: '192.168.0.120'
-      - clusters:
-          selector:
-            matchLabels:
-              argocd.argoproj.io/secret-type: cluster
-          values:
-            environment: '{{ metadata.annotations.environment }}'
-            ipAddress: '{{ metadata.annotations.ip-address }}'
+        - list:
+            elements:
+              - cluster: in-cluster
+                url: https://kubernetes.default.svc
+                values:
+                  environment: 'mgmt' # hard-code since in-cluster does not have a cluster secret
+                  ipAddress: '192.168.0.120'
+        - clusters:
+            selector:
+              matchLabels:
+                argocd.argoproj.io/secret-type: cluster
+            values:
+              environment: '{{ metadata.annotations.environment }}'
+              ipAddress: '{{ metadata.annotations.ip-address }}'
       template:
         metadata:
           name: '{{ values.environment }}-external-dns'
