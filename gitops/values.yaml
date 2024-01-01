@@ -98,18 +98,18 @@ argocd-apps:
             - cluster: in-cluster
               url: https://kubernetes.default.svc
               values:
-                clusterName: 'mgmt' # hard-code since in-cluster does not have a cluster secret
+                environment: 'mgmt' # hard-code since in-cluster does not have a cluster secret
                 ipAddress: '192.168.0.120'
       - clusters:
           selector:
             matchLabels:
               argocd.argoproj.io/secret-type: cluster
           values:
-            clusterName: '{{ name }}'
+            environment: '{{ metadata.annotations.environment }}'
             ipAddress: '{{ metadata.annotations.ip-address }}'
       template:
         metadata:
-          name: '{{ values.clusterName }}-external-dns'
+          name: '{{ values.environment }}-external-dns'
         spec:
           project: system
           source:
@@ -120,7 +120,7 @@ argocd-apps:
               releaseName: external-dns
               parameters:
                 - name: 'environment'
-                  value: '{{ values.clusterName }}'
+                  value: '{{ values.environment }}'
           destination:
             server: '{{ server }}'
             namespace: external-dns
