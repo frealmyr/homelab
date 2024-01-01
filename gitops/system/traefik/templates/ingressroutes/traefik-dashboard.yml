@@ -15,7 +15,7 @@ spec:
     - kind: Rule
       match: Host(`traefik.{{ $environment }}.fmlab.no`)
       middlewares:
-        - name: traefik-internal-security@kubernetescrd
+        - name: traefik-security@kubernetescrd
       services:
         - name: api@internal
           kind: TraefikService
