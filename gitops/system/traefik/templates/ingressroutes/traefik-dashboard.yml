@@ -31,6 +31,6 @@ spec:
   dnsNames:
     - traefik.{{ $environment }}.fmlab.no
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-prod
     kind: ClusterIssuer
 {{- end }}

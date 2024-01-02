@@ -9,5 +9,5 @@ spec:
   dnsNames:
     - argocd.mgmt.fmlab.no
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-prod
     kind: ClusterIssuer
