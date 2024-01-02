@@ -21,7 +21,7 @@
         memory: 6144
         maxmemory: 8196
         address: 192.168.0.122
-    recreate_nodes: true # destroy vms and recreate
+    recreate_nodes: false # destroy vms and recreate
   tasks:
 
 ##################
