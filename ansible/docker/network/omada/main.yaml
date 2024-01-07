@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: homelab
   become: true
   vars:
     service_name: omada
@@ -9,7 +9,7 @@
 ## Users ##
 ###########
 
-    - name: omada - create non-root user
+    - name: "{{ service_name }} - create non-root user"
       user:
         name: omada
         create_home: false
@@ -21,7 +21,7 @@
 ## Backups ##
 #############
 
-    - name: traefik - create config sub-directory
+    - name: "{{ service_name }} - create config sub-directory"
       file:
         path: "/var/lib/homelab/backups/omada"
         state: directory
@@ -33,7 +33,7 @@
 ## Docker Volumes ##
 ####################
 
-    - name: omada - create docker volumes
+    - name: "{{ service_name }} - create docker volumes"
       community.docker.docker_volume:
         volume_name: "{{ service_name }}_{{ item }}"
       loop:
@@ -45,14 +45,14 @@
 ## Docker Containers ##
 #######################
 
-    - name: omada - remove containers
+    - name: "{{ service_name }} - remove containers"
       community.docker.docker_container:
         name: "{{ item }}"
         state: absent
       loop:
         - omada
 
-    - name: traefik - start docker proxy container
+    - name: "{{ service_name }} - start docker container"
       community.docker.docker_container:
         name: omada
         image: mbentley/omada-controller:5.12

@@ -1,10 +1,37 @@
 http:
   use_x_forwarded_for: true
   trusted_proxies:
-    - 127.0.0.1
+    - 172.18.0.9
 
-# Loads default set of integrations. Do not remove.
-default_config:
+## Manually load integrations, instead of using default_config
+# https://www.home-assistant.io/integrations/default_config/
+automation: !include automations.yaml
+config:
+counter:
+dhcp:
+energy:
+history:
+image_upload:
+input_boolean:
+input_button:
+input_datetime:
+input_number:
+input_select:
+input_text:
+logbook:
+logger:
+map:
+mobile_app:
+network:
+person:
+schedule:
+scene:
+script:
+ssdp:
+stream:
+timer:
+zeroconf:
+zone:
 
 # Load frontend themes from the themes folder
 frontend:

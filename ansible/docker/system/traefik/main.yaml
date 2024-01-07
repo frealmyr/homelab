@@ -1,12 +1,14 @@
-- hosts: all
+- hosts: homelab
   become: true
+  vars:
+    service_name: traefik
   tasks:
 
 ###########
 ## Users ##
 ###########
 
-    - name: traefik - create non-root user
+    - name: "{{ service_name }} - create non-root user"
       user:
         name: traefik
         create_home: false
@@ -18,7 +20,7 @@
 ## Config Files ##
 ##################
 
-    - name: traefik - create config sub-directory
+    - name: "{{ service_name }} - create config sub-directory"
       file:
         path: "/var/lib/homelab/configs/traefik"
         state: directory
@@ -26,7 +28,7 @@
         group: "{{ user.group }}"
         mode: 0700
 
-    - name: traefik - copy local config folder to remote target
+    - name: "{{ service_name }} - copy local config folder to remote target"
       copy:
         src: "config/"
         dest: "/var/lib/homelab/configs/traefik/"
@@ -40,7 +42,7 @@
 ## Secrets ##
 #############
 
-    - name: traefik - create secrets sub-directory
+    - name: "{{ service_name }} - create secrets sub-directory"
       file:
         path: "/var/lib/homelab/secrets/traefik"
         state: directory
@@ -48,7 +50,7 @@
         group: "{{ user.group }}"
         mode: 0700
 
-    - name: traefik - touch secret file
+    - name: "{{ service_name }} - touch secret file"
       copy:
         content: ""
         dest: "/var/lib/homelab/secrets/traefik/acme.json"
@@ -57,11 +59,11 @@
         group: "{{ user.group }}"
         mode: 0700
 
-    - name: traefik - fetch secrets from secrets.yaml
+    - name: "{{ service_name }} - fetch secrets from secrets.yaml"
       ansible.builtin.include_vars:
         file: secrets.yaml
 
-    - name: traefik - copy secret to remote target
+    - name: "{{ service_name }} - copy secret to remote target"
       copy:
         content: "{{ cloudflare_token }}"
         dest: "/var/lib/homelab/secrets/traefik/cloudflare_token"
@@ -72,11 +74,11 @@
 ## Docker Networks ##
 #####################
 
-    - name: traefik - create reverse proxy network
+    - name: "{{ service_name }} - create reverse proxy network"
       community.docker.docker_network:
         name: reverse-proxy
 
-    - name: traefik - create docker proxy network
+    - name: "{{ service_name }} - create docker proxy network"
       community.docker.docker_network:
         name: docker-proxy-traefik
         driver: bridge
@@ -86,7 +88,7 @@
 ## Docker Containers ##
 #######################
 
-    - name: traefik - remove containers
+    - name: "{{ service_name }} - remove containers"
       community.docker.docker_container:
         name: "{{ item }}"
         state: absent
@@ -94,7 +96,7 @@
         - docker-proxy-traefik
         - traefik
 
-    - name: traefik - start docker proxy container
+    - name: "{{ service_name }} - start docker proxy container"
       community.docker.docker_container:
         name: docker-proxy-traefik
         image: tecnativa/docker-socket-proxy:latest
@@ -106,7 +108,7 @@
           - /var/run/docker.sock:/var/run/docker.sock:ro
         restart_policy: unless-stopped
 
-    - name: traefik - start traefik container
+    - name: "{{ service_name }} - start traefik container"
       community.docker.docker_container:
         name: traefik
         image: traefik:v3.0

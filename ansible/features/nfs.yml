@@ -1,0 +1,21 @@
+- name: nfs - install misc packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - nfs-common
+
+- name: nfs - create mount directory
+  file:
+    path: /media/nas
+    state: directory
+
+- name: nfs - mount storage disk
+  mount:
+    fstype: nfs
+    src: nas.fmlab.no:/volume1/entertainment
+    path: /media/nas
+    opts: defaults,noatime
+    state: mounted

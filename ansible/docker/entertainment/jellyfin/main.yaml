@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: homelab
   become: true
   vars:
     service_name: jellyfin
@@ -8,6 +8,12 @@
 ###########
 ## Users ##
 ###########
+
+    - name: "{{ service_name }} - create group"
+      ansible.builtin.group:
+        name: entertainment
+        state: present
+      register: group
 
     - name: "{{ service_name }} - create non-root user"
       user:
@@ -43,13 +49,7 @@
         minute: "5"
         hour: "3" # 03:05
         weekday: "0" # Sunday
-        job: >
-          sh -c "printf 'docker stop: ' && docker stop {{ item.container }}
-          && tar -czf /var/lib/homelab/backups/{{ service_name }}/{{ item.volume }}_backup-$(date +%F).tar.gz -C /var/lib/docker/volumes/{{ item.volume }}/_data .
-          && echo 'created backup: /var/lib/homelab/backups/{{ service_name }}/{{ item.volume }}_backup-$(date +%F).tar.gz'
-          && printf 'docker start: ' && docker start {{ item.container }}"
-          | while IFS= read -r line; do printf '%s - %s\n' "$(date +%F-%T)" "$line"; done
-          >> /var/lib/homelab/backups/docker-volumes.log 2>&1
+        job: "/var/lib/homelab/scripts/backup-docker-volume.sh {{ item.container }} {{ service_name }} {{ item.volume }}"
       with_items:
         - { container: "{{ service_name }}", volume: "{{ service_name }}_config" }
 
@@ -57,17 +57,30 @@
 ## Reverse Proxy ##
 ###################
 
-    - name: "{{ service_name }} - configure traefik labels"
-      set_fact:
-          traefik_labels: "{{ traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
-      with_items:
-        - { 'key': 'traefik.enable' , 'value': 'true'}
-        - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
-        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`{{ service_name }}.{{ domain }}`)'}
-        - { 'key': 'traefik.http.routers.{{ service_name }}.service' , 'value': '{{ service_name }}'}
-        - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
-        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '8096'}
-        - { 'key': 'traefik.http.routers.{{ service_name }}.middlewares' , 'value': 'security@file'}
+    - name: "{{ service_name }} - create dynamic traefik file"
+      copy:
+        dest: "/var/lib/homelab/configs/traefik/dynamic/{{ service_name }}.yaml"
+        force: true
+        owner: "traefik"
+        group: "traefik"
+        mode: 0700
+        content: |
+          http:
+            routers:
+              {{ service_name }}:
+                entryPoints:
+                  - https
+                rule: Host(`{{ service_name }}.{{ domain }}`)
+                tls:
+                  certResolver: letsEncrypt
+                service: {{ service_name }}
+                middlewares:
+                  - security@file
+            services:
+              {{ service_name }}:
+                loadBalancer:
+                  servers:
+                    - url: http://192.168.0.20:8096
 
 #############
 ## Helpers ##
@@ -98,7 +111,7 @@
       community.docker.docker_container:
         name: "{{ service_name }}"
         image: jellyfin/jellyfin:latest
-        user: "{{ user.uid }}:{{ user.group }}"
+        user: "{{ user.uid }}:{{ group.gid }}"
         groups:
           - '{{ group_video.ansible_facts.getent_group.video[1] }}'
           - '{{ group_render.ansible_facts.getent_group.render[1] }}'
@@ -110,7 +123,6 @@
           - /dev/dri/card0:/dev/dri/card0
           - /dev/dri/renderD128:/dev/dri/renderD128
         network_mode: host
-        labels: "{{ traefik_labels }}"
         security_opts:
           - no-new-privileges:true
         restart_policy: unless-stopped

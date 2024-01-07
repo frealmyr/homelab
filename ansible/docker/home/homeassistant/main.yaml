@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: homelab
   become: true
   vars:
     service_name: homeassistant
@@ -27,7 +27,7 @@
       register: user
 
 ###################
-## Configuration ##
+## Data & Backup ##
 ###################
 
     - name: "{{ service_name }} - create config sub-directory"
@@ -48,10 +48,6 @@
         directory_mode: 0700
         force: true
 
-#####################
-## Persistent Data ##
-#####################
-
     - name: "{{ service_name }} - create backup sub-directory"
       file:
         path: "/var/lib/homelab/backups/{{ service_name }}"
@@ -60,12 +56,15 @@
         group: "{{ user.group }}"
         mode: 0770
 
-    - name: "{{ service_name }} - create docker volumes"
-      community.docker.docker_volume:
-        volume_name: "{{ service_name }}_{{ item }}"
-        state: absent
-      loop:
-        - config
+    - name: "{{ service_name }} - create weekly dump-volume-to-backup-folder job"
+      ansible.builtin.cron:
+        name: "docker-volume-backup-{{ item.volume }}"
+        minute: "0"
+        hour: "3" # 03:00
+        weekday: "0" # Sunday
+        job: "/var/lib/homelab/scripts/backup-docker-hostpath.sh {{ item.container }} {{ service_name }} {{ item.path }}"
+      with_items:
+        - { container: "{{ service_name }}", volume: "{{ service_name }}_data", path: "/var/lib/homelab/configs/{{ service_name }}" }
 
 ###################
 ## Reverse Proxy ##

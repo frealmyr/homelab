@@ -168,57 +168,60 @@ sensor:
 utility_meter:
   panel_office_power_accumulated_daily:
     unique_id: panel_office_power_accumulated_daily
-    source: sensor.sensor_panel_office_current_power_integral
+    source: sensor.panel_office_power_accumulated
     cycle: daily
   panel_office_power_accumulated_weekly:
     unique_id: panel_office_power_accumulated_weekly
-    source: sensor.sensor_panel_office_current_power_integral
+    source: sensor.panel_office_power_accumulated
     cycle: weekly
   panel_office_power_accumulated_monthly:
     unique_id: panel_office_power_accumulated_monthly
-    source: sensor.sensor_panel_office_current_power_integral
+    source: sensor.panel_office_power_accumulated
     cycle: monthly
   panel_bedroom_power_accumulated_daily:
     unique_id: panel_bedroom_power_accumulated_daily
-    source: sensor.sensor_panel_bedroom_current_power_integral
+    source: sensor.panel_bedroom_power_accumulated
     cycle: daily
   panel_bedroom_power_accumulated_weekly:
     unique_id: panel_bedroom_power_accumulated_weekly
-    source: sensor.sensor_panel_bedroom_current_power_integral
+    source: sensor.panel_bedroom_power_accumulated
     cycle: weekly
   panel_bedroom_power_accumulated_monthly:
     unique_id: panel_bedroom_power_accumulated_monthly
-    source: sensor.sensor_panel_bedroom_current_power_integral
+    source: sensor.panel_bedroom_power_accumulated
     cycle: monthly
   radiator_kitchen_power_accumulated_daily:
     unique_id: radiator_kitchen_power_accumulated_daily
-    source: sensor.sensor_radiator_kitchen_current_power_integral
+    source: sensor.radiator_kitchen_power_accumulated
     cycle: daily
   radiator_kitchen_power_accumulated_weekly:
     unique_id: radiator_kitchen_power_accumulated_weekly
-    source: sensor.sensor_radiator_kitchen_current_power_integral
+    source: sensor.radiator_kitchen_power_accumulated
     cycle: weekly
   radiator_kitchen_power_accumulated_monthly:
     unique_id: radiator_kitchen_power_accumulated_monthly
-    source: sensor.sensor_radiator_kitchen_current_power_integral
+    source: sensor.radiator_kitchen_power_accumulated
     cycle: monthly
   radiator_lounge_power_accumulated_daily:
     unique_id: radiator_lounge_power_accumulated_daily
-    source: sensor.sensor_radiator_lounge_current_power_integral
+    source: sensor.radiator_lounge_power_accumulated
     cycle: daily
   radiator_lounge_power_accumulated_weekly:
     unique_id: radiator_lounge_power_accumulated_weekly
-    source: sensor.sensor_radiator_lounge_current_power_integral
+    source: sensor.radiator_lounge_power_accumulated
     cycle: weekly
   radiator_lounge_power_accumulated_monthly:
     unique_id: radiator_lounge_power_accumulated_monthly
-    source: sensor.sensor_radiator_lounge_current_power_integral
+    source: sensor.radiator_lounge_power_accumulated
     cycle: monthly
 
 template:
   - sensor:
     - unique_id: "panel_office_power_percentage_daily"
       unit_of_measurement: '%'
+      availability: >-
+        {{ is_number(states('sensor.accumulated_consumption_bunesvegen_19')) }}
+        {{ is_number(states('sensor.panel_office_power_accumulated_daily')) }}
       state: >-
         {% set panel_office = states('sensor.panel_office_power_accumulated_daily') | float %}
         {% set total_usage = states('sensor.accumulated_consumption_bunesvegen_19') | float %}
@@ -226,6 +229,9 @@ template:
   - sensor:
     - unique_id: "panel_bedroom_power_percentage_daily"
       unit_of_measurement: '%'
+      availability: >-
+        {{ is_number(states('sensor.accumulated_consumption_bunesvegen_19')) }}
+        {{ is_number(states('sensor.panel_bedroom_power_accumulated_daily')) }}
       state: >-
         {% set panel_bedroom = states('sensor.panel_bedroom_power_accumulated_daily') | float %}
         {% set total_usage = states('sensor.accumulated_consumption_bunesvegen_19') | float %}
@@ -233,6 +239,10 @@ template:
   - sensor:
     - unique_id: "radiator_livingroom_power_percentage_daily"
       unit_of_measurement: '%'
+      availability: >-
+        {{ is_number(states('sensor.accumulated_consumption_bunesvegen_19')) }}
+        {{ is_number(states('sensor.radiator_kitchen_power_accumulated_daily')) }}
+        {{ is_number(states('sensor.radiator_lounge_power_accumulated_daily')) }}
       state: >-
         {% set radiator_kitchen = states('sensor.radiator_kitchen_power_accumulated_daily') | float %}
         {% set radiator_lounge = states('sensor.radiator_lounge_power_accumulated_daily') | float %}

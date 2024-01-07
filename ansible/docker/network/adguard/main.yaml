@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: homelab
   become: true
   vars:
     service_name: adguard
@@ -49,8 +49,8 @@
       file:
         path: "/var/lib/homelab/backups/{{ service_name }}"
         state: directory
-        owner: "{{ user.uid }}"
-        group: "{{ user.group }}"
+        owner: backup
+        group: backup
         mode: "0770"
 
     - name: "{{ service_name }} - create weekly dump-volume-to-backup-folder job"
@@ -59,13 +59,7 @@
         minute: "5"
         hour: "3" # 03:05
         weekday: "0" # Sunday
-        job: >
-          sh -c "printf 'docker stop: ' && docker stop {{ item.container }}
-          && tar -czf /var/lib/homelab/backups/{{ service_name }}/{{ item.volume }}_backup-$(date +%F).tar.gz -C /var/lib/docker/volumes/{{ item.volume }}/_data .
-          && echo 'created backup: /var/lib/homelab/backups/{{ service_name }}/{{ item.volume }}_backup-$(date +%F).tar.gz'
-          && printf 'docker start: ' && docker start {{ item.container }}"
-          | while IFS= read -r line; do printf '%s - %s\n' "$(date +%F-%T)" "$line"; done
-          >> /var/lib/homelab/backups/docker-volumes.log 2>&1
+        job: "/var/lib/homelab/scripts/backup-docker-volume.sh {{ item.container }} {{ service_name }} {{ item.volume }}"
       with_items:
         - { container: "{{ service_name }}", volume: "{{ service_name }}_conf" }
 

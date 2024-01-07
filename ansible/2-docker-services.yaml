@@ -9,7 +9,6 @@
       state: present
     with_items:
       - backup
-      - entertainment
 
   - name: docker - create folders
     file:
@@ -18,12 +17,22 @@
       group: "{{ item.group }}"
       mode: 0770 # owner+group rwx, others none
     loop:
-      - { path: /media/storage/downloads, group: entertainment }
-      - { path: /media/storage/entertainment, group: entertainment }
       - { path: /var/lib/homelab, group: root }
       - { path: /var/lib/homelab/backups, group: backup }
       - { path: /var/lib/homelab/configs, group: root }
+      - { path: /var/lib/homelab/scripts, group: root }
       - { path: /var/lib/homelab/secrets, group: root }
+
+  - name: backup - copy backup scripts
+    copy:
+      src: "./.scripts/{{ item }}"
+      dest: "/var/lib/homelab/scripts/{{ item }}"
+      owner: root
+      group: root
+      mode: "0770"
+    with_items:
+      - "backup-docker-volume.sh"
+      - "backup-docker-hostpath.sh"
 
 # System
 - import_playbook: docker/system/traefik/main.yaml

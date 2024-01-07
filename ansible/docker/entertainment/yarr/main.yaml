@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: homelab
   become: true
   vars:
     service_name: yarr
@@ -6,8 +6,14 @@
   tasks:
 
 ###########
-## Users ##
+## Users & Groups ##
 ###########
+
+    - name: "{{ service_name }} - create group"
+      ansible.builtin.group:
+        name: entertainment
+        state: present
+      register: group
 
     - name: "{{ service_name }} - create non-root user"
       user:
@@ -15,11 +21,25 @@
         create_home: false
         shell: /usr/sbin/nologin
         state: present
+        groups: entertainment
+        append: yes
       register: user
 
 ###################
 ## Data & Backup ##
 ###################
+
+    - name: "{{ service_name }} - create shared folders"
+      file:
+        path: "{{ item.path }}"
+        state: directory
+        group: "{{ item.group }}"
+        mode: 0770 # owner+group rwx, others none
+      loop:
+        - { path: /media/storage/downloads, group: entertainment }
+        - { path: /media/storage/entertainment, group: entertainment }
+        - { path: /media/storage/entertainment/Anime/Series, group: entertainment }
+        - { path: /media/storage/entertainment/Anime/Movies, group: entertainment }
 
     - name: "{{ service_name }} - create docker volumes"
       community.docker.docker_volume:
@@ -45,13 +65,7 @@
         minute: "10"
         hour: "3" # 03:10
         weekday: "0" # Sunday
-        job: >
-          sh -c "printf 'docker stop: ' && docker stop {{ item.container }}
-          && tar -czf /var/lib/homelab/backups/{{ service_name }}/{{ item.volume }}_backup-$(date +%F).tar.gz -C /var/lib/docker/volumes/{{ item.volume }}/_data .
-          && echo 'created backup: /var/lib/homelab/backups/{{ service_name }}/{{ item.volume }}_backup-$(date +%F).tar.gz'
-          && printf 'docker start: ' && docker start {{ item.container }}"
-          | while IFS= read -r line; do printf '%s - %s\n' "$(date +%F-%T)" "$line"; done
-          >> /var/lib/homelab/backups/docker-volumes.log 2>&1
+        job: "/var/lib/homelab/scripts/backup-docker-volume.sh {{ item.container }} {{ service_name }} {{ item.volume }}"
       with_items:
         - { container: "prowlarr", volume: "prowlarr_config" }
         - { container: "radarr", volume: "radarr_config" }
@@ -65,6 +79,8 @@
     - name: "{{ service_name }} - configure prowlarr labels"
       set_fact:
           prowlarr_traefik_labels: "{{ prowlarr_traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      vars:
+        service_name: prowlarr
       with_items:
         - { 'key': 'traefik.enable' , 'value': 'true'}
         - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
@@ -77,6 +93,8 @@
     - name: "{{ service_name }} - configure radarr labels"
       set_fact:
           radarr_traefik_labels: "{{ radarr_traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      vars:
+        service_name: radarr
       with_items:
         - { 'key': 'traefik.enable' , 'value': 'true'}
         - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
@@ -89,6 +107,8 @@
     - name: "{{ service_name }} - configure sonarr labels"
       set_fact:
           sonarr_traefik_labels: "{{ sonarr_traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      vars:
+        service_name: sonarr
       with_items:
         - { 'key': 'traefik.enable' , 'value': 'true'}
         - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
@@ -101,6 +121,8 @@
     - name: "{{ service_name }} - configure transmission labels"
       set_fact:
           transmission_traefik_labels: "{{ transmission_traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      vars:
+        service_name: transmission
       with_items:
         - { 'key': 'traefik.enable' , 'value': 'true'}
         - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
@@ -129,7 +151,7 @@
         name: "prowlarr"
         image: lscr.io/linuxserver/prowlarr:latest
         env:
-          PGID: "{{ user.group }}"
+          PGID: "{{ group.gid }}"
           PUID: "{{ user.uid }}"
           TZ: "Europe/Oslo"
         volumes:
@@ -146,7 +168,7 @@
         name: "radarr"
         image: lscr.io/linuxserver/radarr:latest
         env:
-          PGID: "{{ user.group }}"
+          PGID: "{{ group.gid }}"
           PUID: "{{ user.uid }}"
           TZ: "Europe/Oslo"
         volumes:
@@ -165,7 +187,7 @@
         name: "sonarr"
         image: lscr.io/linuxserver/sonarr:latest
         env:
-          PGID: "{{ user.group }}"
+          PGID: "{{ group.gid }}"
           PUID: "{{ user.uid }}"
           TZ: "Europe/Oslo"
         volumes:
@@ -184,7 +206,7 @@
         name: "transmission"
         image: lscr.io/linuxserver/transmission:latest
         env:
-          PGID: "{{ user.group }}"
+          PGID: "{{ group.gid }}"
           PUID: "{{ user.uid }}"
           TZ: "Europe/Oslo"
           PEERPORT: "54213"

@@ -1,12 +1,14 @@
-- hosts: all
+- hosts: homelab
   become: true
+  vars:
+    service_name: watchtower
   tasks:
 
     #############
     ## Secrets ##
     #############
 
-    - name: watchtower - create secrets sub-directory
+    - name: "{{ service_name }} - create secrets sub-directory"
       file:
         path: "/var/lib/homelab/secrets/{{ item.folder }}"
         state: directory
@@ -16,11 +18,11 @@
       loop:
         - { folder: watchtower, owner: root }
 
-    - name: watchtower - fetch secrets from secrets.yaml
+    - name: "{{ service_name }} - fetch secrets from secrets.yaml"
       ansible.builtin.include_vars:
         file: secrets.yaml
 
-    - name: watchtower - copy secrets to remote target
+    - name: "{{ service_name }} - copy secrets to remote target"
       copy:
         content: "{{ discord_webhook }}"
         dest: "/var/lib/homelab/secrets/{{ item.file }}"
@@ -34,13 +36,13 @@
     ## Docker Network ##
     ####################
 
-    - name: watchtower - create docker proxy network
+    - name: "{{ service_name }} - create docker proxy network"
       community.docker.docker_network:
         name: watchtower-docker-proxy
         driver: bridge
         internal: true
 
-    - name: watchtower - create watchtower network
+    - name: "{{ service_name }} - create watchtower network"
       community.docker.docker_network:
         name: watchtower-bridge
         driver: bridge
@@ -49,7 +51,7 @@
     ## Docker Container ##
     #######################
 
-    - name: watchtower - remove containers
+    - name: "{{ service_name }} - remove containers"
       community.docker.docker_container:
         name: "{{ item }}"
         state: absent
@@ -57,7 +59,7 @@
         - docker-proxy-watchtower
         - watchtower
 
-    - name: watchtower - start docker proxy container
+    - name: "{{ service_name }} - start docker proxy container"
       community.docker.docker_container:
         name: docker-proxy-watchtower
         image: tecnativa/docker-socket-proxy:latest
@@ -74,7 +76,7 @@
           - no-new-privileges:true
         restart_policy: unless-stopped
 
-    - name: watchtower - start watchtower container
+    - name: "{{ service_name }} - start watchtower container"
       community.docker.docker_container:
         name: watchtower
         image: containrrr/watchtower:latest
