@@ -1,11 +1,12 @@
 http:
   use_x_forwarded_for: true
   trusted_proxies:
-    - 172.18.0.9
+    - 172.18.0.0/16
 
 ## Manually load integrations, instead of using default_config
 # https://www.home-assistant.io/integrations/default_config/
 automation: !include automations.yaml
+application_credentials:
 config:
 counter:
 dhcp:
@@ -39,3 +40,5 @@ frontend:
 
 homeassistant:
   packages: !include_dir_named packages
+  allowlist_external_dirs:
+    - /config/photos/

@@ -52,8 +52,8 @@
       file:
         path: "/var/lib/homelab/backups/{{ service_name }}"
         state: directory
-        owner: "{{ user.uid }}"
-        group: "{{ user.group }}"
+        owner: backup
+        group: backup
         mode: 0770
 
     - name: "{{ service_name }} - create weekly dump-volume-to-backup-folder job"
@@ -109,7 +109,6 @@
           PGID: "{{ user.group }}"
         volumes:
           - "/var/lib/homelab/configs/{{ service_name }}:/config"
-          - "/var/lib/homelab/backups/{{ service_name }}:/config/backups"
         mounts:
           - type: bind
             read_only: true

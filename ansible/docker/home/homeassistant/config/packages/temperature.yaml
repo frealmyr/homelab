@@ -1,94 +1,94 @@
 input_number:
-  temperature_comfort_stue:
-    name: Temperature Comfort - Stue
+  temperature_comfort_livingroom:
+    name: Temperature Comfort - Living Room
     min: 10
     max: 23
     step: 0.5
     mode: slider
     unit_of_measurement: "°C"
     icon: mdi:thermometer
-  temperature_sleep_stue:
-    name: Temperature Sleep - Stue
+  temperature_sleep_livingroom:
+    name: Temperature Sleep - Living Room
     min: 10
     max: 23
     step: 0.5
     mode: slider
     unit_of_measurement: "°C"
     icon: mdi:thermometer
-  temperature_away_stue:
-    name: Temperature Away - Stue
+  temperature_away_livingroom:
+    name: Temperature Away - Living Room
     min: 10
     max: 23
     step: 0.5
     mode: slider
     unit_of_measurement: "°C"
     icon: mdi:thermometer
-  temperature_comfort_soverom:
-    name: Temperature Comfort - Soverom
+  temperature_comfort_bedroom:
+    name: Temperature Comfort - Bedroom
     min: 10
     max: 23
     step: 0.5
     mode: slider
     unit_of_measurement: "°C"
     icon: mdi:thermometer
-  temperature_sleep_soverom:
-    name: Temperature Sleep - Soverom
+  temperature_sleep_bedroom:
+    name: Temperature Sleep - Bedroom
     min: 10
     max: 23
     step: 0.5
     mode: slider
     unit_of_measurement: "°C"
     icon: mdi:thermometer
-  temperature_away_soverom:
-    name: Temperature Away - Soverom
+  temperature_away_bedroom:
+    name: Temperature Away - Bedroom
     min: 10
     max: 23
     step: 0.5
     mode: slider
     unit_of_measurement: "°C"
     icon: mdi:thermometer
-  temperature_comfort_gjesterom:
-    name: Temperature Comfort - Gjesterom
+  temperature_comfort_guestroom:
+    name: Temperature Comfort - Guest Room
     min: 10
     max: 23
     step: 0.5
     mode: slider
     unit_of_measurement: "°C"
     icon: mdi:thermometer
-  temperature_sleep_gjesterom:
-    name: Temperature Sleep - Gjesterom
+  temperature_sleep_guestroom:
+    name: Temperature Sleep - Guest Room
     min: 10
     max: 23
     step: 0.5
     mode: slider
     unit_of_measurement: "°C"
     icon: mdi:thermometer
-  temperature_away_gjesterom:
-    name: Temperature Away - Gjesterom
+  temperature_away_guestroom:
+    name: Temperature Away - Guest Room
     min: 10
     max: 23
     step: 0.5
     mode: slider
     unit_of_measurement: "°C"
     icon: mdi:thermometer
-  temperature_override_target_stue:
-    name: Temperature Override - Stue
+  temperature_override_target_livingroom:
+    name: Temperature Override - Living Room
     min: 0
     max: 24
     step: 1
     mode: slider
     unit_of_measurement: "Hours"
     icon: mdi:clock
-  temperature_override_target_soverom:
-    name: Temperature Override - Soverom
+  temperature_override_target_bedroom:
+    name: Temperature Override - Bedroom
     min: 0
     max: 24
     step: 1
     mode: slider
     unit_of_measurement: "Hours"
     icon: mdi:clock
-  temperature_override_target_gjesterom:
-    name: Temperature Override - Gjesterom
+  temperature_override_target_guestroom:
+    name: Temperature Override - Guest Room
     min: 0
     max: 24
     step: 1
@@ -97,49 +97,49 @@ input_number:
     icon: mdi:clock
 
 input_boolean:
-  temperature_override_toggle_stue:
-    name: Temperature Override Toggle - Stue
+  temperature_override_toggle_livingroom:
+    name: Temperature Override Toggle - Living Room
     icon: mdi:thermometer
-  temperature_override_toggle_soverom:
-    name: Temperature Override Toggle - Soverom
+  temperature_override_toggle_bedroom:
+    name: Temperature Override Toggle - Bedroom
     icon: mdi:thermometer
-  temperature_override_toggle_gjesterom:
-    name: Temperature Override Toggle - Gjesterom
+  temperature_override_toggle_guestroom:
+    name: Temperature Override Toggle - Guest Room
     icon: mdi:thermometer
 
 input_datetime:
-  temperature_override_duration_stue:
-    name: Temperature Override Duration - Stue
+  temperature_override_duration_livingroom:
+    name: Temperature Override Duration - Living Room
     has_time: true
     icon: mdi:clock
-  temperature_override_duration_soverom:
-    name:  Temperature Override Duration - Soverom
+  temperature_override_duration_bedroom:
+    name:  Temperature Override Duration - Bedroom
     has_time: true
     icon: mdi:clock
-  temperature_override_duration_gjesterom:
-    name:  Temperature Override Duration - Gjesterom
+  temperature_override_duration_guestroom:
+    name:  Temperature Override Duration - Guest Room
     has_time: true
     icon: mdi:clock
 
 timer:
-  temperature_override_timer_stue:
-    name: Temperature Override Timer - Stue
+  temperature_override_timer_livingroom:
+    name: Temperature Override Timer - Living Room
     icon: mdi:clock
     restore: true
-  temperature_override_timer_overom:
-    name: Temperature Override Timer - Soverom
+  temperature_override_timer_bedroom:
+    name: Temperature Override Timer - Bedroom
     icon: mdi:clock
     restore: true
-  temperature_override_timer_gjesterom:
-    name: Temperature Override Timer - Gjesterom
+  temperature_override_timer_guestroom:
+    name: Temperature Override Timer - Guest Room
     icon: mdi:clock
     restore: true
 
 sensor:
   - platform: integration
-    name: panel_office_power_accumulated
-    unique_id: panel_office_power_accumulated
-    source: sensor.panel_office_current_power
+    name: panel_guestroom_power_accumulated
+    unique_id: panel_guestroom_power_accumulated
+    source: sensor.panel_guestroom_current_power
     round: 4
     unit_prefix: k
     method: left
@@ -166,17 +166,17 @@ sensor:
     method: left
 
 utility_meter:
-  panel_office_power_accumulated_daily:
-    unique_id: panel_office_power_accumulated_daily
-    source: sensor.panel_office_power_accumulated
+  panel_guestroom_power_accumulated_daily:
+    unique_id: panel_guestroom_power_accumulated_daily
+    source: sensor.panel_guestroom_power_accumulated
     cycle: daily
-  panel_office_power_accumulated_weekly:
-    unique_id: panel_office_power_accumulated_weekly
-    source: sensor.panel_office_power_accumulated
+  panel_guestroom_power_accumulated_weekly:
+    unique_id: panel_guestroom_power_accumulated_weekly
+    source: sensor.panel_guestroom_power_accumulated
     cycle: weekly
-  panel_office_power_accumulated_monthly:
-    unique_id: panel_office_power_accumulated_monthly
-    source: sensor.panel_office_power_accumulated
+  panel_guestroom_power_accumulated_monthly:
+    unique_id: panel_guestroom_power_accumulated_monthly
+    source: sensor.panel_guestroom_power_accumulated
     cycle: monthly
   panel_bedroom_power_accumulated_daily:
     unique_id: panel_bedroom_power_accumulated_daily
@@ -217,21 +217,23 @@ utility_meter:
 
 template:
   - sensor:
-    - unique_id: "panel_office_power_percentage_daily"
+    - unique_id: "panel_guestroom_power_percentage_daily"
       unit_of_measurement: '%'
       availability: >-
-        {{ is_number(states('sensor.accumulated_consumption_bunesvegen_19')) }}
-        {{ is_number(states('sensor.panel_office_power_accumulated_daily')) }}
+        {{ not 'unavailable' in
+          [ states('sensor.accumulated_consumption_bunesvegen_19'),
+            states('sensor.panel_guestroom_power_accumulated_daily') ] }}
       state: >-
-        {% set panel_office = states('sensor.panel_office_power_accumulated_daily') | float %}
+        {% set panel_guestroom = states('sensor.panel_guestroom_power_accumulated_daily') | float %}
         {% set total_usage = states('sensor.accumulated_consumption_bunesvegen_19') | float %}
-        {{ ( (panel_office / total_usage) * 100 | float ) | round(2) }}
+        {{ ( (panel_guestroom / total_usage) * 100 | float ) | round(2) }}
   - sensor:
     - unique_id: "panel_bedroom_power_percentage_daily"
       unit_of_measurement: '%'
       availability: >-
-        {{ is_number(states('sensor.accumulated_consumption_bunesvegen_19')) }}
-        {{ is_number(states('sensor.panel_bedroom_power_accumulated_daily')) }}
+        {{ not 'unavailable' in
+          [ states('sensor.accumulated_consumption_bunesvegen_19'),
+            states('sensor.panel_bedroom_power_accumulated_daily') ] }}
       state: >-
         {% set panel_bedroom = states('sensor.panel_bedroom_power_accumulated_daily') | float %}
         {% set total_usage = states('sensor.accumulated_consumption_bunesvegen_19') | float %}
@@ -240,9 +242,10 @@ template:
     - unique_id: "radiator_livingroom_power_percentage_daily"
       unit_of_measurement: '%'
       availability: >-
-        {{ is_number(states('sensor.accumulated_consumption_bunesvegen_19')) }}
-        {{ is_number(states('sensor.radiator_kitchen_power_accumulated_daily')) }}
-        {{ is_number(states('sensor.radiator_lounge_power_accumulated_daily')) }}
+        {{ not 'unavailable' in
+          [ states('sensor.accumulated_consumption_bunesvegen_19'),
+            states('sensor.radiator_kitchen_power_accumulated_daily'),
+            states('sensor.radiator_lounge_power_accumulated_daily') ] }}
       state: >-
         {% set radiator_kitchen = states('sensor.radiator_kitchen_power_accumulated_daily') | float %}
         {% set radiator_lounge = states('sensor.radiator_lounge_power_accumulated_daily') | float %}
