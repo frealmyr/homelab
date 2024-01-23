@@ -6,22 +6,22 @@
       k8s-mgmt:
         name: k8s-mgmt
         cpu: 4
-        memory: 6144
-        maxmemory: 8196
+        memory: 12288
+        maxmemory: 12288
         address: 192.168.0.120
       k8s-test:
         name: k8s-test
         cpu: 4
         memory: 6144
-        maxmemory: 8196
+        maxmemory: 6144
         address: 192.168.0.121
       k8s-prod:
         name: k8s-prod
         cpu: 4
         memory: 6144
-        maxmemory: 8196
+        maxmemory: 6144
         address: 192.168.0.122
-    recreate_nodes: false # destroy vms and recreate
+    recreate_nodes: true # destroy vms and recreate
   tasks:
 
 ##################
@@ -132,7 +132,7 @@
             late-commands:
               - |
                 cat <<'EOF' > /target/etc/default/grub.d/40my.cfg
-                GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory systemd.unified_cgroup_hierarchy=0"
+                GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory systemd.unified_cgroup_hierarchy=0 console=tty0 console=ttyS0,115200n8"
                 EOF
                 curtin in-target --target=/target -- update-grub
       loop: "{{ nodes | dict2items }}"
@@ -192,19 +192,34 @@
       loop: "{{ nodes | dict2items }}"
       when: recreate_nodes and item.value.name in existing_vm_names
 
+    - name: virsh - delete vm disk
+      file:
+        path: /var/lib/vms/volumes/{{ item.value.name }}.img
+        state: absent
+      loop: "{{ nodes | dict2items }}"
+      when: recreate_nodes and item.value.name in existing_vm_names
+
     - name: virt-install - create
       shell: |
         virt-install \
           --name {{ item.value.name }} \
           --vcpus {{ item.value.cpu }} \
           --memory={{ item.value.memory }},currentMemory={{ item.value.memory }},maxmemory={{ item.value.maxmemory }} \
+          --network default \
           --network bridge=br0,model=virtio \
           --graphics none \
           --os-variant ubuntu22.04 \
           --import \
           --disk /var/lib/vms/volumes/{{ item.value.name }}.img,device=disk,bus=virtio,size=40,backing_store="/var/lib/vms/images/jammy-server-cloudimg-amd64-disk-kvm.img" \
           --disk /var/lib/vms/configs/{{ item.value.name }}/config-disk.img,format=raw \
-          --noautoconsole \
-          --autostart
+          --noautoconsole
+      loop: "{{ nodes | dict2items }}"
       when: item.value.name not in existing_vm_names or recreate_nodes
+
+    - name: assert - wait for ssh to be available
+      wait_for:
+        host: "{{ item.value.address }}"
+        port: 22
+        delay: 10
+        timeout: 300
       loop: "{{ nodes | dict2items }}"
