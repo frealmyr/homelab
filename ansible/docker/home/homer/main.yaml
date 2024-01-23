@@ -78,4 +78,5 @@
           - name: reverse-proxy
         security_opts:
           - no-new-privileges:true
+        labels: "{{ traefik_labels }}"
         restart_policy: unless-stopped
