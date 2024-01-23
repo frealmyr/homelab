@@ -29,8 +29,12 @@ done < <(
     printf "docker stop: "
     docker stop "$container_name"
 
-    tar -czf "/var/lib/homelab/backups/$service_name/${service_name}_backup-$(date +%F).tar.gz" -C "$host_path" .
-    echo "created backup: /var/lib/homelab/backups/$service_name/${service_name}_backup-$(date +%F).tar.gz"
+    image_sha=$(docker inspect $container_name --format='{{.Image}}' | sed 's/sha256://')
+
+    tar -czf "/var/lib/homelab/backups/$service_name/backup-$(date +%F)-${service_name}-sha256-${image_sha}.tar.gz" -C "$host_path" .
+    chown backup:backup "/var/lib/homelab/backups/$service_name/backup-$(date +%F)-${service_name}-sha256-${image_sha}.tar.gz"
+
+    echo "created backup: /var/lib/homelab/backups/$service_name/backup-$(date +%F)-${service_name}-sha256-${image_sha}.tar.gz"
 
     printf "docker start: "
     docker start "$container_name"

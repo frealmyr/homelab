@@ -21,7 +21,7 @@ get_timestamp() {
     date +"%Y-%m-%d-%H:%M:%S"
 }
 
-printf "%s - starting backup for service %s...\n" "$(get_timestamp)" "$service_name"
+printf "%s - starting backup for container %s...\n" "$(get_timestamp)" "$container_name"
 
 while IFS= read -r line; do
     printf "%s - %s\n" "$(get_timestamp)" "$line"
@@ -29,8 +29,12 @@ done < <(
     printf "docker stop: "
     docker stop "$container_name"
 
-    tar -czf "/var/lib/homelab/backups/$service_name/${volume_name}_backup-$(date +%F).tar.gz" -C "/var/lib/docker/volumes/$volume_name/_data" .
-    echo "created backup: /var/lib/homelab/backups/$service_name/${volume_name}_backup-$(date +%F).tar.gz"
+    image_sha=$(docker inspect $container_name --format='{{.Image}}' | sed 's/sha256://')
+
+    tar -czf "/var/lib/homelab/backups/$service_name/backup-$(date +%F)-${volume_name}-sha256-${image_sha}.tar.gz" -C "/var/lib/docker/volumes/$volume_name/_data" .
+    chown backup:backup "/var/lib/homelab/backups/$service_name/backup-$(date +%F)-${volume_name}-sha256-${image_sha}.tar.gz"
+
+    echo "created backup: /var/lib/homelab/backups/$service_name/backup-$(date +%F)-${volume_name}-sha256-${image_sha}.tar.gz"
 
     printf "docker start: "
     docker start "$container_name"
@@ -39,4 +43,5 @@ done < <(
 end_time=$(date +%s) # Record the end time in seconds since epoch
 backup_time=$((end_time - start_time)) # Calculate the backup duration
 
-printf "%s - backup for service %s took %d seconds\n" "$(get_timestamp)" "$service_name" "$backup_time"
+printf "%s - backup for container %s took %d seconds\n" "$(get_timestamp)" "$container_name" "$backup_time"
+``
