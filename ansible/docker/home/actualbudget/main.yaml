@@ -1,0 +1,99 @@
+- hosts: homelab
+  become: true
+  vars:
+    service_name: actualbudget
+    domain: fmlab.no
+  tasks:
+
+###########
+## Users ##
+###########
+
+    - name: "{{ service_name }} - create non-root user"
+      user:
+        name: "{{ service_name }}"
+        create_home: false
+        shell: /usr/sbin/nologin
+        state: present
+      register: user
+
+###################
+## Data & Backup ##
+###################
+
+    - name: "{{ service_name }} - create docker volumes"
+      community.docker.docker_volume:
+        volume_name: "{{ service_name }}_{{ item }}"
+        state: present
+      loop:
+        - data
+
+    - name: "{{ service_name }} - set folder permission on volumes"
+      file:
+        path: "/var/lib/docker/volumes/{{ service_name }}_{{ item }}/data"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: root
+      loop:
+        - data
+
+    - name: "{{ service_name }} - create backup sub-directory"
+      file:
+        path: "/var/lib/homelab/backups/{{ service_name }}"
+        state: directory
+        owner: backup
+        group: backup
+        mode: "0770"
+
+    - name: "{{ service_name }} - create weekly dump-volume-to-backup-folder job"
+      ansible.builtin.cron:
+        name: "docker-volume-backup-{{ item.volume }}"
+        minute: "0"
+        hour: "3" # 03:00
+        weekday: "0" # Sunday
+        job: "/var/lib/homelab/scripts/backup-docker-volume.sh {{ item.container }} {{ service_name }} {{ item.volume }}"
+      with_items:
+        - { container: "{{ service_name }}", volume: "{{ service_name }}_data" }
+
+###################
+## Reverse Proxy ##
+###################
+
+    - name: "{{ service_name }} - configure traefik labels"
+      set_fact:
+          traefik_labels: "{{ traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+      with_items:
+        - { 'key': 'traefik.enable' , 'value': 'true'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`{{ service_name }}.{{ domain }}`)'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.service' , 'value': '{{ service_name }}'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
+        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '5006'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.middlewares' , 'value': 'security@file'}
+
+#######################
+## Docker Containers ##
+#######################
+
+    - name: "{{ service_name }} - remove containers"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        state: absent
+
+    - name: "{{ service_name }} - start docker proxy container"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        image: actualbudget/actual-server:latest-alpine
+        user: "{{ user.uid }}:{{ user.group }}"
+        env:
+          ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB: '20'
+          ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB: '50'
+          ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB: '20'
+        volumes:
+          - "{{ service_name }}_data:/data"
+        networks:
+          - name: reverse-proxy
+        security_opts:
+          - no-new-privileges:true
+        labels: "{{ traefik_labels }}"
+        restart_policy: unless-stopped
