@@ -83,7 +83,7 @@
         env:
           TZ: "Europe/Oslo"
           DOCKER_HOST: "tcp://docker-proxy-watchtower:2375"
-          WATCHTOWER_SCHEDULE: "0 0 3 * * 1"
+          WATCHTOWER_SCHEDULE: "0 0 4 * * 1"
           WATCHTOWER_NO_STARTUP_MESSAGE: "true"
           WATCHTOWER_CLEANUP: "true"
           WATCHTOWER_INCLUDE_STOPPED: "true"
