@@ -34,20 +34,24 @@
       - "backup-docker-volume.sh"
       - "backup-docker-hostpath.sh"
 
-# System
+## System
 - import_playbook: docker/system/traefik/main.yaml
 - import_playbook: docker/system/watchtower/main.yaml
 
-# Network
+## Network
 - import_playbook: docker/network/omada/main.yaml
 - import_playbook: docker/network/librespeed/main.yaml
 - import_playbook: docker/network/adguard/main.yaml
 
-# Home
+## Home
+- import_playbook: docker/home/actualbudget/main.yaml
 - import_playbook: docker/home/homeassistant/main.yaml
 - import_playbook: docker/home/homebox/main.yaml
 - import_playbook: docker/home/homer/main.yaml
 
-# Entertainment
+## Entertainment
 - import_playbook: docker/entertainment/jellyfin/main.yaml
 - import_playbook: docker/entertainment/yarr/main.yaml
+
+## Game Servers
+- import_playbook: docker/games/palworld/main.yaml
