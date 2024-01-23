@@ -1,0 +1,134 @@
+- hosts: homelab
+  become: true
+  vars:
+    service_name: palworld
+    domain: fmlab.no
+  tasks:
+
+###########
+## Users ##
+###########
+
+    - name: "linuxgsm - create non-root user"
+      user:
+        name: "linuxgsm"
+        create_home: false
+        shell: /usr/sbin/nologin
+        state: present
+      register: user
+
+###################
+## Configuration ##
+###################
+
+    - name: "{{ service_name }} - create config sub-directory"
+      file:
+        path: "/var/lib/homelab/configs/{{ service_name }}"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: 0744
+
+    - name: "{{ service_name }} - fetch secrets from secrets.yaml"
+      ansible.builtin.include_vars:
+        file: secrets.yaml
+
+    - name: "{{ service_name }} - copy linuxgsm config to remote target"
+      copy:
+        dest: "/var/lib/homelab/configs/{{ service_name }}/common.cfg"
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: 0700
+        force: true
+        content: |
+          ##################################
+          ######## Common Settings #########
+          ##################################
+          # PLACE GLOBAL SETTINGS HERE
+          ## These settings will apply to all instances.
+          statusalert="on"
+          discordalert="on"
+          discordwebhook="{{ discord_webhook }}"
+          maxbackups="7"
+
+    - name: "{{ service_name }} - copy gameserver config to remote target"
+      copy:
+        dest: "/var/lib/homelab/configs/{{ service_name }}/PalWorldSettings.ini"
+        owner: "{{ user.uid }}"
+        group: "{{ user.group }}"
+        mode: 0700
+        force: true
+        content: |
+          [/Script/Pal.PalGameWorldSettings]
+          OptionSettings=(Difficulty=None,DayTimeSpeedRate=1.000000,NightTimeSpeedRate=1.000000,ExpRate=1.000000,PalCaptureRate=1.000000,PalSpawnNumRate=1.000000,PalDamageRateAttack=1.000000,PalDamageRateDefense=1.000000,PlayerDamageRateAttack=1.000000,PlayerDamageRateDefense=1.000000,PlayerStomachDecreaceRate=1.000000,PlayerStaminaDecreaceRate=1.000000,PlayerAutoHPRegeneRate=1.000000,PlayerAutoHpRegeneRateInSleep=1.000000,PalStomachDecreaceRate=1.000000,PalStaminaDecreaceRate=1.000000,PalAutoHPRegeneRate=1.000000,PalAutoHpRegeneRateInSleep=1.000000,BuildObjectDamageRate=1.000000,BuildObjectDeteriorationDamageRate=1.000000,CollectionDropRate=1.000000,CollectionObjectHpRate=1.000000,CollectionObjectRespawnSpeedRate=1.000000,EnemyDropItemRate=1.000000,DeathPenalty=All,bEnablePlayerToPlayerDamage=False,bEnableFriendlyFire=False,bEnableInvaderEnemy=True,bActiveUNKO=False,bEnableAimAssistPad=True,bEnableAimAssistKeyboard=False,DropItemMaxNum=3000,DropItemMaxNum_UNKO=100,BaseCampMaxNum=128,BaseCampWorkerMaxNum=15,DropItemAliveMaxHours=1.000000,bAutoResetGuildNoOnlinePlayers=False,AutoResetGuildTimeNoOnlinePlayers=72.000000,GuildPlayerMaxNum=20,PalEggDefaultHatchingTime=72.000000,WorkSpeedRate=1.000000,bIsMultiplay=False,bIsPvP=False,bCanPickupOtherGuildDeathPenaltyDrop=False,bEnableNonLoginPenalty=True,bEnableFastTravel=True,bIsStartLocationSelectByMap=True,bExistPlayerAfterLogout=False,bEnableDefenseOtherGuildPlayer=False,CoopPlayerMaxNum=4,ServerPlayerMaxNum=32,ServerName="{{ vars.server_name }}",ServerDescription="",AdminPassword="",ServerPassword="",PublicPort=8211,PublicIP="0.0.0.0",RCONEnabled=False,RCONPort=25575,Region="",bUseAuth=True,BanListURL="https://api.palworldgame.com/api/banlist.txt")
+      vars:
+        server_name: "FreddyMaru Palworld Server"
+
+###################
+## Data & Backup ##
+###################
+
+    - name: "{{ service_name }} - create docker volumes"
+      community.docker.docker_volume:
+        volume_name: "{{ service_name }}_{{ item }}"
+        state: present
+      loop:
+        - data
+        - backup
+
+    - name: "{{ service_name }} - create backup sub-directory"
+      file:
+        path: "/var/lib/homelab/backups/{{ service_name }}"
+        state: directory
+        owner: backup
+        group: backup
+        mode: "0770"
+
+    - name: "{{ service_name }} - create nightly game files backup job"
+      ansible.builtin.cron:
+        name: "linuxgsm-{{ service_name }}-backup"
+        minute: "0"
+        hour: "2" # 02:00
+        weekday: "*" # Every day
+        job: "docker exec -it --user linuxgsm palworld ./pwserver backup"
+
+    - name: "{{ service_name }} - create nightly game update job"
+      ansible.builtin.cron:
+        name: "linuxgsm-{{ service_name }}-update"
+        minute: "0"
+        hour: "3" # 03:00
+        weekday: "*" # Every day
+        job: "docker exec -it --user linuxgsm palworld ./pwserver update"
+
+    - name: "{{ service_name }} - create weekly dump-volume-to-backup-folder job"
+      ansible.builtin.cron:
+        name: "docker-volume-backup-{{ item.volume }}"
+        minute: "0"
+        hour: "3" # 03:00
+        weekday: "0" # Sunday
+        job: "/var/lib/homelab/scripts/backup-docker-volume.sh {{ item.container }} {{ service_name }} {{ item.volume }}"
+      with_items:
+        - { container: "{{ service_name }}", volume: "{{ service_name }}_backup" }
+
+#######################
+## Docker Containers ##
+#######################
+
+    - name: "{{ service_name }} - remove containers"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        state: absent
+
+    - name: "{{ service_name }} - start docker proxy container"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        image: gameservermanagers/gameserver:pw
+        volumes:
+          - "{{ service_name }}_data:/data"
+          - "{{ service_name }}_backup:/app/lgsm/backup"
+          - "/var/lib/homelab/configs/{{ service_name }}/pwserver.cfg:/data/config-lgsm/pwserver/common.cfg"
+          - "/var/lib/homelab/configs/{{ service_name }}/PalWorldSettings.ini:/data/serverfiles/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini"
+        security_opts:
+          - no-new-privileges:true
+        network_mode: host
+        restart_policy: unless-stopped
