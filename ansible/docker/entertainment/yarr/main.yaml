@@ -5,9 +5,9 @@
     domain: fmlab.no
   tasks:
 
-###########
+####################
 ## Users & Groups ##
-###########
+####################
 
     - name: "{{ service_name }} - create group"
       ansible.builtin.group:
@@ -55,8 +55,8 @@
       file:
         path: "/var/lib/homelab/backups/{{ service_name }}"
         state: directory
-        owner: "{{ user.uid }}"
-        group: "{{ user.group }}"
+        owner: backup
+        group: backup
         mode: "0770"
 
     - name: "{{ service_name }} - create weekly dump-volume-to-backup-folder job"
@@ -67,10 +67,10 @@
         weekday: "0" # Sunday
         job: "/var/lib/homelab/scripts/backup-docker-volume.sh {{ item.container }} {{ service_name }} {{ item.volume }}"
       with_items:
-        - { container: "prowlarr", volume: "prowlarr_config" }
-        - { container: "radarr", volume: "radarr_config" }
-        - { container: "sonarr", volume: "sonarr_config" }
-        - { container: "transmission", volume: "transmission_config" }
+        - { container: "prowlarr", volume: "{{ service_name }}_prowlarr_config" }
+        - { container: "radarr", volume: "{{ service_name }}_radarr_config" }
+        - { container: "sonarr", volume: "{{ service_name }}_sonarr_config" }
+        - { container: "transmission", volume: "{{ service_name }}_transmission_config" }
 
 ###################
 ## Reverse Proxy ##
