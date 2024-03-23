@@ -1,3 +1,5 @@
+data "google_client_config" "gcp" {}
+
 resource "random_string" "suffix" {
   length  = 4
   special = false
@@ -14,7 +16,7 @@ resource "google_service_account_key" "secret_manager_accessor" {
 }
 
 resource "google_project_iam_member" "secret_manager_accessor" {
-  project = var.gcp_project
+  project = data.google_client_config.gcp.project
   role    = "roles/secretmanager.secretAccessor"
   member  = "serviceAccount:${google_service_account.secret_manager_accessor.email}"
 }
