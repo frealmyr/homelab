@@ -2,8 +2,8 @@
 - hosts: homelab
   become: true
   vars:
-    recreate_nodes: false # destroy vms and recreate
-    nodes:
+    recreate_clusters: true # destroy vms and recreate
+    clusters:
       k8s-mgmt:
         name: k8s-mgmt
         cpu: 4
@@ -25,6 +25,7 @@
     local_user: fredrick
 
   tasks:
+
 ##################
 ## APT Packages ##
 ##################
@@ -65,7 +66,7 @@
         owner: "libvirt-qemu"
         group: "kvm"
         mode: 0770 # owner+group rwx, others none
-      loop: "{{ nodes | dict2items }}"
+      loop: "{{ clusters | dict2items }}"
 
 ################
 ## Public Key ##
@@ -83,19 +84,20 @@
       set_fact:
         public_key: "{{ lookup('file', '~/.ssh/homelab.pub') }}"
 
-#################
-## Cloud Image ##
-#################
+##############
+## OS Image ##
+##############
 
-    - get_url:
+    - name: images - download flatcar stable image checksum
+      get_url:
         url: https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_qemu_image.img.DIGESTS
         dest: /tmp/flatcar_production_qemu_image.img.DIGESTS
 
-    - name: Extract SHA256 checksum from DIGESTS file
+    - name: images - extract SHA512 checksum from DIGESTS file
       shell: "grep -A1 'SHA512 HASH' /tmp/flatcar_production_qemu_image.img.DIGESTS | awk 'NR==2{print $1}'"
       register: sha512_checksum
 
-    - name: images - download flatcar stable image
+    - name: images - download flatcar stable image if checksum differs
       get_url:
         url: https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_qemu_image.img
         dest: /var/lib/vms/images/flatcar_production_qemu_image.img
@@ -109,7 +111,7 @@
 ## Configuration ##
 ###################
 
-    - name: configuration - create butane config file
+    - name: config - create butane config file
       copy:
         dest: /var/lib/vms/configs/{{ item.value.name }}/butane.yaml
         owner: libvirt-qemu
@@ -139,6 +141,14 @@
                   Gateway=192.168.0.1
                   LinkLocalAddressing=no
                   IPv6AcceptRA=no
+            - path: /etc/flatcar/update.conf
+              overwrite: true
+              contents:
+                inline: |
+                  REBOOT_STRATEGY=reboot
+                  LOCKSMITHD_REBOOT_WINDOW_START=Mon 04:00
+                  LOCKSMITHD_REBOOT_WINDOW_LENGTH=1h
+              mode: 0420
             - path: /opt/k3s-install.sh
               mode: 0555
               contents:
@@ -182,15 +192,15 @@
                   ExecStart=/usr/bin/sh -c "/opt/k3s-install.sh"
                   [Install]
                   WantedBy=multi-user.target
-      loop: "{{ nodes | dict2items }}"
+      loop: "{{ clusters | dict2items }}"
       register: butane_config
 
-    - name: get libvirt-qemu uid and gid
+    - name: config - get libvirt-qemu uid and gid
       getent:
         database: passwd
         key: libvirt-qemu
 
-    - name: transpile butane to ignition config
+    - name: config - transpile butane to ignition config
       docker_container:
         name: ignition
         user: "{{ getent_passwd['libvirt-qemu'][1] }}:{{ getent_passwd['libvirt-qemu'][2] }}"
@@ -200,11 +210,11 @@
         volumes:
           - /var/lib/vms/configs/{{ item.value.name }}:/var/lib/vms/configs/{{ item.value.name }}
         restart_policy : "no"
-      loop: "{{ nodes | dict2items }}"
+      loop: "{{ clusters | dict2items }}"
       # when: butane_config.changed
 
     # https://unix.stackexchange.com/questions/435837/how-to-configure-apparmor-so-that-kvm-can-start-guest-that-has-a-backing-file-ch
-    - name: Add line under #include <abstractions/libvirt-qemu>
+    - name: config - add apparmor rules for libvirt to access
       ansible.builtin.lineinfile:
         path: /etc/apparmor.d/libvirt/TEMPLATE.qemu
         insertafter: '^  #include <abstractions/libvirt-qemu>'
@@ -220,7 +230,7 @@
     - name: virsh - check if vm exists
       shell:
         cmd: virsh list --all --name | grep -w "{{ item.value.name }}"
-      loop: "{{ nodes | dict2items }}"
+      loop: "{{ clusters | dict2items }}"
       register: vm_check
       ignore_errors: true
       no_log: true
@@ -233,15 +243,15 @@
       shell: >
         virsh destroy --domain {{ item.value.name }}
         && virsh undefine --domain {{ item.value.name }}
-      loop: "{{ nodes | dict2items }}"
-      when: recreate_nodes and item.value.name in existing_vm_names
+      loop: "{{ clusters | dict2items }}"
+      when: recreate_clusters and item.value.name in existing_vm_names
 
     - name: virsh - delete vm disk
       file:
         path: /var/lib/vms/volumes/{{ item.value.name }}.img
         state: absent
-      loop: "{{ nodes | dict2items }}"
-      when: recreate_nodes and item.value.name in existing_vm_names
+      loop: "{{ clusters | dict2items }}"
+      when: recreate_clusters and item.value.name in existing_vm_names
 
     - name: virt-install - create
       shell: |
@@ -258,8 +268,8 @@
           --qemu-commandline='-fw_cfg name=opt/org.flatcar-linux/config,file=/var/lib/vms/configs/{{ item.value.name }}/ignition.ign' \
           --noautoconsole \
           --autostart
-      loop: "{{ nodes | dict2items }}"
-      when: item.value.name not in existing_vm_names or recreate_nodes
+      loop: "{{ clusters | dict2items }}"
+      when: item.value.name not in existing_vm_names or recreate_clusters
 
     - name: assert - wait for ssh to be available
       wait_for:
@@ -267,7 +277,33 @@
         port: 22
         delay: 10
         timeout: 300
-      loop: "{{ nodes | dict2items }}"
+      loop: "{{ clusters | dict2items }}"
+      when: item.value.name not in existing_vm_names or recreate_clusters
+
+#################
+## Known Hosts ##
+#################
+
+    - name: known_hosts - scan ssh public key of clusters
+      shell: ssh-keyscan -H {{ item.value.address }}
+      loop: "{{ clusters | dict2items }}"
+      loop_control:
+        label: "{{ item.value.name }}"
+      become_user: "{{ local_user }}"
+      delegate_to: localhost
+      register: ssh_keyscan
+
+    - name: known_hosts - add ssh public key to known_hosts
+      known_hosts:
+        name: "{{ item.item.value.address }}"
+        key: "{{ item.stdout }}"
+        path: "~/.ssh/known_hosts"
+        state: present
+      become_user: "{{ local_user }}"
+      delegate_to: localhost
+      loop: "{{ ssh_keyscan.results }}"
+      loop_control:
+        label: "{{ item.item }}"
 
 ################
 ## Kubeconfig ##
@@ -276,13 +312,14 @@
 # https://docs.k3s.io/cluster-access
 # one downside of k3s is that it doesn't have a built-in way to generate kubeconfig files
 # this is a workaround to pull the kubeconfig from vms and merge them into a single file, yolo
+# also there is no python on flatcar by default, so i use local command, yolo
 
     - name: kubeconfig - remote pull k3s kubeconfig to memory
       shell: ssh -qt {{ item.value.address }} 'cat /var/lib/k8s/.kube/config' | tail -n +2
       register: kubeconfig_k3s
       become_user: "{{ local_user }}"
       delegate_to: localhost
-      loop: "{{ nodes | dict2items }}"
+      loop: "{{ clusters | dict2items }}"
       loop_control:
         label: "{{ item.value.name }}"
 
@@ -310,12 +347,12 @@
         ENVIRONMENT=$(echo {{ item.value.name }} | sed 's/k8s-//g')
         kubectl config set clusters.default.server https://{{ item.value.address }}:6443
         sed -i -e "s/default/homelab-$ENVIRONMENT/g" $KUBECONFIG
-        kubectl config rename-context {{ item.value.name }} $ENVIRONMENT
+        kubectl config rename-context homelab-$ENVIRONMENT $ENVIRONMENT
         kubectl config set-context --current --namespace default
       register: kubeconfig_k3s
       become_user: "{{ local_user }}"
       delegate_to: localhost
-      loop: "{{ nodes | dict2items }}"
+      loop: "{{ clusters | dict2items }}"
       loop_control:
         label: "{{ item.value.name }}"
 
@@ -336,3 +373,21 @@
         state: absent
       delegate_to: localhost
       become_user: "{{ local_user }}"
+
+###############
+## Terraform ##
+###############
+
+# Saves me the hassle of running terraform apply manually
+    - name: terraform - apply argocd kickstart project
+      community.general.terraform:
+        project_path: '../terraform'
+        state: present
+        binary_path: ~/.asdf/shims/terraform
+      become_user: "{{ local_user }}"
+      delegate_to: localhost
+      register: terraform_apply
+
+    - name: terraform - output terraform apply
+      debug:
+        msg: "{{ terraform_apply.stdout }}"
