@@ -99,6 +99,11 @@
 ## Docker Containers ##
 #######################
 
+    - name: "{{ service_name }} - pull latest image"
+      community.docker.docker_image:
+        name: lscr.io/linuxserver/homeassistant:latest
+        source: pull
+
     - name: "{{ service_name }} - start container"
       community.docker.docker_container:
         name: "{{ service_name }}"

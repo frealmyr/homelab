@@ -51,6 +51,14 @@
     ## Docker Container ##
     #######################
 
+    - name: "{{ service_name }} - pull latest image"
+      community.docker.docker_image:
+        name: "{{ item }}"
+        source: pull
+      with_items:
+        - tecnativa/docker-socket-proxy:latest
+        - containrrr/watchtower:latest
+
     - name: "{{ service_name }} - remove containers"
       community.docker.docker_container:
         name: "{{ item }}"
@@ -59,65 +67,65 @@
         - docker-proxy-watchtower
         - watchtower
 
-    - name: "{{ service_name }} - start docker proxy container"
-      community.docker.docker_container:
-        name: docker-proxy-watchtower
-        image: tecnativa/docker-socket-proxy:latest
-        networks:
-          - name: watchtower-docker-proxy
-        env:
-          POST: "1"
-          CONTAINERS: "1"
-          NETWORKS: "1"
-          IMAGES: "1"
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        security_opts:
-          - no-new-privileges:true
-        restart_policy: unless-stopped
+    # - name: "{{ service_name }} - start docker proxy container"
+    #   community.docker.docker_container:
+    #     name: docker-proxy-watchtower
+    #     image: tecnativa/docker-socket-proxy:latest
+    #     networks:
+    #       - name: watchtower-docker-proxy
+    #     env:
+    #       POST: "1"
+    #       CONTAINERS: "1"
+    #       NETWORKS: "1"
+    #       IMAGES: "1"
+    #     volumes:
+    #       - /var/run/docker.sock:/var/run/docker.sock:ro
+    #     security_opts:
+    #       - no-new-privileges:true
+    #     restart_policy: unless-stopped
 
-    - name: "{{ service_name }} - start watchtower container"
-      community.docker.docker_container:
-        name: watchtower
-        image: containrrr/watchtower:latest
-        env:
-          TZ: "Europe/Oslo"
-          DOCKER_HOST: "tcp://docker-proxy-watchtower:2375"
-          WATCHTOWER_SCHEDULE: "0 0 4 * * 1"
-          WATCHTOWER_NO_STARTUP_MESSAGE: "true"
-          WATCHTOWER_CLEANUP: "true"
-          WATCHTOWER_INCLUDE_STOPPED: "true"
-          WATCHTOWER_REVIVE_STOPPED: "false"
-          WATCHTOWER_NOTIFICATIONS: "shoutrrr"
-          WATCHTOWER_NOTIFICATION_URL: /run/secrets/discord_webhook
-          WATCHTOWER_NOTIFICATION_REPORT: "true"
-          WATCHTOWER_NOTIFICATION_TEMPLATE: !unsafe |
-            {{- if .Report -}}
-              {{- with .Report -}}
-                {{- if ( or .Updated .Failed ) -}}
-            {{ len .Scanned }} Scanned, {{ len .Updated }} Updated, {{ len .Failed }} Failed
-                  {{- range .Updated}}
-            - {{ .Name }} ({{ .ImageName }}): {{ .CurrentImageID.ShortID }} updated to {{ .LatestImageID.ShortID }}
-                  {{- end -}}
-                  {{- range .Skipped }}
-            - {{ .Name }} ({{ .ImageName }}): {{ .State }}: {{ .Error }}
-                  {{- end -}}
-                  {{- range .Failed }}
-            - {{ .Name }} ({{ .ImageName }}): {{ .State }}: {{ .Error }}
-                  {{- end -}}
-                {{- end -}}
-              {{- end -}}
-            {{- else -}}
-              {{ range .Entries -}}{{ .Message }}{{"\n"}}{{- end -}}
-            {{- end -}}
-        networks:
-          - name: watchtower-docker-proxy
-          - name: watchtower-bridge # for egress with internal bridge for docker-proxy
-        volumes:
-          - /var/lib/homelab/secrets/watchtower/discord_webhook:/run/secrets/discord_webhook:ro
-        security_opts:
-          - no-new-privileges:true
-        read_only: true
-        # mem_limit: 2G
-        # cpus: 0.75m
-        restart_policy: unless-stopped
+    # - name: "{{ service_name }} - start watchtower container"
+    #   community.docker.docker_container:
+    #     name: watchtower
+    #     image: containrrr/watchtower:latest
+    #     env:
+    #       TZ: "Europe/Oslo"
+    #       DOCKER_HOST: "tcp://docker-proxy-watchtower:2375"
+    #       WATCHTOWER_SCHEDULE: "0 0 4 * * 1"
+    #       WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+    #       WATCHTOWER_CLEANUP: "true"
+    #       WATCHTOWER_INCLUDE_STOPPED: "true"
+    #       WATCHTOWER_REVIVE_STOPPED: "false"
+    #       WATCHTOWER_NOTIFICATIONS: "shoutrrr"
+    #       WATCHTOWER_NOTIFICATION_URL: /run/secrets/discord_webhook
+    #       WATCHTOWER_NOTIFICATION_REPORT: "true"
+    #       WATCHTOWER_NOTIFICATION_TEMPLATE: !unsafe |
+    #         {{- if .Report -}}
+    #           {{- with .Report -}}
+    #             {{- if ( or .Updated .Failed ) -}}
+    #         {{ len .Scanned }} Scanned, {{ len .Updated }} Updated, {{ len .Failed }} Failed
+    #               {{- range .Updated}}
+    #         - {{ .Name }} ({{ .ImageName }}): {{ .CurrentImageID.ShortID }} updated to {{ .LatestImageID.ShortID }}
+    #               {{- end -}}
+    #               {{- range .Skipped }}
+    #         - {{ .Name }} ({{ .ImageName }}): {{ .State }}: {{ .Error }}
+    #               {{- end -}}
+    #               {{- range .Failed }}
+    #         - {{ .Name }} ({{ .ImageName }}): {{ .State }}: {{ .Error }}
+    #               {{- end -}}
+    #             {{- end -}}
+    #           {{- end -}}
+    #         {{- else -}}
+    #           {{ range .Entries -}}{{ .Message }}{{"\n"}}{{- end -}}
+    #         {{- end -}}
+    #     networks:
+    #       - name: watchtower-docker-proxy
+    #       - name: watchtower-bridge # for egress with internal bridge for docker-proxy
+    #     volumes:
+    #       - /var/lib/homelab/secrets/watchtower/discord_webhook:/run/secrets/discord_webhook:ro
+    #     security_opts:
+    #       - no-new-privileges:true
+    #     read_only: true
+    #     # mem_limit: 2G
+    #     # cpus: 0.75m
+    #     restart_policy: unless-stopped

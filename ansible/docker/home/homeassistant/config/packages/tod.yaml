@@ -1,0 +1,11 @@
+binary_sensor:
+  - platform: tod
+    name: Night TOD
+    after: "22:00"
+    before: "08:00"
+    unique_id: tod_night_sensor
+  - platform: tod
+    name: Day TOD
+    after: "08:00"
+    before: "22:00"
+    unique_id: tod_day_sensor

@@ -67,6 +67,11 @@
 ## Docker Containers ##
 #######################
 
+    - name: "{{ service_name }} - pull latest image"
+      community.docker.docker_image:
+        name: adguard/adguardhome:latest
+        source: pull
+
     - name: "{{ service_name }} - remove containers"
       community.docker.docker_container:
         name: "{{ service_name }}"

@@ -136,6 +136,16 @@
 ## Docker Containers ##
 #######################
 
+    - name: "{{ service_name }} - pull latest image"
+      community.docker.docker_image:
+        name: "{{ item }}"
+        source: pull
+      with_items:
+        - lscr.io/linuxserver/prowlarr:latest
+        - lscr.io/linuxserver/radarr:latest
+        - lscr.io/linuxserver/sonarr:latest
+        - lscr.io/linuxserver/transmission:latest
+
     - name: "{{ service_name }} - remove containers"
       community.docker.docker_container:
         name: "{{ item }}"

@@ -11,7 +11,7 @@
 
     - name: "{{ service_name }} - configure traefik labels"
       set_fact:
-          traefik_labels: "{{ traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+          "traefik_labels_{{ service_name }}": "{{ traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
       with_items:
         - { 'key': 'traefik.enable' , 'value': 'true'}
         - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
@@ -24,6 +24,11 @@
 #######################
 ## Docker Containers ##
 #######################
+
+    - name: "{{ service_name }} - pull latest image"
+      community.docker.docker_image:
+        name: adolfintel/speedtest:latest
+        source: pull
 
     - name: "{{ service_name }} - remove containers"
       community.docker.docker_container:
@@ -43,5 +48,5 @@
           WEBPORT: "8080"
         networks:
           - name: reverse-proxy
-        labels: "{{ traefik_labels }}"
+        labels: "{{ hostvars[ansible_hostname]['traefik_labels_' + service_name] }}"
         restart_policy: unless-stopped

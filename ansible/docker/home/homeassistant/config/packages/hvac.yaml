@@ -11,6 +11,40 @@ sensor:
       - input_number.hvac_speed_fdm_printer
     round_digits : 0
     unique_id: hvac_target_speed
+  - platform: integration
+    name: hvac_power_power_accumulated
+    unique_id: hvac_power_power_accumulated
+    source: sensor.hvac_power_power
+    round: 4
+    unit_prefix: k
+    method: left
+
+utility_meter:
+  hvac_power_power_accumulated_daily:
+    unique_id: hvac_power_power_accumulated_daily
+    source: sensor.hvac_power_power_accumulated
+    cycle: daily
+  hvac_power_power_accumulated_weekly:
+    unique_id: hvac_power_power_accumulated_weekly
+    source: sensor.hvac_power_power_accumulated
+    cycle: weekly
+  hvac_power_power_accumulated_monthly:
+    unique_id: hvac_power_power_accumulated_monthly
+    source: sensor.hvac_power_power_accumulated
+    cycle: monthly
+
+template:
+  - sensor:
+    - unique_id: "hvac_power_power_percentage_daily"
+      unit_of_measurement: '%'
+      availability: >-
+        {{ not 'unavailable' in
+          [ states('sensor.accumulated_consumption_bunesvegen_19'),
+            states('sensor.hvac_power_power_accumulated_daily') ] }}
+      state: >-
+        {% set hvac_power = states('sensor.hvac_power_power_accumulated_daily') | float %}
+        {% set total_usage = states('sensor.accumulated_consumption_bunesvegen_19') | float %}
+        {{ ( (hvac_power / total_usage) * 100 | float ) | round(2) }}
 
 input_boolean:
   hvac_api_call:
@@ -23,8 +57,35 @@ input_boolean:
   hvac_fireplace:
     name: HVAC Fireplace Toggle
     icon: mdi:fireplace
+  temperature_override_toggle_hvac:
+    name: Temperature Override Toggle - HVAC
+    icon: mdi:thermometer
 
 input_number:
+  temperature_comfort_hvac:
+    name: Temperature Comfort - HVAC
+    min: 12
+    max: 30
+    step: 1
+    mode: slider
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer
+  temperature_sleep_hvac:
+    name: Temperature Sleep - HVAC
+    min: 12
+    max: 30
+    step: 1
+    mode: slider
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer
+  temperature_away_hvac:
+    name: Temperature Away - HVAC
+    min: 12
+    max: 30
+    step: 1
+    mode: slider
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer
   hvac_override:
     name: HVAC Override Speed
     min: 0
@@ -82,11 +143,17 @@ input_number:
     icon: mdi:hvac
 
 rest_command:
-  ventilation_speed_change:
-    url: http://192.168.0.6/mwrite?%7B%221414%22%3A{{ rpm_supply }}%2C%221415%22%3A{{ rpm_extract }}%7D
+  hvac_speed:
+    url: http://192.168.0.6/mwrite?{"1414":{{ rpm_supply }},"1415":{{ rpm_extract }}}
+  hvac_eco:
+    url: http://192.168.0.6/mwrite?{"2504":{{ eco_mode }}}
+  hvac_temperature:
+    url: http://192.168.0.6/mwrite?{"2000":{{ ( temperature | int ) * 10 }}}
+  hvac_filter_change:
+    url: http://192.168.0.6/mwrite?{"7000":{{ filter_period }}}
 
 rest:
-  - resource: http://192.168.0.6/mread?%7B%223021%22%3A1%2C%2211000%22%3A7%2C%2211100%22%3A6%2C%2211200%22%3A6%2C%2212100%22%3A8%2C%2212135%22%3A1%2C%2212150%22%3A6%2C%2212160%22%3A6%2C%2212400%22%3A2%2C%2212542%22%3A1%2C%2212543%22%3A1%7D
+  - resource: http://192.168.0.6/mread?{"12100":8,"12135":1,"12400":2,"12543":1,"2000":1,"2504":1,"7000":1,"7004":2}
     scan_interval: 31536000
     sensor:
       - name: HVAC Outdoor Air Temperature
@@ -134,12 +201,39 @@ rest:
       - name: HVAC Inbuilt Relative Humidity
         value_template: "{{ value_json['12135'] | int }}"
         unit_of_measurement: '%'
+      - name: HVAC Temperature Setpoint
+        value_template: "{{ ( value_json['2000'] | int ) / 10 }}"
+        device_class: temperature
+        unit_of_measurement: '°C'
+      - name: HVAC Filter Period
+        value_template: "{{ value_json['7000'] | int }}"
+        unit_of_measurement: 'months'
+      - name: HVAC Filter Remaining
+        value_template: >
+          {% set datetime = (value_json['7005'] * 2**16) + value_json['7004'] %}
+          {% set days = (datetime / 60 / 60 / 24) | round %}
+          {{ days }}
+        unit_of_measurement: 'days'
+    binary_sensor:
+      - name: HVAC Eco Mode
+        value_template: "{{ value_json['2504'] | int }}"
+        icon: mdi:sprout
 
 input_datetime:
   hvac_override:
     name: HVAC Override Datetime
     has_time: true
     icon: mdi:clock
+
+input_select:
+  temperature_current_mode_hvac:
+    name: Temperature Current Mode - HVAC
+    options:
+      - Comfort
+      - Sleep
+      - Away
+      - Override
+    icon: mdi:thought-bubble
 
 timer:
   hvac_override:

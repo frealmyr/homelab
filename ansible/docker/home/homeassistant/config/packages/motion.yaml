@@ -1,0 +1,69 @@
+sensor:
+  - platform: history_stats
+    name: Office Motion Last 10 Minutes
+    unique_id: office_motion_last_10_minutes
+    entity_id: binary_sensor.office_motion
+    state: "Detected"
+    type: ratio
+    start: "{{ (now() + timedelta(minutes=-10)) }}"
+    end: "{{ now() }}"
+  - platform: history_stats
+    name: Bedroom Motion Last 10 Minutes
+    unique_id: bedroom_motion_last_10_minutes
+    entity_id: binary_sensor.bedroom_motion
+    state: "Detected"
+    type: ratio
+    start: "{{ (now() + timedelta(minutes=-10)) }}"
+    end: "{{ now() }}"
+  - platform: history_stats
+    name: Office Motion Last 30 Minutes
+    unique_id: office_motion_last_30_minutes
+    entity_id: binary_sensor.office_motion
+    state: "Detected"
+    type: ratio
+    start: "{{ (now() + timedelta(minutes=-30)) }}"
+    end: "{{ now() }}"
+  - platform: history_stats
+    name: Bedroom Motion Last 30 Minutes
+    unique_id: bedroom_motion_last_30_minutes
+    entity_id: binary_sensor.bedroom_motion
+    state: "Detected"
+    type: ratio
+    start: "{{ (now() + timedelta(minutes=-30)) }}"
+    end: "{{ now() }}"
+
+binary_sensor:
+  - platform: threshold
+    name: Office Motion Occupancy
+    entity_id: sensor.office_motion_last_30_minutes
+    lower: 0
+    upper: 50
+    device_class: occupancy
+  - platform: threshold
+    name: Bedroom Motion Occupancy
+    entity_id: sensor.bedroom_motion_last_30_minutes
+    lower: 0
+    upper: 50
+    device_class: occupancy
+
+timer:
+  bedroom_motion_timer:
+    name: Bedroom Motion Timer
+    icon: mdi:clock
+    restore: false
+    duration: 00:10:00
+  office_motion_timer:
+    name: Office Motion Timer
+    icon: mdi:clock
+    restore: false
+    duration: 00:10:00
+
+input_boolean:
+  bedroom_motion_timer_active:
+    name: Bedroom Motion Timer Active
+    initial: false
+    icon: mdi:clock
+  office_motion_timer_active:
+    name: Office Motion Timer Active
+    initial: false
+    icon: mdi:clock

@@ -3,7 +3,7 @@ log:
 
 providers:
   docker:
-    network: traefik-servicenet
+    network: reverse-proxy
     exposedbydefault: false
     endpoint: "tcp://docker-proxy-traefik:2375"
   file:

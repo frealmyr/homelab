@@ -1,0 +1,9 @@
+switch:
+  - platform: wake_on_lan
+    mac: "f0:2f:74:53:32:80"
+    host: "192.168.0.40"
+    name: rimuru_wol
+  - platform: wake_on_lan
+    mac: "70:85:c2:f0:7e:99"
+    host: "192.168.0.41"
+    name: milim_wol

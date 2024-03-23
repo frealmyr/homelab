@@ -1,8 +1,9 @@
 - hosts: homelab
   become: true
   vars:
-    service_name: homebox
-    domain: fmlab.no
+    service_name: babybuddy
+    domain: baby.fmlab.no
+    image: lscr.io/linuxserver/babybuddy:latest
   tasks:
 
 ###########
@@ -26,7 +27,16 @@
         volume_name: "{{ service_name }}_{{ item }}"
         state: present
       loop:
-        - data
+        - config
+
+    - name: "{{ service_name }} - set folder permission on volumes"
+      file:
+        path: "/var/lib/docker/volumes/{{ service_name }}_{{ item }}/_data"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: root
+      loop:
+        - config
 
     - name: "{{ service_name }} - create backup sub-directory"
       file:
@@ -44,7 +54,7 @@
         weekday: "0" # Sunday
         job: "/var/lib/homelab/scripts/backup-docker-volume.sh {{ item.container }} {{ service_name }} {{ item.volume }}"
       with_items:
-        - { container: "{{ service_name }}", volume: "{{ service_name }}_data" }
+        - { container: "{{ service_name }}", volume: "{{ service_name }}_config" }
 
 ###################
 ## Reverse Proxy ##
@@ -52,46 +62,44 @@
 
     - name: "{{ service_name }} - configure traefik labels"
       set_fact:
-          traefik_labels_homebox: "{{ traefik_labels_homebox | default({}) | combine ({ item.key : item.value }) }}"
+        traefik_labels_babybuddy: "{{ traefik_labels_babybuddy | default({}) | combine ({ item.key : item.value }) }}"
       with_items:
         - { 'key': 'traefik.enable' , 'value': 'true'}
         - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
-        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`{{ service_name }}.{{ domain }}`)'}
+        - { 'key': 'traefik.http.routers.{{ service_name }}.rule' , 'value': 'Host(`{{ domain }}`)'}
         - { 'key': 'traefik.http.routers.{{ service_name }}.service' , 'value': '{{ service_name }}'}
         - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
-        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '7745'}
-        - { 'key': 'traefik.http.routers.{{ service_name }}.middlewares' , 'value': 'security@file'}
+        - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '8000'}
 
 #######################
 ## Docker Containers ##
 #######################
-
-    - name: "{{ service_name }} - pull latest image"
-      community.docker.docker_image:
-        name: ghcr.io/hay-kot/homebox:latest-rootless
-        source: pull
 
     - name: "{{ service_name }} - remove containers"
       community.docker.docker_container:
         name: "{{ service_name }}"
         state: absent
 
-    - name: "{{ service_name }} - start docker proxy container"
+    - name: "{{ service_name }} - pull latest image"
+      community.docker.docker_image:
+        name: "{{ image }}"
+        source: pull
+
+    - name: "{{ service_name }} - start docker container"
       community.docker.docker_container:
         name: "{{ service_name }}"
-        image: ghcr.io/hay-kot/homebox:latest-rootless
-        # user: "{{ user.uid }}:{{ user.group }}" # TODO: Attempt to fix upstream
+        image: "{{ image }}"
         env:
-          TZ: "Europe/Oslo"
-          HBOX_LOG_LEVEL: "info"
-          HBOX_LOG_FORMAT: "text"
-          HBOX_WEB_MAX_UPLOAD_SIZE: "100"
-          HBOX_OPTIONS_ALLOW_REGISTRATION: "true"
+          PUID: "{{ user.uid }}"
+          PGID: "{{ user.group }}"
+          TIME_ZONE: "Europe/Oslo"
+          USE_24_HOUR_TIME_FORMAT: "True"
+          CSRF_TRUSTED_ORIGINS: "https://{{ domain }}"
         volumes:
-          - "{{ service_name }}_data:/data"
+          - "{{ service_name }}_config:/config"
         networks:
           - name: reverse-proxy
         security_opts:
           - no-new-privileges:true
-        labels: "{{ traefik_labels_homebox }}"
+        labels: "{{ traefik_labels_babybuddy }}"
         restart_policy: unless-stopped

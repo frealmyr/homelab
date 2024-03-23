@@ -1,0 +1,7 @@
+input_boolean:
+  ios_sleep_fredrick:
+    name: iOS Sleep Focus - Fredrick
+    icon: mdi:sleep
+  ios_sleep_marthe:
+    name: iOS Sleep Focus - Marthe
+    icon: mdi:sleep

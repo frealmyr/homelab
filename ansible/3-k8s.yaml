@@ -1,0 +1,338 @@
+---
+- hosts: homelab
+  become: true
+  vars:
+    recreate_nodes: false # destroy vms and recreate
+    nodes:
+      k8s-mgmt:
+        name: k8s-mgmt
+        cpu: 4
+        memory: 6144
+        maxmemory: 6144
+        address: 192.168.0.120
+      k8s-test:
+        name: k8s-test
+        cpu: 4
+        memory: 4096
+        maxmemory: 4096
+        address: 192.168.0.121
+      k8s-prod:
+        name: k8s-prod
+        cpu: 4
+        memory: 4096
+        maxmemory: 4096
+        address: 192.168.0.122
+    local_user: fredrick
+
+  tasks:
+##################
+## APT Packages ##
+##################
+
+    - name: apt - install misc packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - libvirt-daemon-system
+          - qemu-kvm
+          - virt-manager
+          - virtinst
+
+#############
+## Folders ##
+#############
+
+    - name: folders - create root vm folders
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "libvirt-qemu"
+        group: "kvm"
+        mode: 0770 # owner+group rwx, others none
+      loop:
+        - /var/lib/vms
+        - /var/lib/vms/configs
+        - /var/lib/vms/images
+        - /var/lib/vms/volumes
+
+    - name: folders - create vm config folders
+      file:
+        path: "/var/lib/vms/configs/{{ item.value.name }}"
+        state: directory
+        owner: "libvirt-qemu"
+        group: "kvm"
+        mode: 0770 # owner+group rwx, others none
+      loop: "{{ nodes | dict2items }}"
+
+################
+## Public Key ##
+################
+
+    - name: pubkey - copy public key from local machine to remote target
+      copy:
+        src: ~/.ssh/homelab.pub
+        dest: /home/fredrick/.ssh/homelab.pub
+        owner: fredrick
+        group: fredrick
+        mode: 0600
+
+    - name: pubkey - use content of ~/.ssh/homelab.pub as a variable
+      set_fact:
+        public_key: "{{ lookup('file', '~/.ssh/homelab.pub') }}"
+
+#################
+## Cloud Image ##
+#################
+
+    - get_url:
+        url: https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_qemu_image.img.DIGESTS
+        dest: /tmp/flatcar_production_qemu_image.img.DIGESTS
+
+    - name: Extract SHA256 checksum from DIGESTS file
+      shell: "grep -A1 'SHA512 HASH' /tmp/flatcar_production_qemu_image.img.DIGESTS | awk 'NR==2{print $1}'"
+      register: sha512_checksum
+
+    - name: images - download flatcar stable image
+      get_url:
+        url: https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_qemu_image.img
+        dest: /var/lib/vms/images/flatcar_production_qemu_image.img
+        owner: libvirt-qemu
+        group: kvm
+        mode: 0770
+        checksum: "sha512:{{ sha512_checksum.stdout }}"
+      register: flatcar_image
+
+###################
+## Configuration ##
+###################
+
+    - name: configuration - create butane config file
+      copy:
+        dest: /var/lib/vms/configs/{{ item.value.name }}/butane.yaml
+        owner: libvirt-qemu
+        group: kvm
+        mode: 0770
+        content: |
+          variant: flatcar
+          version: 1.0.0
+          storage:
+            filesystems:
+              - device: /dev/disk/by-partlabel/ROOT
+                format: ext4
+                wipe_filesystem: true
+                label: ROOT
+            files:
+            - path: /etc/hostname
+              contents:
+                inline: {{ item.value.name }}
+            - path: /etc/systemd/network/static.network
+              contents:
+                inline: |
+                  [Match]
+                  Name=enp1s0
+                  [Network]
+                  Address={{ item.value.address }}/24
+                  DNS=192.168.0.1
+                  Gateway=192.168.0.1
+                  LinkLocalAddressing=no
+                  IPv6AcceptRA=no
+            - path: /opt/k3s-install.sh
+              mode: 0555
+              contents:
+                source: https://get.k3s.io
+            - path: /opt/k3s-config.yml
+              mode: 0555
+              contents:
+                inline: |
+                  disable-cloud-controller: true
+                  disable:
+                    - servicelb
+                    - traefik
+                  tls-san:
+                    - "{{ item.value.address }}"
+                  write-kubeconfig: "/var/lib/k8s/.kube/config"
+                  write-kubeconfig-mode: "0555"
+                  cluster-init: true
+          passwd:
+            users:
+              - name: fredrick
+                ssh_authorized_keys:
+                  - {{ public_key }}
+                groups: [ sudo, docker ]
+          systemd:
+            units:
+              - name: k3s-install.service
+                enabled: true
+                contents: |
+                  [Unit]
+                  Description=Run K3s script
+                  Wants = network-online.target
+                  After = network.target network-online.target
+                  ConditionPathExists=/opt/k3s-install.sh
+                  ConditionPathExists=!/opt/bin/k3s
+                  [Service]
+                  Type=forking
+                  TimeoutStartSec=180
+                  RemainAfterExit=yes
+                  KillMode=process
+                  Environment="K3S_CONFIG_FILE=/opt/k3s-config.yml"
+                  ExecStart=/usr/bin/sh -c "/opt/k3s-install.sh"
+                  [Install]
+                  WantedBy=multi-user.target
+      loop: "{{ nodes | dict2items }}"
+      register: butane_config
+
+    - name: get libvirt-qemu uid and gid
+      getent:
+        database: passwd
+        key: libvirt-qemu
+
+    - name: transpile butane to ignition config
+      docker_container:
+        name: ignition
+        user: "{{ getent_passwd['libvirt-qemu'][1] }}:{{ getent_passwd['libvirt-qemu'][2] }}"
+        image: quay.io/coreos/butane:release
+        entrypoint: ["butane", "-o", "ignition.ign", "butane.yaml"]
+        working_dir: /var/lib/vms/configs/{{ item.value.name }}
+        volumes:
+          - /var/lib/vms/configs/{{ item.value.name }}:/var/lib/vms/configs/{{ item.value.name }}
+        restart_policy : "no"
+      loop: "{{ nodes | dict2items }}"
+      # when: butane_config.changed
+
+    # https://unix.stackexchange.com/questions/435837/how-to-configure-apparmor-so-that-kvm-can-start-guest-that-has-a-backing-file-ch
+    - name: Add line under #include <abstractions/libvirt-qemu>
+      ansible.builtin.lineinfile:
+        path: /etc/apparmor.d/libvirt/TEMPLATE.qemu
+        insertafter: '^  #include <abstractions/libvirt-qemu>'
+        line: "{{ item }}"
+      with_items:
+        - '  /var/lib/vms/configs/**/ignition.ign rk,'
+        - '  /var/lib/vms/volumes/**.img rk,'
+
+######################
+## Virtual Machines ##
+######################
+
+    - name: virsh - check if vm exists
+      shell:
+        cmd: virsh list --all --name | grep -w "{{ item.value.name }}"
+      loop: "{{ nodes | dict2items }}"
+      register: vm_check
+      ignore_errors: true
+      no_log: true
+
+    - name: virsh - make a collection of existing vm names
+      set_fact:
+        existing_vm_names: "{{ vm_check.results | selectattr('rc', 'eq', 0) | map(attribute='item.value.name') | list }}"
+
+    - name: virsh - destroy vm
+      shell: >
+        virsh destroy --domain {{ item.value.name }}
+        && virsh undefine --domain {{ item.value.name }}
+      loop: "{{ nodes | dict2items }}"
+      when: recreate_nodes and item.value.name in existing_vm_names
+
+    - name: virsh - delete vm disk
+      file:
+        path: /var/lib/vms/volumes/{{ item.value.name }}.img
+        state: absent
+      loop: "{{ nodes | dict2items }}"
+      when: recreate_nodes and item.value.name in existing_vm_names
+
+    - name: virt-install - create
+      shell: |
+        virt-install \
+          --name {{ item.value.name }} \
+          --vcpus {{ item.value.cpu }} \
+          --memory={{ item.value.memory }},currentMemory={{ item.value.memory }},maxmemory={{ item.value.maxmemory }} \
+          --network default \
+          --network bridge=br0,model=virtio \
+          --graphics none \
+          --os-variant linux2022 \
+          --import \
+          --disk /var/lib/vms/volumes/{{ item.value.name }}.img,device=disk,bus=virtio,size=40,backing_store="{{ flatcar_image.dest }}" \
+          --qemu-commandline='-fw_cfg name=opt/org.flatcar-linux/config,file=/var/lib/vms/configs/{{ item.value.name }}/ignition.ign' \
+          --noautoconsole \
+          --autostart
+      loop: "{{ nodes | dict2items }}"
+      when: item.value.name not in existing_vm_names or recreate_nodes
+
+    - name: assert - wait for ssh to be available
+      wait_for:
+        host: "{{ item.value.address }}"
+        port: 22
+        delay: 10
+        timeout: 300
+      loop: "{{ nodes | dict2items }}"
+
+################
+## Kubeconfig ##
+################
+
+# https://docs.k3s.io/cluster-access
+# one downside of k3s is that it doesn't have a built-in way to generate kubeconfig files
+# this is a workaround to pull the kubeconfig from vms and merge them into a single file, yolo
+
+    - name: kubeconfig - remote pull k3s kubeconfig to memory
+      shell: ssh -qt {{ item.value.address }} 'cat /var/lib/k8s/.kube/config' | tail -n +2
+      register: kubeconfig_k3s
+      become_user: "{{ local_user }}"
+      delegate_to: localhost
+      loop: "{{ nodes | dict2items }}"
+      loop_control:
+        label: "{{ item.value.name }}"
+
+    - name: kubeconfig - create tmp work dir
+      file:
+        path: /tmp/kubeconfigs
+        state: directory
+        mode: 0775
+      delegate_to: localhost
+      become_user: "{{ local_user }}"
+
+    - name: kubeconfig - store kubeconfig on disk
+      copy:
+        dest: /tmp/kubeconfigs/{{ item.item.key }}
+        content: "{{ item.stdout }}"
+      delegate_to: localhost
+      become_user: "{{ local_user }}"
+      loop: "{{ kubeconfig_k3s.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: kubeconfig - make k3s configs unique
+      shell: |
+        KUBECONFIG=/tmp/kubeconfigs/{{ item.value.name }}
+        ENVIRONMENT=$(echo {{ item.value.name }} | sed 's/k8s-//g')
+        kubectl config set clusters.default.server https://{{ item.value.address }}:6443
+        sed -i -e "s/default/homelab-$ENVIRONMENT/g" $KUBECONFIG
+        kubectl config rename-context {{ item.value.name }} $ENVIRONMENT
+        kubectl config set-context --current --namespace default
+      register: kubeconfig_k3s
+      become_user: "{{ local_user }}"
+      delegate_to: localhost
+      loop: "{{ nodes | dict2items }}"
+      loop_control:
+        label: "{{ item.value.name }}"
+
+    - name: kubeconfig - remove old config
+      file:
+        path: ~/.kube/config_homelab
+        state: absent
+
+    - name: kubeconfig - merge kubeconfig files
+      shell: KUBECONFIG=$(find /tmp/kubeconfigs -type f | tr '\n' ':') kubectl config view --flatten > ~/.kube/config_homelab
+      delegate_to: localhost
+      become_user: "{{ local_user }}"
+      run_once: true
+
+    - name: kubeconfig - remove tmp work dir
+      file:
+        path: /tmp/kubeconfigs
+        state: absent
+      delegate_to: localhost
+      become_user: "{{ local_user }}"

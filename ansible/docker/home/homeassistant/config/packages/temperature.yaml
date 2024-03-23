@@ -96,6 +96,32 @@ input_number:
     unit_of_measurement: "Hours"
     icon: mdi:clock
 
+input_select:
+  temperature_current_mode_livingroom:
+    name: Temperature Current Mode - Living Room
+    options:
+      - Comfort
+      - Sleep
+      - Away
+      - Override
+    icon: mdi:thought-bubble
+  temperature_current_mode_bedroom:
+    name: Temperature Current Mode - Bedroom Room
+    options:
+      - Comfort
+      - Sleep
+      - Away
+      - Override
+    icon: mdi:thought-bubble
+  temperature_current_mode_guestroom:
+    name: Temperature Current Mode - Guest Room
+    options:
+      - Comfort
+      - Sleep
+      - Away
+      - Override
+    icon: mdi:thought-bubble
+
 input_boolean:
   temperature_override_toggle_livingroom:
     name: Temperature Override Toggle - Living Room
@@ -106,6 +132,12 @@ input_boolean:
   temperature_override_toggle_guestroom:
     name: Temperature Override Toggle - Guest Room
     icon: mdi:thermometer
+  guestroom_sleep:
+    name: Guest Room Sleep
+    icon: mdi:sleep
+  away:
+    name: Away Mode
+    icon: mdi:walk
 
 input_datetime:
   temperature_override_duration_livingroom:

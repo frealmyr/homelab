@@ -38,20 +38,26 @@
 - import_playbook: docker/system/traefik/main.yaml
 - import_playbook: docker/system/watchtower/main.yaml
 
-## Network
-- import_playbook: docker/network/omada/main.yaml
-- import_playbook: docker/network/librespeed/main.yaml
-- import_playbook: docker/network/adguard/main.yaml
-
-## Home
-- import_playbook: docker/home/actualbudget/main.yaml
-- import_playbook: docker/home/homeassistant/main.yaml
-- import_playbook: docker/home/homebox/main.yaml
-- import_playbook: docker/home/homer/main.yaml
-
 ## Entertainment
 - import_playbook: docker/entertainment/jellyfin/main.yaml
 - import_playbook: docker/entertainment/yarr/main.yaml
 
-## Game Servers
+## Games
 - import_playbook: docker/games/palworld/main.yaml
+
+## Home
+- import_playbook: docker/home/actualbudget/main.yaml
+- import_playbook: docker/home/babybuddy/main.yaml
+- import_playbook: docker/home/homeassistant/main.yaml
+- import_playbook: docker/home/homebox/main.yaml
+- import_playbook: docker/home/homebridge/main.yaml
+- import_playbook: docker/home/homer/main.yaml
+
+## Monitoring
+- import_playbook: docker/monitoring/grafana/main.yaml
+- import_playbook: docker/monitoring/victoriametrics/main.yaml
+
+## Network
+- import_playbook: docker/network/omada/main.yaml
+- import_playbook: docker/network/librespeed/main.yaml
+- import_playbook: docker/network/adguard/main.yaml

@@ -1,0 +1,49 @@
+{
+  "Home": {
+    "Change User Mode": {
+      "id": 1161,
+      "type": "integer",
+      "values": {
+        "1": "Auto",
+        "2": "Manual",
+        "3": "Crowded",
+        "4": "Refresh",
+        "5": "Fireplace",
+        "6": "Away",
+        "7": "Holiday"
+      }
+    },
+    "Airflow setpoint": {
+      "id": 1130,
+      "type": "integer",
+      "values": {
+        "0": "Off",
+        "2": "Low",
+        "3": "Normal",
+        "4": "High"
+      }
+    },
+    "Temperature setpoint (12-30 °C)": {
+      "id": 2000,
+      "type": "integer",
+      "description": "Multiply by 10, ex. 200 equals 20°C",
+      "value": 200
+    },
+    "ECO mode": {
+      "id": 2504,
+      "type": "boolean",
+      "values": {
+        "0": "Off",
+        "1": "On"
+      }
+    },
+    "Startup wizard status": {
+      "id": 16100,
+      "type": "boolean",
+      "values": {
+        "0": "Enabled",
+        "1": "Disabled"
+      }
+    }
+  }
+}

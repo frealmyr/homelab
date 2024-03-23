@@ -1,6 +1,0 @@
----
-- hosts: k8s
-  become: true
-
-  tasks:
-    - reboot:

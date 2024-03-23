@@ -45,7 +45,7 @@
 
     - name: "{{ service_name }} - configure traefik labels"
       set_fact:
-          traefik_labels: "{{ traefik_labels | default({}) | combine ({ item.key : item.value }) }}"
+          traefik_labels_homer: "{{ traefik_labels_homer | default({}) | combine ({ item.key : item.value }) }}"
       with_items:
         - { 'key': 'traefik.enable' , 'value': 'true'}
         - { 'key': 'traefik.http.routers.{{ service_name }}.entryPoints' , 'value': 'https'}
@@ -58,6 +58,11 @@
 #######################
 ## Docker Containers ##
 #######################
+
+    - name: "{{ service_name }} - pull latest image"
+      community.docker.docker_image:
+        name: b4bz/homer:latest
+        source: pull
 
     - name: "{{ service_name }} - remove containers"
       community.docker.docker_container:
@@ -78,5 +83,5 @@
           - name: reverse-proxy
         security_opts:
           - no-new-privileges:true
-        labels: "{{ traefik_labels }}"
+        labels: "{{ traefik_labels_homer }}"
         restart_policy: unless-stopped

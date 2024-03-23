@@ -1,19 +1,13 @@
 - hosts: homelab
   become: true
   vars:
-    service_name: jellyfin
+    service_name: homebridge
     domain: fmlab.no
   tasks:
 
 ###########
 ## Users ##
 ###########
-
-    - name: "{{ service_name }} - create group"
-      ansible.builtin.group:
-        name: entertainment
-        state: present
-      register: group
 
     - name: "{{ service_name }} - create non-root user"
       user:
@@ -32,8 +26,16 @@
         volume_name: "{{ service_name }}_{{ item }}"
         state: present
       loop:
-        - config
-        - cache
+        - data
+
+    - name: "{{ service_name }} - set folder permission on volumes"
+      file:
+        path: "/var/lib/docker/volumes/{{ service_name }}_{{ item }}/data"
+        state: directory
+        owner: "{{ user.uid }}"
+        group: root
+      loop:
+        - data
 
     - name: "{{ service_name }} - create backup sub-directory"
       file:
@@ -46,16 +48,17 @@
     - name: "{{ service_name }} - create weekly dump-volume-to-backup-folder job"
       ansible.builtin.cron:
         name: "docker-volume-backup-{{ item.volume }}"
-        minute: "5"
-        hour: "3" # 03:05
+        minute: "0"
+        hour: "3" # 03:00
         weekday: "0" # Sunday
         job: "/var/lib/homelab/scripts/backup-docker-volume.sh {{ item.container }} {{ service_name }} {{ item.volume }}"
       with_items:
-        - { container: "{{ service_name }}", volume: "{{ service_name }}_config" }
+        - { container: "{{ service_name }}", volume: "{{ service_name }}_data" }
 
 ###################
 ## Reverse Proxy ##
 ###################
+
 
     - name: "{{ service_name }} - create dynamic traefik file"
       copy:
@@ -80,23 +83,7 @@
               {{ service_name }}:
                 loadBalancer:
                   servers:
-                    - url: http://192.168.0.20:8096
-
-#############
-## Helpers ##
-#############
-
-    - name: helper - get group_id - video
-      getent:
-        database: group
-        key: video
-      register: group_video
-
-    - name: helper - get group_id - render
-      getent:
-        database: group
-        key: render
-      register: group_render
+                    - url: http://192.168.0.20:8581
 
 #######################
 ## Docker Containers ##
@@ -104,7 +91,7 @@
 
     - name: "{{ service_name }} - pull latest image"
       community.docker.docker_image:
-        name: jellyfin/jellyfin:latest
+        name: homebridge/homebridge:latest
         source: pull
 
     - name: "{{ service_name }} - remove containers"
@@ -112,21 +99,14 @@
         name: "{{ service_name }}"
         state: absent
 
-    - name: "{{ service_name }} - start docker proxy container"
+    - name: "{{ service_name }} - start docker container"
       community.docker.docker_container:
         name: "{{ service_name }}"
-        image: jellyfin/jellyfin:latest
-        user: "{{ user.uid }}:{{ group.gid }}"
-        groups:
-          - '{{ group_video.ansible_facts.getent_group.video[1] }}'
-          - '{{ group_render.ansible_facts.getent_group.render[1] }}'
+        image: homebridge/homebridge:latest
+        env:
+          TZ: "Europe/Oslo"
         volumes:
-          - "{{ service_name }}_cache:/cache"
-          - "{{ service_name }}_config:/config"
-          - /media/storage/entertainment:/media/storage/entertainment:ro
-        devices:
-          - /dev/dri/card0:/dev/dri/card0
-          - /dev/dri/renderD128:/dev/dri/renderD128
+          - "{{ service_name }}_data:/homebridge"
         network_mode: host
         security_opts:
           - no-new-privileges:true

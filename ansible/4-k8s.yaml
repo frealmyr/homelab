@@ -1,7 +1,0 @@
-- import_playbook: k8s/0-checks.yaml
-- import_playbook: k8s/1-packages.yaml
-- import_playbook: k8s/2-configuration.yaml
-# - import_playbook: k8s/3-firewall.yaml
-- import_playbook: k8s/4-create-cluster.yaml
-- import_playbook: k8s/5-kubeconfig.yaml
-- import_playbook: k8s/6-reboot.yaml
