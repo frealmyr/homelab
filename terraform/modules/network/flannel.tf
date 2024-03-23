@@ -17,7 +17,7 @@ resource "helm_release" "flannel" {
   namespace = kubernetes_namespace.flannel.metadata[0].name
 
   values = [<<EOF
-    podCidr: "10.244.0.0/16"
+    podCidr: "10.42.0.0/16"
     flannel:
       backend: "host-gw"
     EOF

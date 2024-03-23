@@ -1,6 +1,11 @@
 variable "environment" {
   type    = string
-  default = "test"
+  default = "mgmt"
+}
+
+variable "environments" {
+  type    = list(string)
+  default = ["mgmt", "test", "prod"]
 }
 
 variable "gcp_project" {
@@ -10,5 +15,5 @@ variable "gcp_project" {
 
 variable "ip_address" {
   description = "The IP address of the instance"
-  default     = "192.168.0.121"
+  default     = "192.168.0.120"
 }

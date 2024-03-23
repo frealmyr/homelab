@@ -142,7 +142,7 @@ resource "helm_release" "argocd_apps_homelab" {
         project: default
         source:
           repoURL: https://github.com/frealmyr/homelab.git
-          targetRevision: rewrite
+          targetRevision: main
           path: gitops
         destination:
           name: in-cluster
