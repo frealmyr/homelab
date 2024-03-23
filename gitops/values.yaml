@@ -27,7 +27,7 @@ argocd-apps:
         namespace: argocd
       source:
         repoURL: https://github.com/frealmyr/homelab
-        targetRevision: rewrite
+        targetRevision: main
         path: gitops/system/argocd
       info:
       - name: url
@@ -50,7 +50,7 @@ argocd-apps:
           project: system
           source:
             repoURL: https://github.com/frealmyr/homelab
-            targetRevision: rewrite
+            targetRevision: main
             path: gitops/system/external-secrets
             helm:
               releaseName: external-secrets
@@ -80,7 +80,7 @@ argocd-apps:
           project: system
           source:
             repoURL: https://github.com/frealmyr/homelab
-            targetRevision: rewrite
+            targetRevision: main
             path: gitops/system/cert-manager
             helm:
               releaseName: cert-manager
@@ -111,7 +111,7 @@ argocd-apps:
           project: system
           source:
             repoURL: https://github.com/frealmyr/homelab
-            targetRevision: rewrite
+            targetRevision: main
             path: gitops/system/traefik
             helm:
               releaseName: traefik
