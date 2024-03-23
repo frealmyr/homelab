@@ -18,8 +18,6 @@ traefik:
   service:
     annotations:
       metallb.universe.tf/allow-shared-ip: sharing-is-caring
-    spec:
-      loadBalancerIP: 10.8.0.10
   tlsOptions:
     default:
       cipherSuites:
