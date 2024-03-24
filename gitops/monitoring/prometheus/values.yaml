@@ -6,8 +6,7 @@ prometheus:
   prometheus-node-exporter:
     enabled: true
 
-  serverFiles:
-    prometheus.yml:
-      global:
-        remoteWrite:
-          - url: http://192.168.0.20:8428/api/v1/write
+  server:
+    global:
+      remoteWrite:
+        - url: http://192.168.0.20:8428/api/v1/write
