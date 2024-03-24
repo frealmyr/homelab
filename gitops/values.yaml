@@ -178,7 +178,7 @@ argocd-apps:
             helm:
               releaseName: prometheus
               parameters:
-                - name: 'prometheus.serverFiles.prometheus\.yml.external_labels.cluster'
+                - name: 'prometheus.serverFiles.prometheus.yml.external_labels.cluster'
                   value: '{{ values.environment }}'
           destination:
             server: '{{ server }}'
