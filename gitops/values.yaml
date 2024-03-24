@@ -15,8 +15,27 @@ argocd-apps:
       namespaceResourceWhitelist:
       - group: '*'
         kind: '*'
+    - name: monitoring
+      namespace: argocd
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
 
   applications:
+############
+## System ##
+############
+
     - name: argocd-ui
       namespace: argocd
       finalizers:
@@ -127,6 +146,43 @@ argocd-apps:
           destination:
             server: '{{ server }}'
             namespace: traefik
+          syncPolicy:
+            automated:
+              prune: false
+              selfHeal: false
+            syncOptions:
+              - CreateNamespace=true
+
+################
+## Monitoring ##
+################
+
+    - name: prometheus
+      namespace: argocd
+      generators:
+        - clusters:
+            selector:
+              matchLabels:
+                argocd.argoproj.io/secret-type: cluster
+            values:
+              environment: '{{ metadata.annotations.environment }}'
+      template:
+        metadata:
+          name: '{{ values.environment }}-prometheus'
+        spec:
+          project: monitoring
+          source:
+            repoURL: https://github.com/frealmyr/homelab
+            targetRevision: main
+            path: gitops/monitoring/prometheus
+            helm:
+              releaseName: prometheus
+              parameters:
+                - name: 'prometheus.serverFiles.prometheus\.yml.external_labels.cluster'
+                  value: '{{ values.environment }}'
+          destination:
+            server: '{{ server }}'
+            namespace: monitoring
           syncPolicy:
             automated:
               prune: false
