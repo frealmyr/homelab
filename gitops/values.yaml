@@ -197,6 +197,8 @@ argocd-apps:
             selector:
               matchLabels:
                 argocd.argoproj.io/secret-type: cluster
+            values:
+              environment: '{{ metadata.annotations.environment }}'
       template:
         metadata:
           name: '{{ values.environment }}-victoria-metrics-operator'
