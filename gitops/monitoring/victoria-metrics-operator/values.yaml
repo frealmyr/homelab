@@ -40,6 +40,11 @@ prometheus-node-exporter:
             scheme: http
             attach_metadata:
               node: true
+            relabelConfigs:
+              - sourceLabels:
+                  - "__meta_kubernetes_pod_node_name"
+                action: replace
+                targetLabel: instance
         selector:
           matchLabels:
             app.kubernetes.io/name: prometheus-node-exporter
