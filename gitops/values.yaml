@@ -29,6 +29,10 @@ argocd-apps:
         repoURL: https://github.com/frealmyr/homelab
         targetRevision: main
         path: gitops/system/argocd
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: false
       info:
       - name: url
         value: https://argocd.mgmt.fmlab.no/
