@@ -41,10 +41,10 @@ prometheus-node-exporter:
             attach_metadata:
               node: true
             relabelConfigs:
-              - sourceLabels:
-                  - "__meta_kubernetes_pod_node_name"
-                action: replace
-                targetLabel: instance
+              - source_labels: [__address__]
+                target_label: instance
+                regex: '([^:]+)(:[0-9]+)?'
+                replacement: '${1}'
         selector:
           matchLabels:
             app.kubernetes.io/name: prometheus-node-exporter
