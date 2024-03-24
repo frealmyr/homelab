@@ -1,0 +1,45 @@
+victoria-metrics-operator:
+  operator:
+    disable_prometheus_converter: true
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 150Mi
+
+  extraObjects:
+    - apiVersion: operator.victoriametrics.com/v1beta1
+      kind: VMAgent
+      metadata:
+        name: victoria-metrics-agent
+        annotations:
+          argocd.argoproj.io/sync-wave: "1"
+      spec:
+        selectAllByDefault: true
+        remoteWrite:
+          - url: "http://192.168.0.20:8428/api/v1/write"
+
+prometheus-node-exporter:
+  hostNetwork: false
+  service:
+    enabled: false
+  extraManifests:
+    - |
+      apiVersion: operator.victoriametrics.com/v1beta1
+      kind: VMPodScrape
+      metadata:
+        name: node-exporter
+        annotations:
+          argocd.argoproj.io/sync-wave: "1"
+      spec:
+        podMetricsEndpoints:
+          - port: metrics
+            scheme: http
+            attach_metadata:
+              node: true
+        selector:
+          matchLabels:
+            app.kubernetes.io/name: prometheus-node-exporter

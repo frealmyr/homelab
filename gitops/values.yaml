@@ -157,29 +157,57 @@ argocd-apps:
 ## Monitoring ##
 ################
 
-    - name: prometheus
+    # - name: prometheus
+    #   namespace: argocd
+    #   generators:
+    #     - clusters:
+    #         selector:
+    #           matchLabels:
+    #             argocd.argoproj.io/secret-type: cluster
+    #         values:
+    #           environment: '{{ metadata.annotations.environment }}'
+    #   template:
+    #     metadata:
+    #       name: '{{ values.environment }}-prometheus'
+    #     spec:
+    #       project: monitoring
+    #       source:
+    #         repoURL: https://github.com/frealmyr/homelab
+    #         targetRevision: main
+    #         path: gitops/monitoring/prometheus
+    #         helm:
+    #           releaseName: prometheus
+    #           parameters:
+    #             - name: 'prometheus.server.global.external_labels.cluster'
+    #               value: '{{ values.environment }}'
+    #       destination:
+    #         server: '{{ server }}'
+    #         namespace: monitoring
+    #       syncPolicy:
+    #         automated:
+    #           prune: false
+    #           selfHeal: false
+    #         syncOptions:
+    #           - CreateNamespace=true
+
+    - name: victoria-metrics-operator
       namespace: argocd
       generators:
         - clusters:
             selector:
               matchLabels:
                 argocd.argoproj.io/secret-type: cluster
-            values:
-              environment: '{{ metadata.annotations.environment }}'
       template:
         metadata:
-          name: '{{ values.environment }}-prometheus'
+          name: '{{ values.environment }}-victoria-metrics-operator'
         spec:
           project: monitoring
           source:
             repoURL: https://github.com/frealmyr/homelab
             targetRevision: main
-            path: gitops/monitoring/prometheus
+            path: gitops/monitoring/victoria-metrics-operator
             helm:
-              releaseName: prometheus
-              parameters:
-                - name: 'prometheus.server.global.external_labels.cluster'
-                  value: '{{ values.environment }}'
+              releaseName: victoria-metrics-operator
           destination:
             server: '{{ server }}'
             namespace: monitoring
