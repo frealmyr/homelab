@@ -39,9 +39,7 @@ prometheus-node-exporter:
           - port: metrics
             scheme: http
             relabelConfigs:
-              - sourceLabels:
-                  - "__meta_kubernetes_pod_node_name"
-                action: replace
+              - sourceLabels: [__meta_kubernetes_pod_node_name]
                 targetLabel: instance
         selector:
           matchLabels:
