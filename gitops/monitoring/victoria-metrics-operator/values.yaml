@@ -38,6 +38,8 @@ prometheus-node-exporter:
         podMetricsEndpoints:
           - port: metrics
             scheme: http
+            interval: 15m
+            scrapeTimeout: 30s
             relabelConfigs:
               - sourceLabels: [__meta_kubernetes_pod_node_name]
                 targetLabel: instance
