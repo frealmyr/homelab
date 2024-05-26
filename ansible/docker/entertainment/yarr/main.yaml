@@ -168,6 +168,8 @@
           - "{{ service_name }}_prowlarr_config:/config"
         networks:
           - name: reverse-proxy
+        ports:
+          - "9696:9696"
         labels: "{{ prowlarr_traefik_labels }}"
         security_opts:
           - no-new-privileges:true
@@ -187,6 +189,8 @@
           - /media/storage/entertainment:/media/storage/entertainment
         networks:
           - name: reverse-proxy
+        ports:
+          - "7878:7878"
         labels: "{{ radarr_traefik_labels }}"
         security_opts:
           - no-new-privileges:true
@@ -206,6 +210,8 @@
           - /media/storage/entertainment:/media/storage/entertainment
         networks:
           - name: reverse-proxy
+        ports:
+          - "8989:8989"
         labels: "{{ sonarr_traefik_labels }}"
         security_opts:
           - no-new-privileges:true
@@ -227,6 +233,7 @@
         networks:
           - name: reverse-proxy
         ports:
+          - "9091:9091"
           - "54213:54213"
           - "54213:54213/udp"
         security_opts:

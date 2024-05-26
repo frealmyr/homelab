@@ -1,0 +1,47 @@
+- hosts: homelab
+  become: true
+  vars:
+    service_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+  tasks:
+
+#####################
+## Docker Networks ##
+#####################
+
+    - name: "{{ service_name }} - create metrics docker network"
+      community.docker.docker_network:
+        name: metrics
+
+#######################
+## Docker Containers ##
+#######################
+
+    - name: "{{ service_name }} - remove containers"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        state: absent
+
+    - name: "{{ service_name }} - pull latest image"
+      community.docker.docker_image:
+        name: "{{ image }}"
+        source: pull
+
+    - name: "{{ service_name }} - start docker container"
+      community.docker.docker_container:
+        name: "{{ service_name }}"
+        image: "{{ image }}"
+        command:
+          - "--enable_metrics=cpu,memory,network,disk,diskIO,oom_event"
+          - "--store_container_labels=false"
+          - "--docker_only=true"
+        volumes:
+          - /:/rootfs:ro
+          - /var/run:/var/run:ro
+          - /sys:/sys:ro
+          - /var/lib/docker/:/var/lib/docker:ro
+          - /dev/disk/:/dev/disk:ro
+        networks:
+          - name: metrics
+        privileged: true
+        restart_policy: unless-stopped

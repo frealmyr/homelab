@@ -51,7 +51,7 @@
         name: "docker-volume-backup-{{ item.volume }}"
         minute: "0"
         hour: "3" # 03:00
-        weekday: "0" # Sunday
+        weekday: "*" # Everyday
         job: "/var/lib/homelab/scripts/backup-docker-volume.sh {{ item.container }} {{ service_name }} {{ item.volume }}"
       with_items:
         - { container: "{{ service_name }}", volume: "{{ service_name }}_config" }

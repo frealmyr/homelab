@@ -89,68 +89,74 @@ input_number:
   hvac_override:
     name: HVAC Override Speed
     min: 0
-    max: 3300
-    step: 100
-    unit_of_measurement: "RPM"
+    max: 5
+    step: 1
+    unit_of_measurement: "Mode"
     icon: mdi:hvac
   hvac_speed_livingroom:
     name: HVAC Speed - Livingroom
     min: 0
-    max: 3300
-    step: 100
+    max: 4
+    step: 1
     mode: box
-    unit_of_measurement: "RPM"
+    unit_of_measurement: "Mode"
     icon: mdi:hvac
   hvac_speed_bedroom:
     name: HVAC Speed - Bedroom
     min: 0
-    max: 3300
-    step: 100
+    max: 4
+    step: 1
     mode: box
-    unit_of_measurement: "RPM"
+    unit_of_measurement: "Mode"
     icon: mdi:hvac
   hvac_speed_guestroom:
     name: HVAC Speed - Guestroom
     min: 0
-    max: 3300
-    step: 100
+    max: 4
+    step: 1
     mode: box
-    unit_of_measurement: "RPM"
+    unit_of_measurement: "Mode"
     icon: mdi:hvac
   hvac_speed_bathroom:
     name: HVAC Speed - Bathroom
     min: 0
-    max: 3300
-    step: 100
+    max: 4
+    step: 1
     mode: box
-    unit_of_measurement: "RPM"
+    unit_of_measurement: "Mode"
     icon: mdi:hvac
   hvac_speed_shower:
     name: HVAC Speed - Shower
     min: 0
-    max: 3300
-    step: 100
+    max: 4
+    step: 1
     mode: box
-    unit_of_measurement: "RPM"
+    unit_of_measurement: "Mode"
     icon: mdi:hvac
   hvac_speed_fdm_printer:
     name: HVAC Speed - FDM Printer
     min: 0
-    max: 3300
-    step: 100
+    max: 4
+    step: 1
     mode: box
-    unit_of_measurement: "RPM"
+    unit_of_measurement: "Mode"
     icon: mdi:hvac
 
 rest_command:
+  hvac_mode:
+    url: http://192.168.0.6/mwrite?{"1161":{{ mode }}}
   hvac_speed:
-    url: http://192.168.0.6/mwrite?{"1414":{{ rpm_supply }},"1415":{{ rpm_extract }}}
-  hvac_eco:
-    url: http://192.168.0.6/mwrite?{"2504":{{ eco_mode }}}
+    url: http://192.168.0.6/mwrite?{"1130":{{ speed }}}
   hvac_temperature:
     url: http://192.168.0.6/mwrite?{"2000":{{ ( temperature | int ) * 10 }}}
+  hvac_eco:
+    url: http://192.168.0.6/mwrite?{"2504":{{ eco_mode }}}
   hvac_filter_change:
     url: http://192.168.0.6/mwrite?{"7000":{{ filter_period }}}
+  hvac_fireplace:
+    url: http://192.168.0.6/mwrite?{"1102":{{ minutes }}}
+  hvac_refresh:
+    url: http://192.168.0.6/mwrite?{"1103":{{ minutes }}}
 
 rest:
   - resource: http://192.168.0.6/mread?{"12100":8,"12135":1,"12400":2,"12543":1,"2000":1,"2504":1,"7000":1,"7004":2}

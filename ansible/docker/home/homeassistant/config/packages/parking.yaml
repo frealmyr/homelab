@@ -1,0 +1,46 @@
+rest:
+  - authentication: basic
+    username: "IVJiUc51K3R6"
+    password: "m0vscMbs2fTQtDMPK9M9"
+    scan_interval: 1800
+    resource: https://api.ledig-parkering.no/freespaces
+    sensor:
+      - name: Parking KlosterGarasjen
+        json_attributes_path: "$.data.klostergarasjen"
+        value_template: "{{ value_json.data.klostergarasjen.NumFreeSpaces | int }}"
+        unit_of_measurement: "available"
+        icon: "mdi:parking"
+        json_attributes:
+          - "NumFreeSpaces"
+          - "NumAvailableChargepoints"
+          - "NumOccupiedChargepoints"
+          - "CurrentPrice"
+          - "CurrentPriceElectric"
+          - "MaxPricePer24Hours"
+          - "StatusMessage"
+      - name: Parking ByGarasjen
+        json_attributes_path: "$.data.bygarasjen"
+        value_template: "{{ value_json.data.bygarasjen.NumFreeSpaces | int }}"
+        unit_of_measurement: "available"
+        icon: "mdi:parking"
+        json_attributes:
+          - "NumFreeSpaces"
+          - "NumAvailableChargepoints"
+          - "NumOccupiedChargepoints"
+          - "CurrentPrice"
+          - "CurrentPriceElectric"
+          - "MaxPricePer24Hours"
+          - "StatusMessage"
+      - name: Parking GriegGarasjen
+        json_attributes_path: "$.data.edvard"
+        value_template: "{{ value_json.data.edvard.NumFreeSpaces | int }}"
+        unit_of_measurement: "available"
+        icon: "mdi:parking"
+        json_attributes:
+          - "NumFreeSpaces"
+          - "NumAvailableChargepoints"
+          - "NumOccupiedChargepoints"
+          - "CurrentPrice"
+          - "CurrentPriceElectric"
+          - "MaxPricePer24Hours"
+          - "StatusMessage"

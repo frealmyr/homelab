@@ -47,7 +47,7 @@
 
     - name: "{{ service_name }} - pull latest image"
       community.docker.docker_image:
-        name: mbentley/omada-controller:5.12
+        name: mbentley/omada-controller:latest
         source: pull
 
     - name: "{{ service_name }} - remove containers"
@@ -60,7 +60,7 @@
     - name: "{{ service_name }} - start docker container"
       community.docker.docker_container:
         name: omada
-        image: mbentley/omada-controller:5.12
+        image: mbentley/omada-controller:latest
         env:
           TZ: "Europe/Oslo"
           PUID: "{{ user.uid }}"

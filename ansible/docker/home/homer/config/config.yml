@@ -3,7 +3,7 @@ title: "Fredrick's Nerdebule"
 header: false
 footer: false
 links: false
-columns: "2"
+columns: "3"
 connectivityCheck: false
 stylesheet:
   - "assets/custom.css"

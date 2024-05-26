@@ -1,0 +1,45 @@
+- name: apt - download gpg key
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - url: https://pkgs.tailscale.com/stable/ubuntu/jammy.gpg
+      dest: /etc/apt/keyrings/tailscale-archive-keyring.gpg.armored
+  register: tailscale_gpg_download
+
+- name: apt - gpg dearmor key
+  shell: "cat {{ item }}.armored | gpg --dearmor | tee {{ item }}"
+  with_items:
+    - /etc/apt/keyrings/tailscale-archive-keyring.gpg
+  when: tailscale_gpg_download.changed
+
+- name: apt - add repository
+  apt_repository:
+    repo: "{{ item.repo }}"
+    state: present
+    filename: "{{ item.filename }}"
+  with_items:
+    - repo: deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }} signed-by=/etc/apt/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu {{ ansible_distribution_release }} main
+      filename: tailscale
+
+- name: apt - install tailscale packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+      - tailscale
+  register: tailscale_apt
+
+- name: file - add networkd-dispatcher config
+  copy:
+    content: |
+      #!/bin/bash
+      ethtool -K br0 rx-udp-gro-forwarding on rx-gro-list off
+    dest: /etc/networkd-dispatcher/routable.d/50-tailscale
+    mode: '0755'
+
+# - name: tailscale - connect to tailnet
+#   shell: tailscale up --advertise-routes=192.168.0.0/24 --accept-routes --advertise-exit-node

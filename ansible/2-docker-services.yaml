@@ -10,18 +10,27 @@
     with_items:
       - backup
 
+  - name: docker - create backup user
+    user:
+      name: backup
+      group: backup
+      create_home: false
+      shell: /bin/bash
+      state: present
+    register: backup_user
+
   - name: docker - create folders
     file:
       path: "{{ item.path }}"
       state: directory
       group: "{{ item.group }}"
-      mode: 0770 # owner+group rwx, others none
+      mode: "{{ item.mode }}"
     loop:
-      - { path: /var/lib/homelab, group: root }
-      - { path: /var/lib/homelab/backups, group: backup }
-      - { path: /var/lib/homelab/configs, group: root }
-      - { path: /var/lib/homelab/scripts, group: root }
-      - { path: /var/lib/homelab/secrets, group: root }
+      - { path: /var/lib/homelab, group: root, mode: 775 }
+      - { path: /var/lib/homelab/backups, group: backup, mode: 770 }
+      - { path: /var/lib/homelab/configs, group: root, mode: 770 }
+      - { path: /var/lib/homelab/scripts, group: root, mode: 770 }
+      - { path: /var/lib/homelab/secrets, group: root, mode: 770 }
 
   - name: backup - copy backup scripts
     copy:
@@ -33,6 +42,15 @@
     with_items:
       - "backup-docker-volume.sh"
       - "backup-docker-hostpath.sh"
+      - "backup-purge-old.sh"
+
+  - name: "backup - delete backups older than 30 days"
+    ansible.builtin.cron:
+      name: "backup-purge-30days-old"
+      minute: "0"
+      hour: "3" # 03:00
+      weekday: "1" # Monday
+      job: "/var/lib/homelab/scripts/backup-purge-old.sh /var/lib/homelab/backups 30"
 
 ## System
 - import_playbook: docker/system/traefik/main.yaml

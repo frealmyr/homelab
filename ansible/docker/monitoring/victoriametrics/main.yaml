@@ -93,6 +93,14 @@
         - { 'key': 'traefik.http.routers.{{ service_name }}.tls.certresolver' , 'value': 'letsEncrypt'}
         - { 'key': 'traefik.http.services.{{ service_name }}.loadbalancer.server.port' , 'value': '8428'}
 
+#####################
+## Docker Networks ##
+#####################
+
+    - name: "{{ service_name }} - create metrics docker network"
+      community.docker.docker_network:
+        name: metrics
+
 #######################
 ## Docker Containers ##
 #######################
@@ -115,8 +123,11 @@
         volumes:
           - "{{ service_name }}_data:/victoria-metrics-data"
           - "/var/lib/homelab/configs/{{ service_name }}/promscrape.yml:/etc/victoria-metrics/promscrape.yml:ro"
+        ports:
+          - "8428:8428"
         networks:
           - name: reverse-proxy
+          - name: metrics
         security_opts:
           - no-new-privileges:true
         labels: "{{ traefik_labels_victoriametrics }}"

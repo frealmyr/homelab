@@ -95,6 +95,8 @@
           ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB: '20'
         volumes:
           - "{{ service_name }}_data:/data"
+        ports:
+          - "5006:5006"
         networks:
           - name: reverse-proxy
         security_opts:
