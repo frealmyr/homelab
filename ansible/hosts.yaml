@@ -1,5 +1,11 @@
 servers:
   hosts:
     homelab:
-      ansible_host: 192.168.0.20
+      ansible_host: 192.168.0.21
+      ansible_user: fredrick
+
+gameservers:
+  hosts:
+    gs-satisfactory:
+      ansible_host: 192.168.0.70
       ansible_user: fredrick

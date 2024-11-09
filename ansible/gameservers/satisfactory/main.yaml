@@ -1,0 +1,213 @@
+---
+- name: Satisfactory - Configure OS
+  hosts: homelab
+  become: true
+  vars:
+    server_name: sfserver
+    fqdn: satisfactory.fmlab.no
+  tasks:
+
+####################
+## System Upgrade ##
+####################
+
+    - name: apt - update & upgrade packages
+      apt:
+        upgrade: full
+        update_cache: yes
+        cache_valid_time: 3600
+      register: package_upgrade
+
+    - name: system - reboot (kernel update)
+      reboot:
+      when: package_upgrade.changed
+
+##################
+## APT Packages ##
+##################
+
+    - name: dpkg - check if i386 is enabled
+      shell: dpkg --print-foreign-architectures | grep i386
+      ignore_errors: true
+      no_log: true
+      register: dpkg_i386
+
+    - name: dpkg - add i386 architecture
+      command: dpkg --add-architecture i386
+      when: dpkg_i386.stdout == ""
+
+    - name: apt - install misc packages
+      ansible.builtin.apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - bc
+          - binutils
+          - bsdmainutils
+          - bzip2
+          - ca-certificates
+          - cpio
+          - curl
+          - distro-info
+          - file
+          - gzip
+          - hostname
+          - jq
+          - lib32gcc-s1
+          - lib32stdc++6
+          - libsdl2-2.0-0:i386
+          - netcat-openbsd
+          - pigz
+          - python3
+          - tar
+          - tmux
+          - ufw
+          - unzip
+          - util-linux
+          - uuid-runtime
+          - wget
+          - xz-utils
+
+    - name: Install steamcmd
+      shell: |
+        echo steam steam/question select "I AGREE" | debconf-set-selections && \
+        echo steam steam/license note '' | debconf-set-selections && \
+        DEBIAN_FRONTEND=noninteractive apt-get install -q -y --no-install-recommends steamcmd && \
+        ln -sf /usr/games/steamcmd /usr/bin/steamcmd
+
+##############
+## Firewall ##
+##############
+
+    - name: firewall - allow satisfactory udp ports
+      community.general.ufw:
+        rule: allow
+        port: '{{ item }}'
+        proto: udp
+      loop:
+        - '7777'
+        - '15000'
+        - '15777'
+
+###########
+## Users ##
+###########
+
+    - name: Create user for {{ server_name }}
+      ansible.builtin.user:
+        name: "{{ server_name }}"
+        create_home: yes
+        home: "/home/{{ server_name }}"
+
+##############
+## LinuxGSM ##
+##############
+
+## Install ##
+    - name: linuxgsm - check if script exists
+      stat:
+        path: /home/{{ server_name }}/linuxgsm.sh
+      become_user: "{{ server_name }}"
+      register: linuxgsm_script
+
+    - name: linuxgsm - download script
+      get_url:
+        url: https://linuxgsm.sh
+        dest: /home/{{ server_name }}/linuxgsm.sh
+        mode: '755'
+      become_user: "{{ server_name }}"
+      when: not linuxgsm_script.stat.exists
+
+    - name: linuxgsm - prepare installer
+      command: bash linuxgsm.sh {{ server_name }}
+      args:
+        chdir: /home/{{ server_name }}
+      become_user: "{{ server_name }}"
+      when: not linuxgsm_script.stat.exists
+
+    - name: linuxgsm - install {{ server_name }} server
+      command: ./{{ server_name }} auto-install
+      args:
+        chdir: /home/{{ server_name }}
+      become_user: "{{ server_name }}"
+      when: not linuxgsm_script.stat.exists
+
+## Configuration ##
+    - name: config - copy common.cfg to {{ server_name }}
+      ansible.builtin.copy:
+        src: ../files/common.cfg
+        dest: /home/{{ server_name }}/lgsm/config-lgsm/{{ server_name }}/common.cfg
+      become_user: "{{ server_name }}"
+
+    - name: config - {{ server_name }} instance configuration
+      blockinfile:
+        path: /home/{{ server_name }}/lgsm/config-lgsm/{{ server_name }}/{{ server_name }}.cfg
+        block: |
+          servername="Eden"
+          displayip="{{ fqdn }}"
+          startparameters="FactoryGame -Port=7777 -ServerQueryPort=15777 -BeaconPort=15000 -log -multihome=0.0.0.0"
+
+## Webhooks ##
+    - name: "{{ service_name }} - fetch secrets from secrets.yaml"
+      ansible.builtin.include_vars:
+        file: secrets.yaml
+
+    - name: webhooks - Adding discord webhook {{ server_name }}
+      ansible.builtin.lineinfile:
+        path: /home/{{ server_name }}/lgsm/config-lgsm/{{ server_name }}/common.cfg
+        regexp: '^discordwebhook=""'
+        line: discordwebhook="{{ discord_webhook }}"
+
+## Start ##
+    - name: linuxgsm - check status
+      shell: "./{{ server_name }} details | grep Status: | head -1"
+      args:
+        chdir: /home/{{ server_name }}
+      become_user: "{{ server_name }}"
+      register: sfserver_status
+
+    - name: linuxgsm - start {{ server_name }} server
+      command: ./{{ server_name }} start
+      args:
+        chdir: /home/{{ server_name }}
+      become_user: "{{ server_name }}"
+      when: "'STOPPED' in sfserver_status.stdout"
+
+## CronJobs ##
+    - name: cronjob - add {{ server_name }} monitor
+      ansible.builtin.cron:
+        name: "monitor {{ server_name }}"
+        weekday: "*"
+        minute: "*/5"
+        hour: "*"
+        job: "/home/{{ server_name }}/{{ server_name }} monitor"
+      become_user: "{{ server_name }}"
+
+    - name: cronjob - add {{ server_name }} update-lgsm
+      ansible.builtin.cron:
+        name: "monitor update-lgsm"
+        weekday: "*"
+        minute: "50"
+        hour: "6"
+        job: "/home/{{ server_name }}/{{ server_name }} update-lgsm"
+      become_user: "{{ server_name }}"
+
+    - name: cronjob - add {{ server_name }} update
+      ansible.builtin.cron:
+        name: "update {{ server_name }}"
+        weekday: "5"
+        minute: "0"
+        hour: "7"
+        job: "/home/{{ server_name }}/{{ server_name }} backup && /home/{{ server_name }}/{{ server_name }} update"
+      become_user: "{{ server_name }}"
+
+    - name: cronjob - add {{ server_name }} backup
+      ansible.builtin.cron:
+        name: "backup {{ server_name }}"
+        weekday: "6-1"
+        minute: "0"
+        hour: "6"
+        job: "/home/{{ server_name }}/{{ server_name }} backup"
+      become_user: "{{ server_name }}"

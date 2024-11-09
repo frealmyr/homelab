@@ -68,7 +68,7 @@
         "o=";
       };
       Unattended-Upgrade::Automatic-Reboot "true";
-      Unattended-Upgrade::Automatic-Reboot-Time "05:15";
+      Unattended-Upgrade::Automatic-Reboot-Time "05:30";
   register: unattended_upgrades
 
 - name: unattended-upgrades - restart and enable service

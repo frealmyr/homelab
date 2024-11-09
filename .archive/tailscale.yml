@@ -3,7 +3,7 @@
     url: "{{ item.url }}"
     dest: "{{ item.dest }}"
   with_items:
-    - url: https://pkgs.tailscale.com/stable/ubuntu/jammy.gpg
+    - url: https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_distribution_release }}.noarmor.gpg
       dest: /etc/apt/keyrings/tailscale-archive-keyring.gpg.armored
   register: tailscale_gpg_download
 

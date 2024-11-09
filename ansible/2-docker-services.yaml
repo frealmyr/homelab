@@ -27,6 +27,7 @@
       mode: "{{ item.mode }}"
     loop:
       - { path: /var/lib/homelab, group: root, mode: 775 }
+      - { path: /var/lib/homelab/volumes, group: root, mode: 770 }
       - { path: /var/lib/homelab/backups, group: backup, mode: 770 }
       - { path: /var/lib/homelab/configs, group: root, mode: 770 }
       - { path: /var/lib/homelab/scripts, group: root, mode: 770 }
@@ -61,14 +62,12 @@
 - import_playbook: docker/entertainment/yarr/main.yaml
 
 ## Games
-- import_playbook: docker/games/palworld/main.yaml
+- import_playbook: docker/games/satisfactory/main.yaml
 
 ## Home
 - import_playbook: docker/home/actualbudget/main.yaml
-- import_playbook: docker/home/babybuddy/main.yaml
 - import_playbook: docker/home/homeassistant/main.yaml
 - import_playbook: docker/home/homebox/main.yaml
-- import_playbook: docker/home/homebridge/main.yaml
 - import_playbook: docker/home/homer/main.yaml
 
 ## Monitoring

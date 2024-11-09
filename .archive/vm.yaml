@@ -1,0 +1,301 @@
+---
+- name: Satisfactory - Configure VM
+  hosts: homelab
+  become: true
+  vars:
+    hostname: gs-satisfactory
+    local_user: fredrick
+    linuxgsm:
+      name: sfserver
+    admin:
+      user: fredrick
+      ssh_key_path: "~/.ssh/homelab.pub"
+    compute:
+      cpu: 4
+      memory:
+        min: 12288
+        max: 16384
+    disk_size: "40"
+    network:
+      address: "192.168.0.70"
+      gateway: "192.168.0.1"
+      dns:
+        - "192.168.0.1"
+    recreate_vm: false # DANGER: will destroy existing VM!
+  tasks:
+
+##################
+## APT Packages ##
+##################
+
+    - name: apt - install misc packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - libvirt-daemon-system
+          - qemu-kvm
+          - virt-manager
+          - virtinst
+          - genisoimage
+
+#############
+## Folders ##
+#############
+
+    - name: folders - ensure root vm folders exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "libvirt-qemu"
+        group: "kvm"
+        mode: 0770 # owner+group rwx, others none
+      loop:
+        - /var/lib/vms
+        - /var/lib/vms/configs
+        - /var/lib/vms/images
+        - /var/lib/vms/volumes
+
+    - name: folders - ensure vm config folders exist
+      file:
+        path: "/var/lib/vms/configs/{{ hostname }}"
+        state: directory
+        owner: "libvirt-qemu"
+        group: "kvm"
+        mode: 0770 # owner+group rwx, others none
+
+################
+## Public Key ##
+################
+
+    - name: pubkey - copy public key from local machine to remote target
+      copy:
+        src: "{{ admin.ssh_key_path }}"
+        dest: /home/fredrick/.ssh/homelab.pub
+        owner: fredrick
+        group: fredrick
+        mode: 0600
+
+    - name: pubkey - set pubkey as a variable
+      set_fact:
+        public_key: "{{ lookup('file', '~/.ssh/homelab.pub') }}"
+
+##############
+## OS Image ##
+##############
+
+    - name: images - download cloud images SHA256 digest
+      get_url:
+        url: https://cloud-images.ubuntu.com/noble/current/SHA256SUMS
+        dest: /tmp/noble-server-cloudimg-amd64.img.DIGESTS
+
+    - name: images - extract SHA256 checksum from DIGESTS file
+      shell: "grep '*noble-server-cloudimg-amd64.img' /tmp/noble-server-cloudimg-amd64.img.DIGESTS | awk '{print $1}'"
+      register: sha256_checksum
+
+    - name: images - download OS image if checksum differs
+      get_url:
+        url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+        dest: /var/lib/vms/images/noble-server-cloudimg-amd64.img
+        owner: libvirt-qemu
+        group: kvm
+        mode: 0770
+        checksum: "sha256:{{ sha256_checksum.stdout }}"
+      register: ubuntuserver_image
+
+###################
+## Configuration ##
+###################
+
+    - name: config - create meta-data
+      copy:
+        dest: "/var/lib/vms/configs/{{ hostname }}/meta-data.yaml"
+        owner: libvirt-qemu
+        group: kvm
+        mode: 0770
+        content: |
+          instance-id: {{ hostname }}
+          local-hostname: {{ hostname }}
+
+    - name: config - create user-data
+      copy:
+        dest: "/var/lib/vms/configs/{{ hostname }}/user-data.yaml"
+        owner: libvirt-qemu
+        group: kvm
+        mode: 0770
+        content: |
+          #cloud-config
+          hostname: {{ hostname }}
+          manage_etc_hosts: true
+          users:
+            - name: {{ admin.user }}
+              ssh-authorized-keys:
+                - {{ public_key }}
+              lock_passwd: false
+              passwd: $1$SaltSalt$YhgRYajLPrYevs14poKBQ0
+              sudo: ALL=(ALL) NOPASSWD:ALL
+              groups: sudo
+              shell: /bin/bash
+            - name: {{ linuxgsm.name }}
+              homedir: /home/{{ linuxgsm.name }}
+              sudo: false
+          package_update: true
+          package_upgrade: true
+          packages:
+            - qemu-guest-agent
+            - acpid
+          runcmd:
+            - systemctl enable qemu-guest-agent
+            - systemctl enable acpid
+            - systemctl start qemu-guest-agent
+            - systemctl start acpid
+
+    - name: config - create meta-data
+      copy:
+        dest: "/var/lib/vms/configs/{{ hostname }}/network-config.yaml"
+        owner: libvirt-qemu
+        group: kvm
+        mode: 0770
+        content: |
+          network:
+            version: 2
+            ethernets:
+              enp1s0:
+                dhcp4: false
+                addresses:
+                  - {{ network.address }}/24
+                gateway4: {{ network.gateway }}
+                nameservers:
+                  addresses:
+                    {% for dns in network.dns %}
+                    - {{ dns }}
+                    {% endfor %}
+
+######################
+## Virtual Machine ##
+######################
+
+    - name: virsh - check if vm exists
+      shell:
+        cmd: virsh list --all --name | grep -w "{{ hostname }}"
+      register: vm_check
+      ignore_errors: true
+      no_log: true
+
+    - name: virsh - destroy vm
+      shell: virsh destroy --domain {{ hostname }}
+      when: recreate_vm | bool and vm_check.stdout != ""
+      ignore_errors: true
+
+    - name: virsh - undefine vm
+      shell: virsh undefine --domain {{ hostname }}
+      when: recreate_vm | bool and vm_check.stdout != ""
+      ignore_errors: true
+
+    - name: virsh - delete vm disk
+      file:
+        path: /var/lib/vms/volumes/{{ hostname }}.img
+        state: absent
+      when: recreate_vm | bool and vm_check.stdout != ""
+
+    - name: virsh - create vm disk
+      command: qemu-img create -b {{ ubuntuserver_image.dest }} -f qcow2 -F qcow2 /var/lib/vms/volumes/{{ hostname }}.img {{ disk_size }}G
+      when: recreate_vm | bool or vm_check.stdout == ""
+
+    - name: virt-install - create
+      shell: |
+        virt-install \
+          --name {{ hostname }} \
+          --vcpus {{ compute.cpu }} \
+          --memory={{ compute.memory.min }},currentMemory={{ compute.memory.min }},maxmemory={{ compute.memory.max }} \
+          --network bridge=br0,model=virtio \
+          --graphics none \
+          --os-variant ubuntu24.04 \
+          --import \
+          --disk /var/lib/vms/volumes/{{ hostname }}.img,format=qcow2,device=disk,bus=virtio \
+          --cloud-init user-data=/var/lib/vms/configs/{{ hostname }}/user-data.yaml,meta-data=/var/lib/vms/configs/{{ hostname }}/meta-data.yaml,network-config=/var/lib/vms/configs/{{ hostname }}/network-config.yaml \
+          --noautoconsole \
+          --events on_crash=restart \
+          --autostart
+      when: recreate_vm | bool or vm_check.stdout == ""
+
+#################
+## Known Hosts ##
+#################
+
+    - name: assert - wait for ssh to be available
+      wait_for:
+        host: "{{ network.address }}"
+        port: 22
+        delay: 10
+        timeout: 300
+      when: recreate_vm | bool or vm_check.stdout == ""
+
+    - name: known_hosts - scan ssh public key of clusters
+      shell: ssh-keyscan -H {{ network.address }}
+      become_user: "{{ local_user }}"
+      delegate_to: localhost
+      register: ssh_keyscan
+      when: recreate_vm | bool or vm_check.stdout == ""
+
+    - name: known_hosts - add ssh public key to known_hosts
+      known_hosts:
+        name: "{{ network.address }}"
+        key: "{{ ssh_keyscan.stdout }}"
+        path: "~/.ssh/known_hosts"
+        state: present
+      become_user: "{{ local_user }}"
+      delegate_to: localhost
+      when: recreate_vm | bool or vm_check.stdout == ""
+
+################
+## Cloud Init ##
+################
+
+    - name: assert - wait for cloud-init to finish
+      ansible.builtin.wait_for:
+        path: /var/lib/cloud/instance/boot-finished
+      delegate_to: gs-satisfactory
+
+# Workaround ahead:
+# since qemu-guest-agent and acpid packages are not present on base image
+# we need to manually start the VM after first shutdown/reboot as
+# acpi integration to libvirt is not yet active.
+# After first reboot, it should work as intended and handle ACPI calls to/from libvirt.
+
+    - name: poweroff - gracefully shutdown from inside guest
+      community.general.shutdown:
+      delegate_to: gs-satisfactory
+      when: recreate_vm | bool or vm_check.stdout == ""
+
+    - name: virsh - wait for shutdown
+      command: virsh domstate {{ hostname }}
+      register: vm_state
+      until: vm_state.stdout == "shut off"
+      retries: 30
+      delay: 5
+      changed_when: false
+      when: recreate_vm | bool or vm_check.stdout == ""
+
+    - name: virsh - start vm
+      command: virsh start {{ hostname }}
+      when: recreate_vm | bool or vm_check.stdout == ""
+
+    - name: virsh - assure running state
+      command: virsh domstate {{ hostname }}
+      register: vm_state
+      until: vm_state.stdout == "running"
+      retries: 5
+      delay: 3
+      changed_when: false
+      when: recreate_vm | bool or vm_check.stdout == ""
+
+    - name: assert - wait for ssh to be available
+      wait_for:
+        host: "{{ network.address }}"
+        port: 22
+        delay: 10
+        timeout: 300
+      when: recreate_vm | bool or vm_check.stdout == ""
